@@ -3,6 +3,9 @@ import {DataStore} from "./DataStore";
 import {UIStore} from "./UIStore";
 import {extendObservable} from "mobx";
 
+/**
+ * basic store holding all other stores
+ */
 export class RootStore {
     constructor() {
         this.dataStore = null
@@ -12,6 +15,10 @@ export class RootStore {
         })
     }
 
+    /**
+     * initialized data when data is loaded
+     * @param {Object} data
+     */
     init(data) {
         this.dataStore = new DataStore(data)
         this.dataLoaded = true;

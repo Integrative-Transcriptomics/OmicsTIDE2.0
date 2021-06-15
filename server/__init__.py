@@ -250,7 +250,7 @@ def load_test_data_bloodcell():
 
 @app.route('/load_test_data_streptomyces', methods=['GET', 'POST'])
 def load_test_data_streptomyces():
-    data = {}
+    data = []
     k = int(request.form.to_dict()['k'])
     lower_variance_percentile = int(request.form.to_dict()['lowerVariancePercentage'])
     upper_variance_percentile = int(request.form.to_dict()['upperVariancePercentage'])
@@ -260,10 +260,10 @@ def load_test_data_streptomyces():
     prot_m1152 = os.path.join(app.config['FILES_STREPTOMYCES'], "Proteome_M1152.csv")
 
     try:
-        data['Comparison1'] = pairwise_trendcomparison(trans_m1152, trans_m145, 1, lower_variance_percentile,
-                                                       upper_variance_percentile, k, True)
-        data['Comparison2'] = pairwise_trendcomparison(trans_m1152, prot_m1152, 2, lower_variance_percentile,
-                                                       upper_variance_percentile, k, True)
+        data.append(pairwise_trendcomparison(trans_m1152, trans_m145, 1, lower_variance_percentile,
+                                                       upper_variance_percentile, k, True))
+        data.append(pairwise_trendcomparison(trans_m1152, prot_m1152, 2, lower_variance_percentile,
+                                                       upper_variance_percentile, k, True))
 
     except TypeError as te:
         if str(te) == "object of type 'builtin_function_or_method' has no len()":
@@ -273,7 +273,7 @@ def load_test_data_streptomyces():
         if str(ve).startswith("Length mismatch: Expected axis has"):
             return jsonify(message='Number of columns/conditions for the loaded files not identical!'), 500
 
-    return data
+    return jsonify(data)
 
 
 @app.route('/download_session', methods=['GET', 'POST'])

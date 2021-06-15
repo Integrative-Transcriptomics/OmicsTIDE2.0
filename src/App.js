@@ -11,7 +11,7 @@ function App() {
         <div className="App">
             <button onClick={() => {
                 const formData = new FormData();
-                formData.append("k", 5);
+                formData.append("k", 4);
                 formData.append("lowerVariancePercentage", 0);
                 formData.append("upperVariancePercentage", 100);
                 axios.post("/load_test_data_bloodcell", formData)

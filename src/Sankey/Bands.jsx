@@ -6,29 +6,39 @@ import {useStore} from "../Stores/RootStore";
 const Bands = observer((props) => {
     const store = useStore();
     const paths = [];
+    // current y position of intersection at ds1
     let currPos1 = 0;
+    // array to store y positions of intersections at ds2
     let currPos2 = [];
+    // helper to fill currPos2
     let currPos = 0;
+    // fill currPos2 with y positions of nodes at ds2
     store.clusterNames.forEach((cluster, i) => {
         const height = props.yScale(props.clusters2[cluster])
         currPos2.push(currPos)
         currPos += height + props.whiteSpace
     })
+    // iterate through clusters of both data sets
     store.clusterNames.forEach((cluster1) => {
         store.clusterNames.forEach((cluster2, i2) => {
+            // if there is an intersection, draw a band
             if ([cluster1, cluster2] in props.intersections) {
                 const fill1 = props.colorScale(cluster1);
                 const fill2 = props.colorScale(cluster2);
                 let opacity = 0.7;
-                if (store.highlightedIntersection.length === 2) {
-                    if (JSON.stringify(store.highlightedIntersection) === JSON.stringify([cluster1, cluster2])) {
+
+                // highlighting
+                if (store.highlightedIntersections.length > 0) {
+                    if (store.highlightedIntersections
+                        .filter(intersection => JSON.stringify(intersection) === JSON.stringify([cluster1, cluster2])).length > 0) {
                         opacity = 1;
-                    } else{
-                        opacity = 0.5
+                    } else {
+                        opacity = 0.2
                     }
                 }
-
+                // height of band
                 const height = props.yScale(props.intersections[cluster1 + "," + cluster2])
+                // create curved band
                 const p1 = "M0 " + currPos1;
                 const p2 = "C " + props.width / 2 + " " + currPos1 + ", "
                     + props.width / 2 + " " + currPos2[i2] + ", "
@@ -47,13 +57,16 @@ const Bands = observer((props) => {
                     <path
                         d={p1 + " " + p2 + " " + p3 + " " + p4 + " Z"} opacity={opacity}
                         fill={"url(#" + cluster1 + cluster2 + ")"}
-                        onMouseEnter={() => store.setHighlightedIntersection([cluster1, cluster2])}
+                        onMouseEnter={() => store.setHighlightedIntersection([[cluster1, cluster2]])}
                         onMouseLeave={() => store.setHighlightedIntersection([])}/>
                 </g>)
+                // next position on ds1
                 currPos1 += height;
+                // save next position of ds2 for current ds2 cluster
                 currPos2[i2] += height;
             }
         })
+        // add whitespace to currPos1 when finished with a cluster
         currPos1 += props.whiteSpace;
     })
     return (
