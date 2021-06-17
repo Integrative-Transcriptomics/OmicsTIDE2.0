@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {RootStore, StoreProvider} from "./Stores/RootStore";
 import {useState} from "react";
-import InteresectVis from "./IntersectVis";
+import VisTabs from "./VisTabs";
 
 const rootStore = new RootStore();
 
@@ -14,7 +14,7 @@ function App() {
                 formData.append("k", 4);
                 formData.append("lowerVariancePercentage", 0);
                 formData.append("upperVariancePercentage", 100);
-                axios.post("/load_test_data_bloodcell", formData)
+                axios.post("/load_test_data_streptomyces", formData)
                     .then((response) => {
                         rootStore.init(JSON.parse(response.data.replace(/\bNaN\b/g, "null")));
                         setDataLoaded(true)
@@ -23,8 +23,8 @@ function App() {
             </button>
             <p>{rootStore.dataLoaded.toString()}</p>
             {dataLoaded ?
-                <StoreProvider store={rootStore.dataStore.comparisons[0].intersecting}>
-                    <InteresectVis width={1000} height={1000} conditions={rootStore.dataStore.conditions}/>
+                <StoreProvider store={rootStore.dataStore}>
+                    <VisTabs/>
                 </StoreProvider> : null
             }
 

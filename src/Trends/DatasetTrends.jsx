@@ -30,7 +30,9 @@ const DatasetTrends = observer((props) => {
         .scale(xScale)
     const yAxis = d3.axisLeft()
         .scale(yScale)
-    const plots = props.clusterNames.map((cluster, i) => {
+    const plots = [];
+    const filteredNames = props.clusterNames.filter(cluster => store.clusterSizes[cluster] > 0)
+    filteredNames.forEach((cluster, i) => {
             let plot = null;
 
             // highlighting
@@ -41,32 +43,34 @@ const DatasetTrends = observer((props) => {
                     opacity = 1;
                 }
             }
-
-            // create plots based on plotTypes
-            if (props.plotType === "profile") {
-                const data = store.geneCentricMapping[cluster]
-                plot = <ProfilePlot data={data} yScale={yScale} xScale={xScale}
-                                    color={props.colorScale(cluster)} opacity={opacity}/>
-            } else if (props.plotType === "centroid") {
-                // if there is only one gene in the cluster we create a profile plot instead of a centroid profile plot
-                if (store.hoverClusters[cluster].length === 1) {
+            if (store.clusterSizes[cluster] > 0) {
+                // create plots based on plotTypes
+                if (props.plotType === "profile") {
                     const data = store.geneCentricMapping[cluster]
                     plot = <ProfilePlot data={data} yScale={yScale} xScale={xScale}
                                         color={props.colorScale(cluster)} opacity={opacity}/>
-                } else {
-                    const data = store.conditionMapping[cluster]
-                    plot = <CentroidProfilePlot data={data} conditions={props.conditions}
-                                                yScale={yScale} xScale={xScale}
-                                                color={props.colorScale(cluster)} opacity={opacity}/>
+                } else if (props.plotType === "centroid") {
+                    // if there is only one gene in the cluster we create a profile plot instead of a centroid profile plot
+                    if (store.hoverClusters[cluster].length === 1) {
+                        const data = store.geneCentricMapping[cluster]
+                        plot = <ProfilePlot data={data} yScale={yScale} xScale={xScale}
+                                            color={props.colorScale(cluster)} opacity={opacity}/>
+                    } else {
+                        const data = store.conditionMapping[cluster]
+                        plot = <CentroidProfilePlot data={data} conditions={props.conditions}
+                                                    yScale={yScale} xScale={xScale}
+                                                    color={props.colorScale(cluster)} opacity={opacity}/>
+                    }
                 }
+
+                plots.push(
+                    <g key={cluster}
+                       transform={"translate(" + margin.left + "," + ((props.height / filteredNames.length) * i + margin.top) + ")"}>
+                        {plot}
+                        <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={""}/>
+                        <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={""}/>
+                    </g>)
             }
-            return (
-                <g key={cluster}
-                   transform={"translate(" + margin.left + "," + ((props.height / props.clusterNames.length) * i + margin.top) + ")"}>
-                    {plot}
-                    <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={""}/>
-                    <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={""}/>
-                </g>)
         }
     )
     return (

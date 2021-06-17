@@ -100,6 +100,13 @@ export class Dataset {
                         intersection[this.index] === cluster
                     ).filter(intersection => this.intersecting.filteredIntersections[intersection].length > 0)
                 )
+            },
+            handleNodeSelection(cluster) {
+                this.intersecting.handleMultipleIntersectionSelection(Object.keys(this.intersecting.filteredIntersections)
+                    .map(intersection => intersection.split(","))
+                    .filter(intersection =>
+                        intersection[this.index] === cluster
+                    ).filter(intersection => this.intersecting.filteredIntersections[intersection].length > 0));
             }
         })
         this.intersecting = intersecting;

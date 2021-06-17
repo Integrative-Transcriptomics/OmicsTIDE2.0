@@ -14,15 +14,15 @@ const Controls = observer((props) => {
     const store = useStore();
 
     // local states for sliders
-    const [var1, setVar1] = useState([0, 100])
-    const [var2, setVar2] = useState([0, 100])
-    const [abu1, setAbu1] = useState([0, 100])
-    const [abu2, setAbu2] = useState([0, 100])
+    const [var1, setVar1] = useState([store.ds1.varianceMinFilter, store.ds1.varianceMaxFilter])
+    const [var2, setVar2] = useState([store.ds2.varianceMinFilter, store.ds2.varianceMaxFilter])
+    const [abu1, setAbu1] = useState([store.ds1.abundanceMinFilter, store.ds1.abundanceMaxFilter])
+    const [abu2, setAbu2] = useState([store.ds2.abundanceMinFilter, store.ds2.abundanceMaxFilter])
 
     return (<div><FormControl component="fieldset">
             <FormLabel component="legend">Plot type</FormLabel>
-            <RadioGroup aria-label="gender" name="gender1" value={props.plotType}
-                        onChange={(e) => props.setPlotType(e.target.value)}>
+            <RadioGroup aria-label="gender" name="gender1" value={store.plotType}
+                        onChange={(e) => store.setPlotType(e.target.value)}>
                 <FormControlLabel value="centroid" control={<Radio/>} label="Centroid Profile Plots"/>
                 <FormControlLabel value="profile" control={<Radio/>} label="Profile Plots"/>
                 <FormControlLabel value="box" control={<Radio/>} label="Boxplot"/>

@@ -58,7 +58,8 @@ const Bands = observer((props) => {
                         d={p1 + " " + p2 + " " + p3 + " " + p4 + " Z"} opacity={opacity}
                         fill={"url(#" + cluster1 + cluster2 + ")"}
                         onMouseEnter={() => store.setHighlightedIntersection([[cluster1, cluster2]])}
-                        onMouseLeave={() => store.setHighlightedIntersection([])}/>
+                        onMouseLeave={() => store.setHighlightedIntersection([])}
+                        onClick={() => store.handleIntersectionSelection([cluster1, cluster2])}/>
                 </g>)
                 // next position on ds1
                 currPos1 += height;

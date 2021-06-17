@@ -23,7 +23,8 @@ const StackedBars = observer((props) => {
         rects.push(<rect key={cluster} height={height} y={currPos} width={props.rectWidth}
                          fill={props.colorScale(cluster)} opacity={opacity}
                          onMouseEnter={() => store.setHighlightedCluster(cluster)}
-                         onMouseLeave={() => store.intersecting.setHighlightedIntersection([])}/>)
+                         onMouseLeave={() => store.intersecting.setHighlightedIntersection([])}
+                         onClick={() => store.handleNodeSelection(cluster)}/>)
         // increment currpos and add white space
         currPos += height + props.whiteSpace
     })

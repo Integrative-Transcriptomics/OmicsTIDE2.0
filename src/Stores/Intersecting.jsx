@@ -8,12 +8,25 @@ import {Dataset} from "./Dataset";
 export class Intersecting {
     constructor(dataStore, data) {
         extendObservable(this, {
-            // selected genes (by clicking on intersections/nodes)
-            selectedGenes: [],
+
             // highlighted intersections (by hovering over intersections or nodes)
             highlightedIntersections: [],
+            // selecten intersections (by clicking on intersections or nodes)
+            selectedIntersections: [],
             // highlighted genes (by hovering over lines in profile plots)
             highlightedGenes: [],
+            plotType: "centroid",
+            get concordantDiscordant() {
+                let concordantCount = 0;
+                let discordantCount = 0;
+                Object.keys(this.filteredIntersections).forEach(intersection => {
+                    const clusters = intersection.split(",");
+                    if (clusters[0] === clusters[1]) {
+                        concordantCount += this.filteredIntersections[intersection].length
+                    } else discordantCount += this.filteredIntersections[intersection].length;
+                })
+                return ({concordant: concordantCount, discordant: discordantCount})
+            },
             /**
              * calculates intersections filtered by abundance and variance
              * @returns {{Object}}
@@ -25,6 +38,13 @@ export class Intersecting {
                         .filter(gene => this.ds1.isinRange(gene) && this.ds2.isinRange(gene))
                 })
                 return intersections
+            },
+            get intersectionSizes() {
+                let intersections = {};
+                Object.keys(this.filteredIntersections).forEach(intersection =>
+                    intersections[intersection] = this.filteredIntersections[intersection].length
+                )
+                return intersections;
             },
             /**
              * gets all genes in filtered intersections
@@ -48,6 +68,34 @@ export class Intersecting {
                 })
                 return genes
             },
+            /**
+             * sets highlighted intersections
+             * @param {number[][]}intersections
+             */
+            setHighlightedIntersection(intersections) {
+                this.highlightedIntersections = intersections
+            },
+            handleIntersectionSelection(intersection) {
+                // intersection is already contained
+                const index = this.getIntersectionIndex(intersection)
+                if (index !== -1) {
+                    this.selectedIntersections.splice(index, 1)
+                } else {
+                    this.selectedIntersections.push(intersection)
+                }
+            },
+            handleMultipleIntersectionSelection(intersections) {
+                const indices = intersections.map(currInt => this.getIntersectionIndex(currInt));
+                if (indices.every(index => index !== -1)) {
+                    indices.sort().reverse().forEach(index => this.selectedIntersections.splice(index, 1));
+                } else {
+                    intersections.filter((currInt, i) => indices[i] === -1)
+                        .forEach(currInd => this.selectedIntersections.push(currInd))
+                }
+            },
+            setPlotType(newPlotType) {
+                this.plotType = newPlotType
+            }
         })
         this.dataStore = dataStore;
         // both data sets
@@ -103,13 +151,6 @@ export class Intersecting {
         return new Dataset(this, data, index)
     }
 
-    /**
-     * sets highlighted intersections
-     * @param {number[][]}intersections
-     */
-    setHighlightedIntersection(intersections) {
-        this.highlightedIntersections = intersections
-    }
 
     /**
      * sorts clusters by length and returns their names
@@ -121,5 +162,9 @@ export class Intersecting {
         });
         clusterList.sort((a, b) => (a.len < b.len) ? 1 : -1)
         return clusterList.map(d => d.name);
+    }
+
+    getIntersectionIndex(intersection) {
+        return this.selectedIntersections.map(currInt => JSON.stringify(currInt)).indexOf(JSON.stringify(intersection))
     }
 }
