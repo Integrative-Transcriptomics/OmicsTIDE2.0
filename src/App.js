@@ -16,7 +16,8 @@ function App() {
                 formData.append("upperVariancePercentage", 100);
                 axios.post("/load_test_data_streptomyces", formData)
                     .then((response) => {
-                        rootStore.init(JSON.parse(response.data.replace(/\bNaN\b/g, "null")));
+                        console.log(response)
+                        rootStore.init(response.data);
                         setDataLoaded(true)
                     })
             }}>Load Example Data

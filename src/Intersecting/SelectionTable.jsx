@@ -16,7 +16,7 @@ const SelectionTable = observer((props) => {
     const height = 30;
 
     const rows = store.selectedIntersections.map(intersection => {
-        return (<TableRow>
+        return (<TableRow key={intersection}>
             <TableCell>
                 <svg width={width} height={height}>
                     <rect height={height} width={width} fill={props.colorScale(intersection[1])}/>
@@ -39,7 +39,7 @@ const SelectionTable = observer((props) => {
             <Table size="small" aria-label="a dense table">
                 <TableHead>
                     <TableRow>
-                        <TableCell component="div" ref={firstCol}>From - To</TableCell>
+                        <TableCell>From - To</TableCell>
                         <TableCell>
                             Count
                         </TableCell>

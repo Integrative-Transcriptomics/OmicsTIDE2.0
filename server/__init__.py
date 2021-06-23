@@ -260,9 +260,9 @@ def load_test_data_streptomyces():
     prot_m1152 = os.path.join(app.config['FILES_STREPTOMYCES'], "Proteome_M1152.csv")
 
     try:
-        data.append(pairwise_trendcomparison(trans_m1152, trans_m145, 1, lower_variance_percentile,
+        data.append(pairwise_trendcomparison(trans_m1152, trans_m145, lower_variance_percentile,
                                                        upper_variance_percentile, k, True))
-        data.append(pairwise_trendcomparison(trans_m1152, prot_m1152, 2, lower_variance_percentile,
+        data.append(pairwise_trendcomparison(trans_m1152, prot_m1152, lower_variance_percentile,
                                                        upper_variance_percentile, k, True))
 
     except TypeError as te:
@@ -272,7 +272,6 @@ def load_test_data_streptomyces():
     except ValueError as ve:
         if str(ve).startswith("Length mismatch: Expected axis has"):
             return jsonify(message='Number of columns/conditions for the loaded files not identical!'), 500
-
     return jsonify(data)
 
 

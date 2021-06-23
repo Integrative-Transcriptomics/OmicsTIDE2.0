@@ -1,12 +1,13 @@
 import {extendObservable, reaction} from "mobx";
 import * as d3 from "d3";
-import {Dataset} from "./Dataset";
+import {IntersectionDataset} from "./IntersectionDataset";
+import {sortClusters} from "./HelperFunctions";
 
 /**
  * store with information on intersecting genes
  */
 export class Intersecting {
-    constructor(dataStore, data) {
+    constructor(comparison, dataStore, data) {
         extendObservable(this, {
 
             // highlighted intersections (by hovering over intersections or nodes)
@@ -17,15 +18,7 @@ export class Intersecting {
             highlightedGenes: [],
             plotType: "centroid",
             get concordantDiscordant() {
-                let concordantCount = 0;
-                let discordantCount = 0;
-                Object.keys(this.filteredIntersections).forEach(intersection => {
-                    const clusters = intersection.split(",");
-                    if (clusters[0] === clusters[1]) {
-                        concordantCount += this.filteredIntersections[intersection].length
-                    } else discordantCount += this.filteredIntersections[intersection].length;
-                })
-                return ({concordant: concordantCount, discordant: discordantCount})
+                return this.calculateConcordantDiscordant(this.filteredIntersections)
             },
             /**
              * calculates intersections filtered by abundance and variance
@@ -35,7 +28,7 @@ export class Intersecting {
                 let intersections = {}
                 Object.keys(this.intersections).forEach(intersection => {
                     intersections[intersection] = this.intersections[intersection]
-                        .filter(gene => this.ds1.isinRange(gene) && this.ds2.isinRange(gene))
+                        .filter(gene => this.ds1.filterStore.isinRange(gene) && this.ds2.filterStore.isinRange(gene))
                 })
                 return intersections
             },
@@ -75,6 +68,9 @@ export class Intersecting {
             setHighlightedIntersection(intersections) {
                 this.highlightedIntersections = intersections
             },
+            setHighlightedGenes(genes) {
+                this.highlightedGenes = genes;
+            },
             handleIntersectionSelection(intersection) {
                 // intersection is already contained
                 const index = this.getIntersectionIndex(intersection)
@@ -98,6 +94,7 @@ export class Intersecting {
             }
         })
         this.dataStore = dataStore;
+        this.comparison = comparison;
         // both data sets
         this.ds1 = this.initDataSet(data.data[0], 0);
         this.ds2 = this.initDataSet(data.data[1], 1);
@@ -110,13 +107,14 @@ export class Intersecting {
         this.maxValue = d3.max(values);
         // complete intersections (unfiltered)
         this.intersections = this.initIntersections(data)
+        this.initialConcordantDiscordant = this.calculateConcordantDiscordant(this.intersections);
         // create clusters for each data set based on intersections (quicker than always recomputing intersections from clusters)
         this.ds1.updateClusters();
         this.ds2.updateClusters();
 
         // sort clusterNames by cluster size of first data set to ensure
         // reproducibility when loading the same data multiple times
-        this.clusterNames = this.sortClusters();
+        this.clusterNames = sortClusters(this.ds1.clusters);
 
         // reaction that updates clusters when intersections are filterd
         reaction(
@@ -145,24 +143,24 @@ export class Intersecting {
      * create new dataset based on data
      * @param {Object} data
      * @param {(0|1)} index: index of dataset (0 or 1)
-     * @returns {Dataset}
+     * @returns {IntersectionDataset}
      */
     initDataSet(data, index) {
-        return new Dataset(this, data, index)
+        return new IntersectionDataset(this, data, index)
     }
 
-
-    /**
-     * sorts clusters by length and returns their names
-     * @returns {*[]}
-     */
-    sortClusters() {
-        const clusterList = Object.keys(this.ds1.clusters).map(cluster => {
-            return ({name: cluster, len: this.ds1.clusters[cluster].length})
-        });
-        clusterList.sort((a, b) => (a.len < b.len) ? 1 : -1)
-        return clusterList.map(d => d.name);
+    calculateConcordantDiscordant(intersections) {
+        let concordantCount = 0;
+        let discordantCount = 0;
+        Object.keys(intersections).forEach(intersection => {
+            const clusters = intersection.split(",");
+            if (clusters[0] === clusters[1]) {
+                concordantCount += intersections[intersection].length
+            } else discordantCount += intersections[intersection].length;
+        })
+        return ({concordant: concordantCount, discordant: discordantCount})
     }
+
 
     getIntersectionIndex(intersection) {
         return this.selectedIntersections.map(currInt => JSON.stringify(currInt)).indexOf(JSON.stringify(intersection))

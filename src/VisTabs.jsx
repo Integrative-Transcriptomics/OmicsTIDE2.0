@@ -2,14 +2,13 @@ import React, {useCallback, useEffect, useState} from "react";
 import Tabs from "@material-ui/core/Tabs";
 import AppBar from "@material-ui/core/AppBar";
 import PropTypes from "prop-types";
-import Overview from "./Overview";
+import Overview from "./Overview/Overview";
 import {StoreProvider, useStore} from "./Stores/RootStore";
-import IntersectVis from "./IntersectVis";
-import Box from "@material-ui/core/Box";
-import Typography from "@material-ui/core/Typography";
+import IntersectVis from "./Intersecting/IntersectVis";
 import Tab from "@material-ui/core/Tab";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close"
+import NIVis from "./NonIntersecting/NIVis";
 
 
 function TabPanel(props) {
@@ -24,9 +23,9 @@ function TabPanel(props) {
             {...other}
         >
             {value === index && (
-                <Box p={3}>
-                    <Typography>{children}</Typography>
-                </Box>
+                <div>
+                    {children}
+                </div>
             )}
         </div>
     );
@@ -40,11 +39,24 @@ TabPanel.propTypes = {
 
 function VisTabs() {
     const store = useStore();
-    // tab types: home, overview, intersect, nonintersect, intersectdetail, nonintersectdetail
+    // tab types: home, overview, intersect, nonIntersect, intersectdetail, nonintersectdetail
     const [tabs, setTabs] = useState([]);
     const [selectedTab, selectTab] = useState(0);
     const addIntersectTab = useCallback((index) => {
-        setTabs(tabs.concat([{type: "intersect", index: index}]))
+        const tabIndex = tabs.map(d => d.type === "intersect" ? d.index : -1).indexOf(index)
+        if (tabIndex === -1) {
+            setTabs(tabs.concat([{type: "intersect", index: index}]))
+        } else {
+            selectTab(tabIndex + 1)
+        }
+    }, [tabs]);
+    const addNITab = useCallback((index) => {
+        const tabIndex = tabs.map(d => d.type === "nonIntersect" ? d.index : -1).indexOf(index)
+        if (tabIndex === -1) {
+            setTabs(tabs.concat([{type: "nonIntersect", index: index}]))
+        } else {
+            selectTab(tabIndex + 1)
+        }
     }, [tabs]);
     const removeTab = useCallback((index) => {
         let currentTabs = tabs.slice();
@@ -56,7 +68,7 @@ function VisTabs() {
     }, [tabs]);
     const tabElems = tabs.map((tab, i) => <Tab key={tab.type + tab.index} component="div" label={
         <span>
-            {tab.type + " " + tab.index + 1}
+            {tab.type + " " + (tab.index + 1)}
             <IconButton onClick={() => removeTab(i)}>
                 <CloseIcon/>
             </IconButton>
@@ -67,6 +79,13 @@ function VisTabs() {
             return (<TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
                 <StoreProvider store={store.comparisons[tab.index].intersecting}>
                     <IntersectVis conditions={store.conditions}/>
+                </StoreProvider>
+            </TabPanel>)
+        }
+        if (tab.type === "nonIntersect") {
+            return (<TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
+                <StoreProvider store={store.comparisons[tab.index].nonIntersecting}>
+                    <NIVis conditions={store.conditions}/>
                 </StoreProvider>
             </TabPanel>)
         }
@@ -85,7 +104,7 @@ function VisTabs() {
             </AppBar>
             {/* eslint-disable-next-line react/jsx-no-undef */}
             <TabPanel value={selectedTab} index={0}>
-                <Overview addIntersectTab={addIntersectTab}/>
+                <Overview addIntersectTab={addIntersectTab} addNITab={addNITab}/>
             </TabPanel>
             {tabPanels}
         </div>

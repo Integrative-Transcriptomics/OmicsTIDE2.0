@@ -1,8 +1,10 @@
 import {observer} from "mobx-react";
 import PropTypes from "prop-types";
 import React from "react";
+import {useStore} from "../Stores/RootStore";
 
 const ProfilePlot = observer((props) => {
+    const store = useStore();
     // create lines
     const lines = Object.keys(props.data).map(gene => {
         // create points for each line
@@ -11,12 +13,13 @@ const ProfilePlot = observer((props) => {
             const point = props.xScale(elem.cond) + "," + props.yScale(elem.value);
             points += point + " "
         })
-        return (<polyline key={gene} points={points} fill="none" stroke={props.color} opacity={props.opacity}/>)
+        return (<polyline key={gene} points={points} fill="none" stroke={props.color} opacity={props.opacity}
+                          onMouseEnter={() => store.parent.setHighlightedGenes([gene])}/>)
     });
 
     return (
         <g>
-            {lines}
+                {lines}
         </g>
 
 

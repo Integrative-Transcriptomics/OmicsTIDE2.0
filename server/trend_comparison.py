@@ -93,7 +93,7 @@ def get_info(file1, file2, filename1, filename2, i_ptcf, ni_ptcf):
     return info
 
 
-def pairwise_trendcomparison(tmp_file1, tmp_file2, comparison_count, lower_variance_percentile,
+def pairwise_trendcomparison(tmp_file1, tmp_file2, lower_variance_percentile,
                              upper_variance_percentile, k, test_data):
     """
     wrapper function to conduct pairwise trend comparison for intersecting and non-intersecting genes

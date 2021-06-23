@@ -22,6 +22,7 @@ export class RootStore {
     init(data) {
         this.dataStore = new DataStore(data)
         this.dataLoaded = true;
+        console.log(data);
     }
 }
 const StoreContext = React.createContext();

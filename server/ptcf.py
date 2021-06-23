@@ -199,7 +199,6 @@ def ptcf_to_json(data, is_intersecting, conditions):
     :param is_intersecting: bool stating whether I_PTCF or NI_PTCF
     :return: dict of cluster/trend information and min/max values
     """
-
     if len(data.index) > 0:
 
         data['gene'] = data.index
@@ -208,48 +207,52 @@ def ptcf_to_json(data, is_intersecting, conditions):
 
         # split data into links
         datasets = [{}, {}]
-        intersections = split_by_link(additional_information['mod_data'])
-        if is_intersecting:
-            for index, row in data.iterrows():
-                values1 = []
-                values2 = []
-                for condition in conditions:
-                    column1 = 'ds1_' + condition
-                    column2 = 'ds2_' + condition
-                    values1.append(row[column1])
-                    values2.append(row[column2])
+        for index, row in data.iterrows():
+            values1 = []
+            values2 = []
+            for condition in conditions:
+                column1 = 'ds1_' + condition
+                column2 = 'ds2_' + condition
+                values1.append(row[column1])
+                values2.append(row[column2])
+            if is_intersecting:
                 datasets[0][row['gene']] = {'gene': row['gene'], 'values': values1, 'median': row['ds1_median'],
                                             'variance': row['ds1_var'],
                                             'cluster': row['ds1_cluster'].split('_')[1]}
                 datasets[1][row['gene']] = {'gene': row['gene'], 'values': values2, 'median': row['ds2_median'],
                                             'variance': row['ds2_var'],
                                             'cluster': row['ds2_cluster'].split('_')[1]}
-
+            else:
+                if type(row['ds1_cluster']) is float:
+                    datasets[1][row['gene']] = {'gene': row['gene'], 'values': values2, 'median': row['ds2_median'],
+                                                'variance': row['ds2_var'],
+                                                'cluster': row['ds2_cluster'].split('_')[1]}
+                else:
+                    datasets[0][row['gene']] = {'gene': row['gene'], 'values': values1, 'median': row['ds1_median'],
+                                                'variance': row['ds1_var'],
+                                                'cluster': row['ds1_cluster'].split('_')[1]}
+        if is_intersecting:
+            intersections = split_by_link(additional_information['mod_data'])
+            return {
+                'data': datasets,
+                'intersections': intersections,
+                'ds1_min': additional_information['min_max']['ds1_min'],
+                'ds1_max': additional_information['min_max']['ds1_max'],
+                'ds2_min': additional_information['min_max']['ds2_min'],
+                'ds2_max': additional_information['min_max']['ds2_max']
+            }
         else:
-            datasets = pd.DataFrame(additional_information['mod_data']).to_dict()
-        return {
-            'data': datasets,
-            'intersections': intersections,
-            'ds1_min': additional_information['min_max']['ds1_min'],
-            'ds1_max': additional_information['min_max']['ds1_max'],
-            'ds2_min': additional_information['min_max']['ds2_min'],
-            'ds2_max': additional_information['min_max']['ds2_max']
-        }
+            return {
+                'data': datasets,
+                'ds1_min': additional_information['min_max']['ds1_min'],
+                'ds1_max': additional_information['min_max']['ds1_max'],
+                'ds2_min': additional_information['min_max']['ds2_min'],
+                'ds2_max': additional_information['min_max']['ds2_max']
+            }
 
     else:
         print("no genes found")
-
-        return {
-            'data': data.to_dict(),
-            'columns': [],
-            'time_points': 0,
-            'x_values': [],
-            'cluster_count': 0,
-            'ds1_min': 0,
-            'ds1_max': 0,
-            'ds2_min': 0,
-            'ds2_max': 0,
-        }
+        return {}
 
 
 def ptcf_to_json_old(data, is_intersecting):
@@ -274,7 +277,6 @@ def ptcf_to_json_old(data, is_intersecting):
         else:
             data_split = pd.DataFrame(additional_information['mod_data']).to_dict()
         return {
-            # 'data' : additional_information['mod_data'].to_json(orient='records'),
             'data': data_split,
             'columns': list(additional_information['mod_data']),
             'time_points': get_time_points(additional_information['mod_data'], "ds1"),

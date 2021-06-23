@@ -1,11 +1,12 @@
 import {observer} from "mobx-react";
 import PropTypes from "prop-types";
 import React from "react";
-import {useStore} from "../Stores/RootStore";
+import {StoreProvider, useStore} from "../Stores/RootStore";
 import ProfilePlot from "./ProfilePlot";
 import * as d3 from "d3";
 import Axis from "./Axis";
 import CentroidProfilePlot from "./CentroidProfilePlot";
+import HighlightLines from "./HighlightLines";
 
 
 const DatasetTrends = observer((props) => {
@@ -16,7 +17,7 @@ const DatasetTrends = observer((props) => {
         left: 50,
         right: 10,
         top: 10,
-        bot: 20,
+        bot: 30,
     }
 
     // height and width of subplots
@@ -47,11 +48,17 @@ const DatasetTrends = observer((props) => {
                 // create plots based on plotTypes
                 if (props.plotType === "profile") {
                     const data = store.geneCentricMapping[cluster]
-                    plot = <ProfilePlot data={data} yScale={yScale} xScale={xScale}
-                                        color={props.colorScale(cluster)} opacity={opacity}/>
+                    plot = <g>
+                        <ProfilePlot data={data} yScale={yScale} xScale={xScale}
+                                     color={props.colorScale(cluster)} opacity={opacity}/>
+                        <StoreProvider store={store.parent}>
+                            <HighlightLines data={data} yScale={yScale} xScale={xScale}/>
+                        </StoreProvider>
+
+                    </g>
                 } else if (props.plotType === "centroid") {
                     // if there is only one gene in the cluster we create a profile plot instead of a centroid profile plot
-                    if (store.hoverClusters[cluster].length === 1) {
+                    if (Object.keys(store.geneCentricMapping[cluster]).length === 1) {
                         const data = store.geneCentricMapping[cluster]
                         plot = <ProfilePlot data={data} yScale={yScale} xScale={xScale}
                                             color={props.colorScale(cluster)} opacity={opacity}/>
@@ -64,17 +71,18 @@ const DatasetTrends = observer((props) => {
                 }
 
                 plots.push(
-                    <g key={cluster}
-                       transform={"translate(" + margin.left + "," + ((props.height / filteredNames.length) * i + margin.top) + ")"}>
-                        {plot}
-                        <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={""}/>
-                        <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={""}/>
-                    </g>)
+                    <svg key={cluster} width={props.width} height={props.height / props.clusterNames.length}>
+                        <g transform={"translate("+margin.left+",0)"}>
+                            {plot}
+                            <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={""}/>
+                            <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={""}/>
+                        </g>
+                    </svg>)
             }
         }
     )
     return (
-        <g>{plots}</g>
+        <div>{plots}</div>
     );
 });
 

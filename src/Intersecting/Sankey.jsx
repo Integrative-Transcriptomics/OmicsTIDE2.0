@@ -20,7 +20,7 @@ const Sankey = observer((props) => {
     const yScale = d3.scaleLinear().domain([0, store.genes.length]).range([0, props.height - store.clusterNames.length * whiteSpace])
     const colorScale = d3.scaleOrdinal().domain(store.clusterNames).range(d3.schemeCategory10);
     return (
-        <g>
+        <svg height={props.height} width={props.width}>
             <g>{<StoreProvider store={store.ds1}>
                 <StackedBars data={store.ds1.clusterSizes}
                              clusterNames={store.clusterNames}
@@ -47,7 +47,7 @@ const Sankey = observer((props) => {
                        colorScale={colorScale}
                        width={props.width - 2 * rectWidth}/>
             </g>
-        </g>
+        </svg>
 
     );
 });
