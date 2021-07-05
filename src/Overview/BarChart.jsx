@@ -6,13 +6,13 @@ function BarChart(props) {
     const bars = [];
     if ("intersecting" in props.data) {
         Object.keys(props.data.intersecting).forEach(elem => {
-            bars.push(<rect width={props.xScale(props.data.intersecting[elem])} height={20} x={currX} fill={props.colorScale(elem)}/>)
+            bars.push(<rect key={elem} width={props.xScale(props.data.intersecting[elem])} height={20} x={currX} fill={props.colorScale(elem)}/>)
             currX += props.xScale(props.data.intersecting.concordant)
         })
     }
     if ("nonIntersecting" in props.data) {
         Object.keys(props.data.nonIntersecting).forEach(file => {
-            bars.push(<rect width={props.xScale(props.data.nonIntersecting[file])} height={20} x={currX} fill={props.colorScale(file)}/>)
+            bars.push(<rect key={file} width={props.xScale(props.data.nonIntersecting[file])} height={20} x={currX} fill={props.colorScale(file)}/>)
             currX += props.xScale(props.data.intersecting.concordant)
         })
     }

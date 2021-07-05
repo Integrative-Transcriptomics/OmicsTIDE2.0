@@ -8,6 +8,9 @@ import Controls from "../Controls";
 import Grid from "@material-ui/core/Grid";
 import {Typography} from "@material-ui/core";
 import Bars from "./Bars";
+import SelectionTable from "./SelectionTable";
+import Button from "@material-ui/core/Button";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 
 const NIVis = observer((props) => {
     const store = useStore();
@@ -23,7 +26,7 @@ const NIVis = observer((props) => {
     useEffect(() => {
         changeWidth()
         window.addEventListener("resize", changeWidth);
-    }, [profiles]);
+    }, [profiles, changeWidth]);
     const maxCluster = d3.max([d3.max(Object.keys(store.ds1.clusterSizes).map(cluster => store.ds1.clusterSizes[cluster]))
         , d3.max(Object.keys(store.ds2.clusterSizes).map(cluster => store.ds2.clusterSizes[cluster]))]);
     return (
@@ -31,6 +34,13 @@ const NIVis = observer((props) => {
             <Grid container spacing={3}>
                 <Grid item xs={3}>
                     <Controls/>
+                    {store.ds1.selectedClusters > 0 || store.ds2.selectedClusters > 0 ?
+                        <div>
+                            <Typography>Selection</Typography>
+                            <SelectionTable colorScale={colorScale}/>
+                            <Button variant="contained" endIcon={<OpenInNewIcon/>}>Start detailed analysis</Button>
+                        </div> : null
+                    }
                 </Grid>
                 <Grid item xs={9}>
                     <Grid container spacing={3}>
@@ -50,7 +60,8 @@ const NIVis = observer((props) => {
                                                    minValue={store.minValue}
                                                    maxValue={store.maxValue}
                                                    plotType={store.plotType}
-                                                   width={width} height={height}/>
+                                                   width={width} height={height}
+                                                   handleClick={store.ds1.setSelectedCluster}/>
                                 </StoreProvider>
                             </div>
                         </Grid>
@@ -58,7 +69,7 @@ const NIVis = observer((props) => {
                             <StoreProvider store={store.ds1}>
                                 <Bars clusterNames={store.clusterNames} colorScale={colorScale}
                                       conditions={props.conditions} maxValue={maxCluster}
-                                      width={width/2} height={height}/>
+                                      width={width / 2} height={height}/>
                             </StoreProvider>
                         </Grid>
 
@@ -69,14 +80,15 @@ const NIVis = observer((props) => {
                                                minValue={store.minValue}
                                                maxValue={store.maxValue}
                                                plotType={store.plotType}
-                                               width={width} height={height}/>
+                                               width={width} height={height}
+                                               handleClick={store.ds1.setSelectedCluster}/>
                             </StoreProvider>
                         </Grid>
                         <Grid item xs={2}>
                             <StoreProvider store={store.ds2}>
                                 <Bars clusterNames={store.clusterNames} colorScale={colorScale}
                                       conditions={props.conditions} maxValue={maxCluster}
-                                      width={width/2} height={height}/>
+                                      width={width / 2} height={height}/>
                             </StoreProvider>
                         </Grid>
                     </Grid>

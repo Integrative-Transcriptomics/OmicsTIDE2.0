@@ -61,7 +61,7 @@ export class IntersectionDataset {
                     ).filter(intersection => this.parent.filteredIntersections[intersection].length > 0)
                 )
             },
-            handleNodeSelection(cluster) {
+            setSelectedCluster(cluster) {
                 this.parent.handleMultipleIntersectionSelection(Object.keys(this.parent.filteredIntersections)
                     .map(intersection => intersection.split(","))
                     .filter(intersection =>

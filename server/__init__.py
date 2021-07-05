@@ -7,16 +7,17 @@ from itertools import combinations
 from zipfile import ZipFile
 
 import pandas as pd
-from server.app import app, files
+from flask import jsonify, request, send_from_directory, send_file
+
+from server.app import app
 from server.data_quality_assurance import valid_cluster_header, valid_cluster_values, invalid_cluster_value_pos, \
     has_equal_number_of_timepoints
-from flask import jsonify, render_template, request, send_from_directory, send_file
+from server.preprocess_files import preprocess_file
 from server.preprocess_files import remove_invalid_genes
 from server.ptcf import get_non_intersecting_ptcf_from_ptcf, get_intersecting_ptcf_from_ptcf, add_additional_columns, \
     ptcf_to_json
 # import svgutils
-from server.trend_comparison import pairwise_trendcomparison, get_info
-from werkzeug.utils import secure_filename
+from server.trend_comparison import pairwise_trendcomparison
 
 # if not os.path.exists(os.path.join('.', 'tmp_files_OmicsTIDE')):
 
@@ -106,15 +107,9 @@ def load_and_modify(file, filename):
 
     data = {}
 
-    info = get_info("file_1", "file_2", filename, filename, i_ptcf, ni_ptcf)
-
-    intersecting_genes['info'] = info
-    non_intersecting_genes['info'] = info
-
     data['Comparison1'] = {
         'intersecting': intersecting_genes,
         'nonIntersecting': non_intersecting_genes,
-        'info': info,
         'k': k,
     }
 
@@ -151,45 +146,28 @@ def get_var_values(data, ds):
     return values.var(axis=1)
 
 
-def remove_tmp_files():
-    """removes tmp files folder with all its content (loaded files etc)
-    """
-
-    filelist = os.listdir(app.config['UPLOAD_FOLDER'])
-
-    for f in filelist:
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], f))
-
-
 ##############
 ### ROUTES ###
 ##############
 
-@app.route('/load_k', methods=['GET', 'POST'])
-def load_k():
-    data = {}
+
+@app.route('/load_data', methods=['POST'])
+def load_data():
+    data = []
+    files = request.files.getlist("files[]")
     k = int(request.form.to_dict()['k'])
     lower_variance_percentile = int(request.form.to_dict()['lowerVariancePercentage'])
     upper_variance_percentile = int(request.form.to_dict()['upperVariancePercentage'])
-
-    comparison_count = 1
-
-    # outsource this to function #
-    for combination in list(combinations(list(files.keys()), 2)):
-
-        tmp_file1 = str(combination[0])
-        tmp_file2 = str(combination[1])
-
-        # get file without NA
+    ds = []
+    for file in files:
+        ds.append({"filename": file.filename, "data": preprocess_file(file)})
+    for combination in combinations(ds, 2):
         try:
-
-            data["Comparison" + str(comparison_count)] = pairwise_trendcomparison(tmp_file1, tmp_file2,
-                                                                                  comparison_count,
-                                                                                  lower_variance_percentile,
-                                                                                  upper_variance_percentile, k,
-                                                                                  False)
-            comparison_count += 1
-
+            comparison = pairwise_trendcomparison(combination[0]["data"], combination[1]["data"],
+                                                  lower_variance_percentile,
+                                                  upper_variance_percentile, k)
+            comparison["files"] = [combination[0]["filename"], combination[1]["filename"]]
+            data.append(comparison)
         except TypeError as te:
             if str(te) == "object of type 'builtin_function_or_method' has no len()":
                 return jsonify(message='ID column has to be named "gene"'), 500
@@ -198,29 +176,7 @@ def load_k():
             if str(ve).startswith("Length mismatch: Expected axis has"):
                 return jsonify(message='Number of columns/conditions for the loaded files not identical!'), 500
 
-    return data
-
-
-
-@app.route('/cluster_data', methods=['GET', 'POST'])
-def cluster_data():
-    counter = 1
-
-    remove_tmp_files()
-
-    files.clear()
-
-    # save files
-    for file in request.files.getlist("files[]")[0:5]:
-        tmp_file = file
-        tmp_filename = secure_filename(tmp_file.filename)
-        tmp_file.save(os.path.join(app.config['UPLOAD_FOLDER'], tmp_filename))
-
-        files['file' + "_" + str(counter)] = tmp_filename
-
-        counter += 1
-
-    return "clustered"
+    return jsonify(data)
 
 
 @app.route('/load_test_data_bloodcell', methods=['GET', 'POST'])
@@ -234,8 +190,11 @@ def load_test_data_bloodcell():
     proteome_data = os.path.join(app.config['FILES_BLOODCELLS'], "Proteome.csv")
 
     try:
-        data.append(pairwise_trendcomparison(transcriptome_data, proteome_data, 1, lower_variance_percentile,
-                                                       upper_variance_percentile, k, True))
+        comparison = pairwise_trendcomparison(preprocess_file(transcriptome_data), preprocess_file(proteome_data),
+                                              lower_variance_percentile,
+                                              upper_variance_percentile, k)
+        comparison["files"] = ["Transcriptome.csv", "Proteome.csv"]
+        data.append(comparison)
 
     except TypeError as te:
         if str(te) == "object of type 'builtin_function_or_method' has no len()":
@@ -260,10 +219,16 @@ def load_test_data_streptomyces():
     prot_m1152 = os.path.join(app.config['FILES_STREPTOMYCES'], "Proteome_M1152.csv")
 
     try:
-        data.append(pairwise_trendcomparison(trans_m1152, trans_m145, lower_variance_percentile,
-                                                       upper_variance_percentile, k, True))
-        data.append(pairwise_trendcomparison(trans_m1152, prot_m1152, lower_variance_percentile,
-                                                       upper_variance_percentile, k, True))
+        comparison1 = pairwise_trendcomparison(preprocess_file(trans_m1152), preprocess_file(trans_m145),
+                                               lower_variance_percentile,
+                                               upper_variance_percentile, k)
+        comparison1["files"] = ["Transcriptome_M1152.csv", "Transcriptome_M145.csv"]
+        data.append(comparison1)
+        comparison2 = pairwise_trendcomparison(preprocess_file(trans_m1152), preprocess_file(prot_m1152),
+                                                           lower_variance_percentile,
+                                                           upper_variance_percentile, k)
+        comparison2["files"] = ["Transcriptome_M1152.csv", "Proteome_M1152.csv"]
+        data.append(comparison2)
 
     except TypeError as te:
         if str(te) == "object of type 'builtin_function_or_method' has no len()":
@@ -377,28 +342,6 @@ def send_svg():
         timestamp_name = "OmicsTIDE_" + time_id
 
         return send_from_directory(app.config['UPLOAD_FOLDER'], timestamp_name, as_attachment=True)
-
-
-@app.route('/upload', methods=['GET', 'POST'])
-def uploaded_file():
-    if request.method == 'POST':
-
-        remove_tmp_files()
-
-        files.clear()
-
-        if len(list(request.files.to_dict().keys())) > 0:
-
-            file = request.files['form_clustered']
-            filename = secure_filename(file.filename)
-
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            server_data = load_and_modify(os.path.join(app.config['UPLOAD_FOLDER'], filename), filename)
-
-            return server_data
-
-        else:
-            return render_template('index.html')
 
 
 if __name__ == '__main__':

@@ -71,8 +71,9 @@ const DatasetTrends = observer((props) => {
                 }
 
                 plots.push(
-                    <svg key={cluster} width={props.width} height={props.height / props.clusterNames.length}>
-                        <g transform={"translate("+margin.left+",0)"}>
+                    <svg key={cluster} width={props.width} height={props.height / props.clusterNames.length}
+                         onClick={() => store.setSelectedCluster(cluster)}>
+                        <g transform={"translate(" + margin.left + ",0)"}>
                             {plot}
                             <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={""}/>
                             <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={""}/>
@@ -94,5 +95,6 @@ DatasetTrends.propTypes = {
     maxValue: PropTypes.number.isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
+    handleClick: PropTypes.func.isRequired,
 };
 export default DatasetTrends;

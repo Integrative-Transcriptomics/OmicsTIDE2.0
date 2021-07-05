@@ -82,10 +82,10 @@ def add_additional_columns(data):
     """
 
     highlighted = [True] * len(data.index)
-    data['highlighted'] = highlighted
+    data.loc[:, 'highlighted'] = highlighted
 
     profile_selected = [False] * len(data.index)
-    data['profile_selected'] = profile_selected
+    data.loc[:, 'profile_selected'] = profile_selected
 
     return data
 
@@ -182,7 +182,7 @@ def split_by_link(data):
 
     split_data = {}
 
-    data['cluster_id'] = data['ds1_cluster'] + "-" + data['ds2_cluster']
+    data.loc[:, 'cluster_id'] = data['ds1_cluster'] + "-" + data['ds2_cluster']
 
     grouped = data.groupby('cluster_id')
 
@@ -201,7 +201,7 @@ def ptcf_to_json(data, is_intersecting, conditions):
     """
     if len(data.index) > 0:
 
-        data['gene'] = data.index
+        data.loc[:, 'gene'] = data.index
 
         additional_information = extract_additional_information(data)
 
@@ -266,7 +266,7 @@ def ptcf_to_json_old(data, is_intersecting):
 
     if len(data.index) > 0:
 
-        data['gene'] = data.index
+        data.loc[:, 'gene'] = data.index
 
         additional_information = extract_additional_information(data)
 

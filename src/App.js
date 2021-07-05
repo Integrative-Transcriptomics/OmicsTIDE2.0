@@ -1,32 +1,21 @@
-import axios from 'axios';
 import {RootStore, StoreProvider} from "./Stores/RootStore";
-import {useState} from "react";
 import VisTabs from "./VisTabs";
+import DefaultView from "./DefaultView";
+import React, {useState} from "react";
 
 const rootStore = new RootStore();
 
 function App() {
-    const [dataLoaded, setDataLoaded] = useState(false)
+    const [dataLoaded, setDataLoaded]=useState(false);
     return (
         <div className="App">
-            <button onClick={() => {
-                const formData = new FormData();
-                formData.append("k", 4);
-                formData.append("lowerVariancePercentage", 0);
-                formData.append("upperVariancePercentage", 100);
-                axios.post("/load_test_data_streptomyces", formData)
-                    .then((response) => {
-                        console.log(response)
-                        rootStore.init(response.data);
-                        setDataLoaded(true)
-                    })
-            }}>Load Example Data
-            </button>
-            <p>{rootStore.dataLoaded.toString()}</p>
             {dataLoaded ?
                 <StoreProvider store={rootStore.dataStore}>
                     <VisTabs/>
-                </StoreProvider> : null
+                </StoreProvider> :
+                <StoreProvider store={rootStore}>
+                    <DefaultView setDataLoaded={setDataLoaded}/>
+                </StoreProvider>
             }
 
         </div>

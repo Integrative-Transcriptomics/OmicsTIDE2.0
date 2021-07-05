@@ -8,9 +8,8 @@ import FormLabel from '@material-ui/core/FormLabel';
 import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 import {useStore} from "./Stores/RootStore";
-import PropTypes from "prop-types";
 
-const Controls = observer((props) => {
+const Controls = observer(() => {
     const store = useStore();
 
     // local states for sliders

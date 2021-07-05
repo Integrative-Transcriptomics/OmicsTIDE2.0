@@ -3,7 +3,7 @@ import Button from "@material-ui/core/Button";
 import React from "react";
 import * as d3 from 'd3';
 import BarChart from "./BarChart";
-import {TableContainer, TableRow, Typography} from "@material-ui/core";
+import {TableBody, TableContainer, TableRow, Typography} from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
@@ -44,7 +44,7 @@ function Overview(props) {
             barChartData.nonIntersecting[comparison.file2] = Object.keys(comparison.nonIntersecting.ds2.genes).length;
         }
 
-        return (<TableRow>
+        return (<TableRow key={comparison.file1 + comparison.file2}>
             <TableCell>
                 <Typography>{comparison.file1 + " - " + comparison.file2}</Typography>
             </TableCell>
@@ -63,7 +63,7 @@ function Overview(props) {
             </TableCell>
         </TableRow>);
     });
-    const legend = colorScale.domain().map(elem => <div>
+    const legend = colorScale.domain().map(elem => <div key={elem}>
         <svg width={20} height={20}>
             <rect width={20} height={20} fill={colorScale(elem)}/>
         </svg>
@@ -74,7 +74,9 @@ function Overview(props) {
             <Typography>Comparisons</Typography>
             <TableContainer component={Paper}>
                 <Table>
-                    {buttons}
+                    <TableBody>
+                        {buttons}
+                    </TableBody>
                 </Table>
             </TableContainer>
             {legend}

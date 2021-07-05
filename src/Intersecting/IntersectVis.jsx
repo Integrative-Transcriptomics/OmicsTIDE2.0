@@ -9,6 +9,8 @@ import Controls from "../Controls";
 import Grid from "@material-ui/core/Grid";
 import SelectionTable from "./SelectionTable";
 import {Typography} from "@material-ui/core";
+import Button from "@material-ui/core/Button";
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const IntersectVis = observer((props) => {
     const store = useStore();
@@ -29,20 +31,21 @@ const IntersectVis = observer((props) => {
     useEffect(() => {
         changeWidth();
         window.addEventListener("resize", changeWidth);
-    }, [profiles, sankey]);
+    }, [profiles, sankey, changeWidth]);
 
     return (
         <div style={{padding: 10}}>
             <Grid container spacing={3}>
-                <Grid item xs={2}>
+                <Grid item xs={3}>
                     <Controls/>
                     {store.selectedIntersections.length > 0 ?
                         <div>
                             <Typography>Selection</Typography>
                             <SelectionTable colorScale={colorScale}/>
+                            <Button variant="contained" endIcon={<OpenInNewIcon/>}>Start detailed analysis</Button>
                         </div> : null}
                 </Grid>
-                <Grid item xs={10}>
+                <Grid item xs={9}>
                     <Grid container spacing={3}>
                         <Grid item xs={3}>
                             <Typography>{store.comparison.file1}</Typography>
@@ -66,7 +69,9 @@ const IntersectVis = observer((props) => {
                                                    minValue={store.minValue}
                                                    maxValue={store.maxValue}
                                                    plotType={store.plotType}
-                                                   width={profilesWidth} height={height}/>
+                                                   width={profilesWidth} height={height}
+                                                   handleClick={(c) => {
+                                                   }}/>
                                 </StoreProvider>
                             </div>
                         </Grid>
@@ -82,7 +87,9 @@ const IntersectVis = observer((props) => {
                                                minValue={store.minValue}
                                                maxValue={store.maxValue}
                                                plotType={store.plotType}
-                                               width={profilesWidth} height={height}/>
+                                               width={profilesWidth} height={height}
+                                               handleClick={(c) => {
+                                               }}/>
                             </StoreProvider>
                         </Grid>
                     </Grid>

@@ -1,5 +1,5 @@
 import {observer} from "mobx-react";
-import React, {createRef} from "react";
+import React from "react";
 
 import {IconButton, TableBody, TableContainer, TableHead, TableRow} from "@material-ui/core";
 import Table from "@material-ui/core/Table";
@@ -11,7 +11,6 @@ import Paper from "@material-ui/core/Paper";
 
 const SelectionTable = observer((props) => {
     const store = useStore();
-    const firstCol = createRef()
     const width = 100;
     const height = 30;
 

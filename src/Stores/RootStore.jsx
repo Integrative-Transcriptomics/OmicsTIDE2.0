@@ -10,7 +10,7 @@ export class RootStore {
     constructor() {
         this.dataStore = null
         this.uiStore = new UIStore(this)
-        extendObservable(this,{
+        extendObservable(this, {
             dataLoaded: false,
         })
     }
@@ -20,17 +20,18 @@ export class RootStore {
      * @param {Object} data
      */
     init(data) {
+        console.log(data)
         this.dataStore = new DataStore(data)
         this.dataLoaded = true;
-        console.log(data);
     }
 }
+
 const StoreContext = React.createContext();
 
-export const StoreProvider = ({ children, store }) => {
-  return (
-    <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
-  );
+export const StoreProvider = ({children, store}) => {
+    return (
+        <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
+    );
 };
 
 /* Hook to use store in any functional component */
@@ -38,5 +39,5 @@ export const useStore = () => React.useContext(StoreContext);
 
 /* HOC to inject store to any functional or class component */
 export const withStore = (Component) => (props) => {
-  return <Component {...props} store={useStore()} />;
+    return <Component {...props} store={useStore()}/>;
 };

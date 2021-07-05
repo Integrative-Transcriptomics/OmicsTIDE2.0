@@ -89,10 +89,11 @@ function VisTabs() {
                 </StoreProvider>
             </TabPanel>)
         }
+        return null;
     })
     return (
         <div>
-            <AppBar>
+            <AppBar position={"static"}>
                 <Tabs
                     value={selectedTab}
                     onChange={(e, v) => selectTab(v)}
