@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useState} from "react";
 import Tabs from "@material-ui/core/Tabs";
-import AppBar from "@material-ui/core/AppBar";
 import PropTypes from "prop-types";
 import Overview from "./Overview/Overview";
 import {StoreProvider, useStore} from "./Stores/RootStore";
@@ -9,6 +8,7 @@ import Tab from "@material-ui/core/Tab";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close"
 import NIVis from "./NonIntersecting/NIVis";
+import SecondLevelAnalysis from "./SecondLevel/SecondLevelAnalysis";
 
 
 function TabPanel(props) {
@@ -58,14 +58,24 @@ function VisTabs() {
             selectTab(tabIndex + 1)
         }
     }, [tabs]);
+    const addDetailTabI = useCallback((index, ds1Selection, ds2Selection) => {
+        setTabs(tabs.concat([{type: "intersectDetail", index: index, ds1Selection, ds2Selection}]))
+        selectTab(tabs.length)
+    }, [tabs])
+    const addDetailTabNI = useCallback((index, ds1Selection, ds2Selection) => {
+        setTabs(tabs.concat([{type: "nonintersectDetail", index: index, ds1Selection, ds2Selection}]))
+        selectTab(tabs.length)
+
+    }, [tabs])
     const removeTab = useCallback((index) => {
         let currentTabs = tabs.slice();
         currentTabs.splice(index, 1)
         setTabs(currentTabs);
     }, [tabs]);
+
     useEffect(() => {
         selectTab(tabs.length)
-    }, [tabs]);
+    }, [tabs.length]);
     const tabElems = tabs.map((tab, i) => <Tab key={tab.type + tab.index} component="div" label={
         <span>
             {tab.type + " " + (tab.index + 1)}
@@ -78,14 +88,34 @@ function VisTabs() {
         if (tab.type === "intersect") {
             return (<TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
                 <StoreProvider store={store.comparisons[tab.index].intersecting}>
-                    <IntersectVis conditions={store.conditions}/>
+                    <IntersectVis conditions={store.conditions} analyzeDetail={addDetailTabI}/>
                 </StoreProvider>
             </TabPanel>)
         }
         if (tab.type === "nonIntersect") {
             return (<TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
                 <StoreProvider store={store.comparisons[tab.index].nonIntersecting}>
-                    <NIVis conditions={store.conditions}/>
+                    <NIVis conditions={store.conditions} analyzeDetail={addDetailTabNI}/>
+                </StoreProvider>
+            </TabPanel>)
+        }
+        if (tab.type === "intersectDetail") {
+            return (
+                <TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
+                    <StoreProvider store={store.comparisons[tab.index].intersecting}>
+                        <SecondLevelAnalysis conditions={store.conditions}
+                                             ds1Selection={tab.ds1Selection}
+                                             ds2Selection={tab.ds2Selection}/>
+                    </StoreProvider>
+                </TabPanel>
+            )
+        }
+        if (tab.type === "nonintersectDetail") {
+            return (<TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
+                <StoreProvider store={store.comparisons[tab.index].nonIntersecting}>
+                    <SecondLevelAnalysis conditions={store.conditions}
+                                         ds1Selection={tab.ds1Selection}
+                                         ds2Selection={tab.ds2Selection}/>
                 </StoreProvider>
             </TabPanel>)
         }
@@ -93,16 +123,14 @@ function VisTabs() {
     })
     return (
         <div>
-            <AppBar position={"static"}>
-                <Tabs
-                    value={selectedTab}
-                    onChange={(e, v) => selectTab(v)}
-                    scrollButtons="auto"
-                >
-                    <Tab label="Overview"/>
-                    {tabElems}
-                </Tabs>
-            </AppBar>
+            <Tabs
+                value={selectedTab}
+                onChange={(e, v) => selectTab(v)}
+                scrollButtons="auto"
+            >
+                <Tab label="Overview"/>
+                {tabElems}
+            </Tabs>
             {/* eslint-disable-next-line react/jsx-no-undef */}
             <TabPanel value={selectedTab} index={0}>
                 <Overview addIntersectTab={addIntersectTab} addNITab={addNITab}/>

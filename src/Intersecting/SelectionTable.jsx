@@ -1,6 +1,5 @@
 import {observer} from "mobx-react";
 import React from "react";
-
 import {IconButton, TableBody, TableContainer, TableHead, TableRow} from "@material-ui/core";
 import Table from "@material-ui/core/Table";
 import TableCell from "@material-ui/core/TableCell";
@@ -9,7 +8,7 @@ import CloseIcon from "@material-ui/icons/Close"
 import Paper from "@material-ui/core/Paper";
 
 
-const SelectionTable = observer((props) => {
+const SelectionTable = observer(() => {
     const store = useStore();
     const width = 100;
     const height = 30;
@@ -18,10 +17,10 @@ const SelectionTable = observer((props) => {
         return (<TableRow key={intersection}>
             <TableCell>
                 <svg width={width} height={height}>
-                    <rect height={height} width={width} fill={props.colorScale(intersection[1])}/>
+                    <rect height={height} width={width} fill={store.colorScale(intersection[1])}/>
                     <polygon
                         points={"0,0 " + width / 3 + ",0 " + width / 3 * 2 + "," + height / 2 + " " + width / 3 + "," + height + " 0," + height}
-                        fill={props.colorScale(intersection[0])} strokeWidth={1} stroke={"white"}/>
+                        fill={store.colorScale(intersection[0])} strokeWidth={1} stroke={"white"}/>
                 </svg>
             </TableCell>
             <TableCell>{store.intersectionSizes[intersection]}</TableCell>
@@ -54,5 +53,4 @@ const SelectionTable = observer((props) => {
     );
 });
 
-SelectionTable.propTypes = {};
 export default SelectionTable;

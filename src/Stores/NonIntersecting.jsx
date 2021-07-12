@@ -35,6 +35,7 @@ export class NonIntersecting {
         // sort clusterNames by cluster size of first data set to ensure
         // reproducibility when loading the same data multiple times
         this.clusterNames = sortClusters(this.ds1.clusters);
+        this.colorScale = d3.scaleOrdinal().domain(this.clusterNames).range(d3.schemeCategory10);
 
     }
 

@@ -15,6 +15,6 @@ export class DataStore {
      * @returns {Comparison[]}
      */
     initComparisons(data) {
-        return data.map(comparison => new Comparison(this, comparison));
+        return data.map((comparison, i) => new Comparison(this, comparison, i));
     }
 }

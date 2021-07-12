@@ -17,13 +17,7 @@ const ProfilePlot = observer((props) => {
                           onMouseEnter={() => store.parent.setHighlightedGenes([gene])}/>)
     });
 
-    return (
-        <g>
-                {lines}
-        </g>
-
-
-    );
+    return (lines);
 });
 
 ProfilePlot.propTypes = {

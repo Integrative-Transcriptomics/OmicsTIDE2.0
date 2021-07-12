@@ -36,6 +36,13 @@ export class NIDataset {
             get numFilteredGenes(){
                 return(d3.sum(Object.keys(this.clusters).map(cluster=>this.clusters[cluster].length)))
             },
+             get geneSelection() {
+                let clusters={}
+                this.selectedClusters.forEach(cluster=>{
+                    clusters[cluster]=this.clusters[cluster];
+                })
+                return geneCentricMapping(clusters, this.genes, this.parent.dataStore.conditions)
+            },
             setHighlightedCluster(cluster) {
                 this.highlightedCluster = cluster
             },

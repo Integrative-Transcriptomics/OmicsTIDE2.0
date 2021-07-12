@@ -1,6 +1,5 @@
 import {observer} from "mobx-react";
 import React from "react";
-import PropTypes from "prop-types";
 import {IconButton, TableBody, TableContainer, TableHead, TableRow} from "@material-ui/core";
 import Table from "@material-ui/core/Table";
 import TableCell from "@material-ui/core/TableCell";
@@ -9,7 +8,7 @@ import CloseIcon from "@material-ui/icons/Close"
 import Paper from "@material-ui/core/Paper";
 
 
-const SelectionTable = observer((props) => {
+const SelectionTable = observer(() => {
     const store = useStore();
     const width = 30;
     const height = 30;
@@ -19,7 +18,7 @@ const SelectionTable = observer((props) => {
         return (<TableRow key={cluster + "1"}>
             <TableCell>
                 <svg width={width} height={height}>
-                    <rect height={height} width={width} fill={props.colorScale(cluster)}/>
+                    <rect height={height} width={width} fill={store.colorScale(cluster)}/>
                 </svg>
             </TableCell>
             <TableCell/>
@@ -36,7 +35,7 @@ const SelectionTable = observer((props) => {
             <TableCell/>
             <TableCell>
                 <svg width={width} height={height}>
-                    <rect height={height} width={width} fill={props.colorScale(cluster)}/>
+                    <rect height={height} width={width} fill={store.colorScale(cluster)}/>
                 </svg>
             </TableCell>
             <TableCell>{store.ds2.clusterSizes[cluster]}</TableCell>
@@ -70,7 +69,4 @@ const SelectionTable = observer((props) => {
     );
 });
 
-SelectionTable.propTypes = {
-    colorScale: PropTypes.func.isRequired,
-};
 export default SelectionTable;

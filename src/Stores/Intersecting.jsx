@@ -61,6 +61,13 @@ export class Intersecting {
                 })
                 return genes
             },
+            get selectedGenes(){
+                let intersections={}
+                this.selectedIntersections.forEach(intersection =>{
+                    intersections[intersection]=this.filteredIntersections[intersection];
+                })
+                return intersections;
+            },
             /**
              * sets highlighted intersections
              * @param {number[][]}intersections
@@ -115,6 +122,7 @@ export class Intersecting {
         // sort clusterNames by cluster size of first data set to ensure
         // reproducibility when loading the same data multiple times
         this.clusterNames = sortClusters(this.ds1.clusters);
+        this.colorScale = d3.scaleOrdinal().domain(this.clusterNames).range(d3.schemeCategory10);
 
         // reaction that updates clusters when intersections are filterd
         reaction(

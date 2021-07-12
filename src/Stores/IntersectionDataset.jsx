@@ -37,8 +37,23 @@ export class IntersectionDataset {
             get geneCentricMapping() {
                 return geneCentricMapping(this.hoverClusters, this.genes, this.parent.dataStore.conditions)
             },
+            get geneSelection() {
+                let clusters={}
+                Object.keys(this.parent.selectedGenes).forEach(intersection =>{
+                    const key = intersection.split(',')[this.index];
+                    clusters[key]=this.parent.selectedGenes[intersection];
+                })
+                return geneCentricMapping(clusters, this.genes, this.parent.dataStore.conditions)
+            },
             get clusterSizes() {
                 return clusterSizes(this.clusters);
+            },
+            get selectedClusters() {
+                let selectedClusters = []
+                this.parent.selectedIntersections.forEach(intersection => {
+                    selectedClusters.push(intersection[this.index])
+                })
+                return selectedClusters;
             },
             updateClusters() {
                 let clusters = {}

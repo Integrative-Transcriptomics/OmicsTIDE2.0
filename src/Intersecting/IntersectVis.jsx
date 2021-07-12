@@ -4,7 +4,6 @@ import DatasetTrends from "../Trends/DatasetTrends";
 import Sankey from "./Sankey";
 import PropTypes from "prop-types";
 import {StoreProvider, useStore} from "../Stores/RootStore";
-import * as d3 from "d3";
 import Controls from "../Controls";
 import Grid from "@material-ui/core/Grid";
 import SelectionTable from "./SelectionTable";
@@ -18,7 +17,6 @@ const IntersectVis = observer((props) => {
     const profiles = createRef();
     const [sankeyWidth, setSankeyWidth] = useState(1);
     const [profilesWidth, setProfilesWidth] = useState(1);
-    const colorScale = d3.scaleOrdinal().domain(store.clusterNames).range(d3.schemeCategory10);
     const height = 800;
     const changeWidth = useCallback(() => {
         if (sankey.current != null) {
@@ -41,8 +39,8 @@ const IntersectVis = observer((props) => {
                     {store.selectedIntersections.length > 0 ?
                         <div>
                             <Typography>Selection</Typography>
-                            <SelectionTable colorScale={colorScale}/>
-                            <Button variant="contained" endIcon={<OpenInNewIcon/>}>Start detailed analysis</Button>
+                            <SelectionTable colorScale={store.colorScale}/>
+                            <Button variant="contained" endIcon={<OpenInNewIcon/>} onClick={()=>props.analyzeDetail(store.comparison.index,store.ds1.geneSelection, store.ds2.geneSelection)}>Start detailed analysis</Button>
                         </div> : null}
                 </Grid>
                 <Grid item xs={9}>
@@ -64,7 +62,7 @@ const IntersectVis = observer((props) => {
                         <Grid item xs={3}>
                             <div ref={profiles}>
                                 <StoreProvider store={store.ds1}>
-                                    <DatasetTrends clusterNames={store.clusterNames} colorScale={colorScale}
+                                    <DatasetTrends clusterNames={store.clusterNames} colorScale={store.colorScale}
                                                    conditions={props.conditions}
                                                    minValue={store.minValue}
                                                    maxValue={store.maxValue}
@@ -77,12 +75,12 @@ const IntersectVis = observer((props) => {
                         </Grid>
                         <Grid item xs={6}>
                             <div ref={sankey}>
-                                <Sankey width={sankeyWidth} height={height} colorScale={colorScale}/>
+                                <Sankey width={sankeyWidth} height={height} colorScale={store.colorScale}/>
                             </div>
                         </Grid>
                         <Grid item xs={3}>
                             <StoreProvider store={store.ds2}>
-                                <DatasetTrends clusterNames={store.clusterNames} colorScale={colorScale}
+                                <DatasetTrends clusterNames={store.clusterNames} colorScale={store.colorScale}
                                                conditions={props.conditions}
                                                minValue={store.minValue}
                                                maxValue={store.maxValue}

@@ -16,7 +16,6 @@ const NIVis = observer((props) => {
     const store = useStore();
     const profiles = createRef();
     const [width, setWidth] = useState(1000);
-    const colorScale = d3.scaleOrdinal().domain(store.clusterNames).range(d3.schemeCategory10);
     const height = 800;
     const changeWidth = useCallback(() => {
         if (profiles.current != null) {
@@ -37,8 +36,10 @@ const NIVis = observer((props) => {
                     {store.ds1.selectedClusters > 0 || store.ds2.selectedClusters > 0 ?
                         <div>
                             <Typography>Selection</Typography>
-                            <SelectionTable colorScale={colorScale}/>
-                            <Button variant="contained" endIcon={<OpenInNewIcon/>}>Start detailed analysis</Button>
+                            <SelectionTable colorScale={store.colorScale}/>
+                            <Button variant="contained" endIcon={<OpenInNewIcon/>}
+                                    onClick={() => props.analyzeDetail(store.comparison.index, store.ds1.geneSelection, store.ds2.geneSelection)}>Start
+                                detailed analysis</Button>
                         </div> : null
                     }
                 </Grid>
@@ -55,7 +56,7 @@ const NIVis = observer((props) => {
                         <Grid item xs={4}>
                             <div ref={profiles}>
                                 <StoreProvider store={store.ds1}>
-                                    <DatasetTrends clusterNames={store.clusterNames} colorScale={colorScale}
+                                    <DatasetTrends clusterNames={store.clusterNames} colorScale={store.colorScale}
                                                    conditions={props.conditions}
                                                    minValue={store.minValue}
                                                    maxValue={store.maxValue}
@@ -67,7 +68,7 @@ const NIVis = observer((props) => {
                         </Grid>
                         <Grid item xs={2}>
                             <StoreProvider store={store.ds1}>
-                                <Bars clusterNames={store.clusterNames} colorScale={colorScale}
+                                <Bars clusterNames={store.clusterNames} colorScale={store.colorScale}
                                       conditions={props.conditions} maxValue={maxCluster}
                                       width={width / 2} height={height}/>
                             </StoreProvider>
@@ -75,7 +76,7 @@ const NIVis = observer((props) => {
 
                         <Grid item xs={4}>
                             <StoreProvider store={store.ds2}>
-                                <DatasetTrends clusterNames={store.clusterNames} colorScale={colorScale}
+                                <DatasetTrends clusterNames={store.clusterNames} colorScale={store.colorScale}
                                                conditions={props.conditions}
                                                minValue={store.minValue}
                                                maxValue={store.maxValue}
@@ -86,7 +87,7 @@ const NIVis = observer((props) => {
                         </Grid>
                         <Grid item xs={2}>
                             <StoreProvider store={store.ds2}>
-                                <Bars clusterNames={store.clusterNames} colorScale={colorScale}
+                                <Bars clusterNames={store.clusterNames} colorScale={store.colorScale}
                                       conditions={props.conditions} maxValue={maxCluster}
                                       width={width / 2} height={height}/>
                             </StoreProvider>

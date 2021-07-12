@@ -9,6 +9,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import makeStyles from "@material-ui/core/styles/makeStyles";
+import Grid from "@material-ui/core/Grid";
 
 
 function DefaultView(props) {
@@ -55,54 +56,60 @@ function DefaultView(props) {
                     })
             }
         },
-        [varFilter, k, testData, files],
+        [varFilter, k, testData, files, store, props],
     );
     return (
-        <div className="App">
-            <Typography id="discrete-slider" gutterBottom>
-                K for k-means
-            </Typography>
-            <Slider
-                value={k}
-                aria-labelledby="discrete-slider"
-                valueLabelDisplay="auto"
-                step={1}
-                marks
-                onChange={(e, v) => setK(v)}
-                max={10}
-            />
-            <Typography id="range-slider" gutterBottom>
-                Variance Filter DS1
-            </Typography>
-            <Slider
-                value={varFilter}
-                onChange={(e, v) => setVarFilter(v)}
-                valueLabelDisplay="auto"
-                aria-labelledby="range-slider"
-            />
-            <Button variant="contained"
-                    component="label">Select Files
-                <input type="file"
-                       multiple
-                       onChange={(e) => setFiles([...e.target.files])
-                       }
-                       hidden/>
-            </Button> or
-            <FormControl className={classes.formControl}>
-                <InputLabel id="demo-simple-select-label">Test Data</InputLabel>
-                <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={testData}
-                    onChange={(e) => selectTestData(e.target.value)}
-                >
-                    <MenuItem value={"bc"}>Blood Cell Study</MenuItem>
-                    <MenuItem value={"s"}>Streptomyces Study</MenuItem>
-                </Select>
-            </FormControl>
-            <Button onClick={launch}>Launch</Button>
-
+        <div style={{padding: 10}}>
+            <Grid container spacing={10}>
+                <Grid item xs={4}>
+                    <Typography id="discrete-slider" gutterBottom>
+                        K for k-means
+                    </Typography>
+                    <Slider
+                        value={k}
+                        aria-labelledby="discrete-slider"
+                        valueLabelDisplay="auto"
+                        step={1}
+                        marks
+                        onChange={(e, v) => setK(v)}
+                        max={10}
+                    />
+                    <Typography id="range-slider" gutterBottom>
+                        Variance Filter
+                    </Typography>
+                    <Slider
+                        value={varFilter}
+                        onChange={(e, v) => setVarFilter(v)}
+                        valueLabelDisplay="auto"
+                        aria-labelledby="range-slider"
+                    />
+                    <form style={{display: 'flex'}}>
+                        <Button component="label">Select Files
+                            <input type="file"
+                                   multiple
+                                   onChange={(e) => setFiles([...e.target.files])
+                                   }
+                                   hidden/>
+                        </Button>
+                        or
+                        <FormControl className={classes.formControl}>
+                            <InputLabel id="demo-simple-select-label">Test Data</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={testData}
+                                onChange={(e) => selectTestData(e.target.value)}
+                            >
+                                <MenuItem value={"bc"}>Blood Cell Study</MenuItem>
+                                <MenuItem value={"s"}>Streptomyces Study</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <Button onClick={launch}>Launch</Button>
+                    </form>
+                </Grid>
+            </Grid>
         </div>
+
     );
 }
 

@@ -7,6 +7,7 @@ import {TableBody, TableContainer, TableRow, Typography} from "@material-ui/core
 import TableCell from "@material-ui/core/TableCell";
 import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
+import Container from "@material-ui/core/Container";
 
 
 function Overview(props) {
@@ -46,10 +47,14 @@ function Overview(props) {
 
         return (<TableRow key={comparison.file1 + comparison.file2}>
             <TableCell>
+                <Typography>{i + 1}</Typography>
+            </TableCell>
+            <TableCell>
                 <Typography>{comparison.file1 + " - " + comparison.file2}</Typography>
             </TableCell>
             <TableCell>
-                <BarChart data={barChartData} xScale={xScale} colorScale={colorScale}/>
+                <BarChart showAxis={i === store.comparisons.length-1} data={barChartData} xScale={xScale}
+                          colorScale={colorScale}/>
             </TableCell>
             <TableCell>
                 {comparison.intersecting != null ?
@@ -64,13 +69,13 @@ function Overview(props) {
         </TableRow>);
     });
     const legend = colorScale.domain().map(elem => <div key={elem}>
-        <svg width={20} height={20}>
+        <svg width={20} height={12}>
             <rect width={20} height={20} fill={colorScale(elem)}/>
         </svg>
         {elem}
     </div>)
     return (
-        <div>
+        <Container maxWidth={false}>
             <Typography>Comparisons</Typography>
             <TableContainer component={Paper}>
                 <Table>
@@ -80,7 +85,7 @@ function Overview(props) {
                 </Table>
             </TableContainer>
             {legend}
-        </div>
+        </Container>
     );
 }
 
