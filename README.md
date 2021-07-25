@@ -33,6 +33,7 @@ user@example:~$ source <your-venv>/bin/activate
 Activate venv and run the python file which will open the web application in a new browser window. 
 ```console
 user@example:~$ source <your-venv>/bin/activate
+(<your-venv>) user@example:~$ npm install
 (<your-venv>) user@example:~$ npm run dev
 ```
 OmicsTIDE requires a stable internet connection to request data from [Panther](http://www.pantherdb.org/). 
