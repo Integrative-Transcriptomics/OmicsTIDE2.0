@@ -9,10 +9,9 @@ import {sortClusters} from "./HelperFunctions";
 export class Intersecting {
     constructor(comparison, dataStore, data) {
         extendObservable(this, {
-
             // highlighted intersections (by hovering over intersections or nodes)
             highlightedIntersections: [],
-            // selecten intersections (by clicking on intersections or nodes)
+            // select intersections (by clicking on intersections or nodes)
             selectedIntersections: [],
             // highlighted genes (by hovering over lines in profile plots)
             highlightedGenes: [],
@@ -22,7 +21,7 @@ export class Intersecting {
             },
             /**
              * calculates intersections filtered by abundance and variance
-             * @returns {{Object}}
+             * @returns {{}}
              */
             get filteredIntersections() {
                 let intersections = {}
@@ -32,6 +31,10 @@ export class Intersecting {
                 })
                 return intersections
             },
+            /**
+             * calculates sizes of intersections
+             * @returns {{}}
+             */
             get intersectionSizes() {
                 let intersections = {};
                 Object.keys(this.filteredIntersections).forEach(intersection =>
@@ -52,7 +55,7 @@ export class Intersecting {
             },
             /**
              * gets genes that are in the currently highlighted intersections
-             * @returns {{Object[]}}
+             * @returns {{}}
              */
             get hoveredGenes() {
                 let genes = {};
@@ -61,12 +64,19 @@ export class Intersecting {
                 })
                 return genes
             },
-            get selectedGenes(){
-                let intersections={}
-                this.selectedIntersections.forEach(intersection =>{
-                    intersections[intersection]=this.filteredIntersections[intersection];
+            /**
+             * gets intersections with selected genes
+             * @returns {{}}
+             */
+            get selectedGenesIntersections() {
+                let intersections = {}
+                this.selectedIntersections.forEach(intersection => {
+                    intersections[intersection] = this.filteredIntersections[intersection];
                 })
                 return intersections;
+            },
+            get selectedGenes(){
+                return Object.values(this.selectedGenesIntersections).flat();
             },
             /**
              * sets highlighted intersections
@@ -75,9 +85,17 @@ export class Intersecting {
             setHighlightedIntersection(intersections) {
                 this.highlightedIntersections = intersections
             },
+            /**
+             * sets highlighted genes
+             * @param genes
+             */
             setHighlightedGenes(genes) {
                 this.highlightedGenes = genes;
             },
+            /**
+             * selects an intersection
+             * @param {string} intersection
+             */
             handleIntersectionSelection(intersection) {
                 // intersection is already contained
                 const index = this.getIntersectionIndex(intersection)
@@ -87,6 +105,10 @@ export class Intersecting {
                     this.selectedIntersections.push(intersection)
                 }
             },
+            /**
+             * selects multiple intersections
+             * @param {string[]} intersections
+             */
             handleMultipleIntersectionSelection(intersections) {
                 const indices = intersections.map(currInt => this.getIntersectionIndex(currInt));
                 if (indices.every(index => index !== -1)) {
@@ -96,6 +118,13 @@ export class Intersecting {
                         .forEach(currInd => this.selectedIntersections.push(currInd))
                 }
             },
+            clearSelection(){
+                this.selectedIntersections=[]
+            },
+            /**
+             * sets current plot type
+             * @param {string} newPlotType
+             */
             setPlotType(newPlotType) {
                 this.plotType = newPlotType
             }
@@ -136,7 +165,7 @@ export class Intersecting {
     /**
      * initialize intersection from data received
      * @param {Object} data
-     * @returns {{Object}}
+     * @returns {{}}
      */
     initIntersections(data) {
         let intersections = {}
@@ -157,6 +186,11 @@ export class Intersecting {
         return new IntersectionDataset(this, data, index)
     }
 
+    /**
+     * calculates number of concordant and discordant genes for intersections
+     * @param {Object} intersections
+     * @returns {{discordant: number, concordant: number}}
+     */
     calculateConcordantDiscordant(intersections) {
         let concordantCount = 0;
         let discordantCount = 0;
@@ -169,7 +203,11 @@ export class Intersecting {
         return ({concordant: concordantCount, discordant: discordantCount})
     }
 
-
+    /**
+     * gets index of intersection in selected intersections
+     * @param {[number,number]} intersection
+     * @returns {number}
+     */
     getIntersectionIndex(intersection) {
         return this.selectedIntersections.map(currInt => JSON.stringify(currInt)).indexOf(JSON.stringify(intersection))
     }

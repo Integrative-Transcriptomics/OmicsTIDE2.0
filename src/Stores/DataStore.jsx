@@ -1,11 +1,14 @@
 import {Comparison} from "./Comparison";
+import {PantherAPI} from "./pantherAPI";
 
 /**
  * store responsible for holding the data
  */
 export class DataStore {
-    constructor(data) {
+    constructor(data,initialVarFilter) {
+        this.initialVarFilter=initialVarFilter;
         this.conditions = data[0].conditions;
+        this.pantherAPI = new PantherAPI();
         this.comparisons = this.initComparisons(data);
     }
 

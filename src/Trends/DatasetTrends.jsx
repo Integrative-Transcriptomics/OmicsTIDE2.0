@@ -75,7 +75,7 @@ const DatasetTrends = observer((props) => {
                          onClick={() => store.setSelectedCluster(cluster)}>
                         <g transform={"translate(" + margin.left + ",0)"}>
                             {plot}
-                            <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={""}/>
+                            <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={"z-score"}/>
                             <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={""}/>
                         </g>
                     </svg>)

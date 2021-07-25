@@ -13,8 +13,12 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const IntersectVis = observer((props) => {
     const store = useStore();
+
+    // refs to dynamically adapt sizes of plots
     const sankey = createRef();
     const profiles = createRef();
+
+    // states for widths of plots
     const [sankeyWidth, setSankeyWidth] = useState(1);
     const [profilesWidth, setProfilesWidth] = useState(1);
     const height = 800;
@@ -26,6 +30,8 @@ const IntersectVis = observer((props) => {
             setProfilesWidth(profiles.current.getBoundingClientRect().width)
         }
     }, [sankey, profiles]);
+
+    // change width when window is resized
     useEffect(() => {
         changeWidth();
         window.addEventListener("resize", changeWidth);
@@ -40,7 +46,13 @@ const IntersectVis = observer((props) => {
                         <div>
                             <Typography>Selection</Typography>
                             <SelectionTable colorScale={store.colorScale}/>
-                            <Button variant="contained" endIcon={<OpenInNewIcon/>} onClick={()=>props.analyzeDetail(store.comparison.index,store.ds1.geneSelection, store.ds2.geneSelection)}>Start detailed analysis</Button>
+                            <Button variant="contained" endIcon={<OpenInNewIcon/>}
+                                    onClick={() => {
+                                        props.analyzeDetail(store.comparison.index, store.ds1.geneSelection, store.ds2.geneSelection)
+                                        store.clearSelection();
+                                    }}>
+                                Start detailed analysis
+                            </Button>
                         </div> : null}
                 </Grid>
                 <Grid item xs={9}>

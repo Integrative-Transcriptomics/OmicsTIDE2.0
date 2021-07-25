@@ -39,9 +39,9 @@ export class IntersectionDataset {
             },
             get geneSelection() {
                 let clusters={}
-                Object.keys(this.parent.selectedGenes).forEach(intersection =>{
+                Object.keys(this.parent.selectedGenesIntersections).forEach(intersection =>{
                     const key = intersection.split(',')[this.index];
-                    clusters[key]=this.parent.selectedGenes[intersection];
+                    clusters[key]=this.parent.selectedGenesIntersections[intersection];
                 })
                 return geneCentricMapping(clusters, this.genes, this.parent.dataStore.conditions)
             },

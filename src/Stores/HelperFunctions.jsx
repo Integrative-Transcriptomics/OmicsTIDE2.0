@@ -1,3 +1,10 @@
+/**
+ * maps the data in a way that is optimal for visualizing data in line charts
+ * @param {Object} clusters
+ * @param {Object} genes
+ * @param {string[]} conditions
+ * @returns {{Object}}
+ */
 export function geneCentricMapping(clusters, genes, conditions) {
     let clusterMap = {};
     Object.keys(clusters).forEach((cluster) => {
@@ -10,6 +17,13 @@ export function geneCentricMapping(clusters, genes, conditions) {
     return clusterMap
 }
 
+/**
+ * maps the data in a way that is optimal for visualizing data in a centroid profile plot
+ * @param {Object} clusters
+ * @param {Object} genes
+ * @param {string[]} conditions
+ * @returns {{Object}}
+ */
 export function conditionMapping(clusters, genes, conditions) {
     let clusterMap = {};
     Object.keys(clusters).forEach((cluster) => {
@@ -24,6 +38,11 @@ export function conditionMapping(clusters, genes, conditions) {
     return clusterMap
 }
 
+/**
+ * gets the sizes for each cluster
+ * @param {Object} clusters
+ * @returns {{Object}}
+ */
 export function clusterSizes(clusters) {
     let clusterSizes = {}
     Object.keys(clusters)
@@ -33,7 +52,7 @@ export function clusterSizes(clusters) {
 
 /**
  * sorts clusters by length and returns their names
- * @returns {*[]}
+ * @returns {string[]}
  */
 export function sortClusters(clusters) {
     const clusterList = Object.keys(clusters).map(cluster => {

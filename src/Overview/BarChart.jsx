@@ -1,6 +1,7 @@
 import React from "react";
 import * as d3 from "d3";
 import Axis from "../Trends/Axis";
+import PropTypes from "prop-types";
 
 
 function BarChart(props) {
@@ -38,5 +39,9 @@ function BarChart(props) {
         </svg>
     );
 }
-
+BarChart.propTypes = {
+    data: PropTypes.objectOf(PropTypes.objectOf(PropTypes.number)).isRequired,
+    xScale: PropTypes.func.isRequired,
+    colorScale: PropTypes.func.isRequired,
+};
 export default BarChart;

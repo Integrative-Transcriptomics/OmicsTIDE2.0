@@ -9,6 +9,7 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close"
 import NIVis from "./NonIntersecting/NIVis";
 import SecondLevelAnalysis from "./SecondLevel/SecondLevelAnalysis";
+import {SecondLevelStore} from "./SecondLevel/SecondLevelStore";
 
 
 function TabPanel(props) {
@@ -59,14 +60,24 @@ function VisTabs() {
         }
     }, [tabs]);
     const addDetailTabI = useCallback((index, ds1Selection, ds2Selection) => {
-        setTabs(tabs.concat([{type: "intersectDetail", index: index, ds1Selection, ds2Selection}]))
+        const secondLevelStore = new SecondLevelStore(store.pantherAPI, store.comparisons[index].intersecting, ds1Selection, ds2Selection);
+        setTabs(tabs.concat([{
+            type: "intersectDetail",
+            index: index,
+            store: secondLevelStore,
+        }]))
         selectTab(tabs.length)
-    }, [tabs])
+    }, [tabs, store.pantherAPI])
     const addDetailTabNI = useCallback((index, ds1Selection, ds2Selection) => {
-        setTabs(tabs.concat([{type: "nonintersectDetail", index: index, ds1Selection, ds2Selection}]))
+        const secondLevelStore = new SecondLevelStore(store.pantherAPI, store.comparisons[index].nonIntersecting, ds1Selection, ds2Selection);
+        setTabs(tabs.concat([{
+            type: "nonintersectDetail",
+            index: index,
+            store: secondLevelStore,
+        }]))
         selectTab(tabs.length)
 
-    }, [tabs])
+    }, [tabs, store.pantherAPI])
     const removeTab = useCallback((index) => {
         let currentTabs = tabs.slice();
         currentTabs.splice(index, 1)
@@ -102,20 +113,16 @@ function VisTabs() {
         if (tab.type === "intersectDetail") {
             return (
                 <TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
-                    <StoreProvider store={store.comparisons[tab.index].intersecting}>
-                        <SecondLevelAnalysis conditions={store.conditions}
-                                             ds1Selection={tab.ds1Selection}
-                                             ds2Selection={tab.ds2Selection}/>
+                    <StoreProvider store={tab.store}>
+                        <SecondLevelAnalysis conditions={store.conditions} isLoading={tab.store.isLoading}/>
                     </StoreProvider>
                 </TabPanel>
             )
         }
         if (tab.type === "nonintersectDetail") {
             return (<TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
-                <StoreProvider store={store.comparisons[tab.index].nonIntersecting}>
-                    <SecondLevelAnalysis conditions={store.conditions}
-                                         ds1Selection={tab.ds1Selection}
-                                         ds2Selection={tab.ds2Selection}/>
+                <StoreProvider store={tab.store}>
+                    <SecondLevelAnalysis conditions={store.conditions} isLoading={tab.store.isLoading}/>
                 </StoreProvider>
             </TabPanel>)
         }

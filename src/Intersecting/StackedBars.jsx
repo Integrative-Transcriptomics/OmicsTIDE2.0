@@ -28,10 +28,7 @@ const StackedBars = observer((props) => {
         // increment currpos and add white space
         currPos += height + props.whiteSpace
     })
-    return (
-        <g>{rects}</g>
-
-    );
+    return (rects);
 });
 
 StackedBars.propTypes = {

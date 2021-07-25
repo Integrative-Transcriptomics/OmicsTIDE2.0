@@ -38,7 +38,10 @@ const NIVis = observer((props) => {
                             <Typography>Selection</Typography>
                             <SelectionTable colorScale={store.colorScale}/>
                             <Button variant="contained" endIcon={<OpenInNewIcon/>}
-                                    onClick={() => props.analyzeDetail(store.comparison.index, store.ds1.geneSelection, store.ds2.geneSelection)}>Start
+                                    onClick={() => {
+                                        props.analyzeDetail(store.comparison.index, store.ds1.geneSelection, store.ds2.geneSelection)
+                                        store.clearSelection();
+                                    }}>Start
                                 detailed analysis</Button>
                         </div> : null
                     }

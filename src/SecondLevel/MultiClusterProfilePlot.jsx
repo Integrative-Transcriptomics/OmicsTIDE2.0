@@ -28,6 +28,7 @@ const MultiClusterProfilePlot = observer((props) => {
 });
 
 MultiClusterProfilePlot.propTypes = {
+    selection: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any))).isRequired,
     yScale: PropTypes.func.isRequired,
     xScale: PropTypes.func.isRequired,
     colorScale: PropTypes.func.isRequired,

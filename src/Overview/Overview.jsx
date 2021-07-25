@@ -8,13 +8,16 @@ import TableCell from "@material-ui/core/TableCell";
 import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
 import Container from "@material-ui/core/Container";
+import PropTypes from "prop-types";
 
 
 function Overview(props) {
     const store = useStore();
     const width = 300;
     let domain = ["concordant", "discordant"]
-    const maxGenes = d3.max(store.comparisons.map(comparison => {
+
+    // get sum of all genes and create domain for color scale
+    const sumGenes = d3.max(store.comparisons.map(comparison => {
         let sum = 0;
         if (comparison.intersecting != null) {
             sum += comparison.intersecting.initialConcordantDiscordant.concordant + comparison.intersecting.initialConcordantDiscordant.discordant;
@@ -30,9 +33,11 @@ function Overview(props) {
         }
         return sum;
     }))
-    const xScale = d3.scaleLinear().domain([0, maxGenes]).range([0, width]);
+    const xScale = d3.scaleLinear().domain([0, sumGenes]).range([0, width]);
     const colorScale = d3.scaleOrdinal().domain(domain).range(d3.schemeCategory10)
-    const buttons = store.comparisons.map((comparison, i) => {
+
+    // for each comparison create row in Overview Table
+    const rows = store.comparisons.map((comparison, i) => {
         let barChartData = {};
         if (comparison.intersecting != null) {
             barChartData.intersecting = {};
@@ -80,7 +85,7 @@ function Overview(props) {
             <TableContainer component={Paper}>
                 <Table>
                     <TableBody>
-                        {buttons}
+                        {rows}
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -88,5 +93,9 @@ function Overview(props) {
         </Container>
     );
 }
+Overview.propTypes = {
+    addNITab: PropTypes.func.isRequired,
+    addIntersectTab: PropTypes.func.isRequired,
+};
 
 export default Overview;

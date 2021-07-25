@@ -33,15 +33,22 @@ export class NIDataset {
                 })
                 return clusters;
             },
-            get numFilteredGenes(){
-                return(d3.sum(Object.keys(this.clusters).map(cluster=>this.clusters[cluster].length)))
+            get numFilteredGenes() {
+                return (d3.sum(Object.keys(this.clusters).map(cluster => this.clusters[cluster].length)))
             },
-             get geneSelection() {
-                let clusters={}
-                this.selectedClusters.forEach(cluster=>{
-                    clusters[cluster]=this.clusters[cluster];
+            get geneSelection() {
+                let clusters = {}
+                this.selectedClusters.forEach(cluster => {
+                    clusters[cluster] = this.clusters[cluster];
                 })
                 return geneCentricMapping(clusters, this.genes, this.parent.dataStore.conditions)
+            },
+            get selectedGenes(){
+                let genes=[]
+                this.selectedClusters.forEach(cluster => {
+                    genes.push(...this.clusters[cluster])
+                })
+                return(genes);
             },
             setHighlightedCluster(cluster) {
                 this.highlightedCluster = cluster
@@ -55,10 +62,12 @@ export class NIDataset {
                 }
 
             },
+            clearSelection(){
+                this.selectedClusters =[];
+            }
         })
 
     }
-
 
 
 }

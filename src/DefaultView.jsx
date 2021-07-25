@@ -10,25 +10,40 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import Grid from "@material-ui/core/Grid";
+import Alert from "@material-ui/lab/Alert";
 
 
 function DefaultView(props) {
     const useStyles = makeStyles((theme) => ({
         formControl: {
             margin: theme.spacing(1),
-            minWidth: 120,
+            minWidth: 150,
         },
         selectEmpty: {
             marginTop: theme.spacing(2),
         },
+        centerText: {
+            display: "flex",
+            justifyContent: "center",
+            alignContent: "center",
+            flexDirection: "column"
+        }
     }));
     const classes = useStyles();
-
     const store = useStore();
     const [varFilter, setVarFilter] = useState([0, 100])
     const [k, setK] = useState(3)
-    const [testData, selectTestData] = useState("")
+    const [testData, setTestData] = useState("")
     const [files, setFiles] = useState([]);
+    const [selectionType, setSelectionType] = useState("none");
+    const selectTestData = useCallback((data) => {
+        setTestData(data);
+        setSelectionType("test");
+    }, [])
+    const selectFiles = useCallback((files) => {
+        setFiles(files)
+        setSelectionType("files");
+    }, [])
     const launch = useCallback(
         () => {
             const formData = new FormData();
@@ -38,74 +53,124 @@ function DefaultView(props) {
             if (testData === "bc") {
                 axios.post("/load_test_data_bloodcell", formData)
                     .then((response) => {
-                        store.init(response.data);
+                        store.init(response.data, varFilter);
                         props.setDataLoaded(true);
                     })
             } else if (testData === "s") {
                 axios.post("/load_test_data_streptomyces", formData)
                     .then((response) => {
-                        store.init(response.data);
+                        store.init(response.data, varFilter);
                         props.setDataLoaded(true);
                     })
             } else {
                 files.forEach(file => formData.append("files[]", file));
                 axios.post("/load_data", formData)
                     .then((response) => {
-                        store.init(response.data);
+                        store.init(response.data, varFilter);
                         props.setDataLoaded(true);
                     })
             }
         },
         [varFilter, k, testData, files, store, props],
     );
+    let selectionText = null;
+    if (selectionType === "files") {
+        selectionText = files.length + " files selected";
+    } else if (selectionType === "test")
+        if (testData === "bc") {
+            selectionText = "Bloodcell study selected"
+        } else {
+            selectionText = "Streptomyces study selected"
+        }
     return (
         <div style={{padding: 10}}>
+            <Alert severity="info">
+                OmicsTIDE integrates proteomics and transcriptomics data by concatenating two tables with expression
+                labels and clustering them with k-means. As a result, each gene is associated with a cluster in both
+                data sets. The result is visualized in OmicsTIDE.
+                <br/>
+                How it works:
+                <ul>
+                    <li>Select two or more files or load test files. First column: Gene IDs, header "gene", Other
+                        columns conditions, e.g. timepoint 1, timepoint 2, timepoint 3. Cells: expression values
+                    </li>
+                    <li>Select k for k-means: K determines how many trends will be created, feel free to play with
+                        different K for your data.
+                    </li>
+                    <li>Variance filter: Filters data by variance. Sometimes results are improved by only considering
+                        highly variant genes.
+                    </li>
+                </ul></Alert>
             <Grid container spacing={10}>
-                <Grid item xs={4}>
+                <Grid item xs={6}>
+                    <Grid container spacing={10}>
+                        <Grid item xs={9}>
+                            <form style={{display: 'flex'}}>
+                                <Button component="label">Select Files
+                                    <input type="file"
+                                           multiple
+                                           onChange={(e) => selectFiles([...e.target.files])}
+                                           hidden/>
+                                </Button>
+                                <div className={classes.centerText}>
+                                    or
+                                </div>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel id="demo-simple-select-label">Select Test Data</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-label"
+                                        id="demo-simple-select"
+                                        value={testData}
+                                        onChange={(e) => selectTestData(e.target.value)}
+                                    >
+                                        <MenuItem value={"bc"}>Blood Cell Study</MenuItem>
+                                        <MenuItem value={"s"}>Streptomyces Study</MenuItem>
+                                    </Select>
+                                </FormControl>
+
+                            </form>
+                        </Grid>
+                        <Grid item xs={3} className={classes.centerText}>
+                            {selectionText}
+                        </Grid>
+                    </Grid>
                     <Typography id="discrete-slider" gutterBottom>
                         K for k-means
                     </Typography>
-                    <Slider
-                        value={k}
-                        aria-labelledby="discrete-slider"
-                        valueLabelDisplay="auto"
-                        step={1}
-                        marks
-                        onChange={(e, v) => setK(v)}
-                        max={10}
-                    />
+                    <Grid container spacing={10}>
+                        <Grid item xs={9}>
+                            <Slider
+                                value={k}
+                                aria-labelledby="discrete-slider"
+                                valueLabelDisplay="auto"
+                                step={1}
+                                marks
+                                onChange={(e, v) => setK(v)}
+                                max={10}
+                            />
+                        </Grid>
+                        <Grid item xs={3} className={classes.centerText}>
+                            {"k=" + k}
+                        </Grid>
+                    </Grid>
                     <Typography id="range-slider" gutterBottom>
                         Variance Filter
                     </Typography>
-                    <Slider
-                        value={varFilter}
-                        onChange={(e, v) => setVarFilter(v)}
-                        valueLabelDisplay="auto"
-                        aria-labelledby="range-slider"
-                    />
-                    <form style={{display: 'flex'}}>
-                        <Button component="label">Select Files
-                            <input type="file"
-                                   multiple
-                                   onChange={(e) => setFiles([...e.target.files])
-                                   }
-                                   hidden/>
-                        </Button>
-                        or
-                        <FormControl className={classes.formControl}>
-                            <InputLabel id="demo-simple-select-label">Test Data</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                value={testData}
-                                onChange={(e) => selectTestData(e.target.value)}
-                            >
-                                <MenuItem value={"bc"}>Blood Cell Study</MenuItem>
-                                <MenuItem value={"s"}>Streptomyces Study</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <Button onClick={launch}>Launch</Button>
-                    </form>
+                    <Grid container spacing={10}>
+                        <Grid item xs={9}>
+                            <Slider
+                                value={varFilter}
+                                onChange={(e, v) => setVarFilter(v)}
+                                valueLabelDisplay="auto"
+                                aria-labelledby="range-slider"
+                            />
+                        </Grid>
+                        <Grid item xs={3} className={classes.centerText}>
+                            {varFilter[0] + "< var <" + varFilter[1]}
+                        </Grid>
+                    </Grid>
+                    <Button onClick={launch} variant="contained">Launch</Button>
+
                 </Grid>
             </Grid>
         </div>

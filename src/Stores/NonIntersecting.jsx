@@ -17,6 +17,13 @@ export class NonIntersecting {
             },
             setPlotType(newPlotType) {
                 this.plotType = newPlotType
+            },
+            clearSelection(){
+                this.ds1.clearSelection();
+                this.ds2.clearSelection();
+            },
+            get selectedGenes() {
+                return(this.ds1.selectedGenes.concat(this.ds2.selectedGenes))
             }
         })
         this.dataStore = dataStore;
@@ -36,6 +43,7 @@ export class NonIntersecting {
         // reproducibility when loading the same data multiple times
         this.clusterNames = sortClusters(this.ds1.clusters);
         this.colorScale = d3.scaleOrdinal().domain(this.clusterNames).range(d3.schemeCategory10);
+
 
     }
 

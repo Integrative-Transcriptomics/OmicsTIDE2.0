@@ -24,14 +24,17 @@ const Controls = observer(() => {
                         onChange={(e) => store.setPlotType(e.target.value)}>
                 <FormControlLabel value="centroid" control={<Radio/>} label="Centroid Profile Plots"/>
                 <FormControlLabel value="profile" control={<Radio/>} label="Profile Plots"/>
-                <FormControlLabel value="box" control={<Radio/>} label="Boxplot"/>
             </RadioGroup>
             <Typography id="range-slider" gutterBottom>
                 Variance Filter DS1
             </Typography>
             <Slider
                 value={var1}
-                onChange={(e, v) => setVar1(v)}
+                onChange={(e, v) => {
+                    if (v[0] >= store.comparison.dataStore.initialVarFilter[0] && v[1] <= store.comparison.dataStore.initialVarFilter[1]) {
+                        setVar1(v)
+                    }
+                }}
                 onChangeCommitted={() => {
                     store.ds1.filterStore.setVarMin(var1[0]);
                     store.ds1.filterStore.setVarMax(var1[1])
@@ -44,7 +47,11 @@ const Controls = observer(() => {
             </Typography>
             <Slider
                 value={var2}
-                onChange={(e, v) => setVar2(v)}
+                onChange={(e, v) => {
+                    if (v[0] >= store.comparison.dataStore.initialVarFilter[0] && v[1] <= store.comparison.dataStore.initialVarFilter[1]) {
+                        setVar2(v)
+                    }
+                }}
                 onChangeCommitted={() => {
                     store.ds2.filterStore.setVarMin(var2[0]);
                     store.ds2.filterStore.setVarMax(var2[1])
