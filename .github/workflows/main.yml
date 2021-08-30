@@ -22,7 +22,6 @@ jobs:
         with:
           node-version: 12
       - run: npm build
-      - run: npm test
 
   rsync-deployment:
     needs: build
