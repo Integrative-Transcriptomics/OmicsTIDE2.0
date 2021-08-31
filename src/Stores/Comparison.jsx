@@ -1,6 +1,9 @@
 import {Intersecting} from "./Intersecting";
 import {NonIntersecting} from "./NonIntersecting";
 
+/**
+ * store holding a single comparison including intersecting and non intersecting genes
+ */
 export class Comparison {
     constructor(dataStore, data, index) {
         this.dataStore=dataStore;

@@ -23,11 +23,9 @@ function TabPanel(props) {
             aria-labelledby={`scrollable-auto-tab-${index}`}
             {...other}
         >
-            {value === index && (
-                <div>
-                    {children}
-                </div>
-            )}
+            <div>
+                {children}
+            </div>
         </div>
     );
 }
@@ -62,22 +60,21 @@ function VisTabs() {
     const addDetailTabI = useCallback((index, ds1Selection, ds2Selection) => {
         const secondLevelStore = new SecondLevelStore(store.pantherAPI, store.comparisons[index].intersecting, ds1Selection, ds2Selection);
         setTabs(tabs.concat([{
-            type: "intersectDetail",
+            type: "detail",
             index: index,
             store: secondLevelStore,
         }]))
         selectTab(tabs.length)
-    }, [tabs, store.pantherAPI])
+    }, [tabs, store.pantherAPI, store.comparisons])
     const addDetailTabNI = useCallback((index, ds1Selection, ds2Selection) => {
         const secondLevelStore = new SecondLevelStore(store.pantherAPI, store.comparisons[index].nonIntersecting, ds1Selection, ds2Selection);
         setTabs(tabs.concat([{
-            type: "nonintersectDetail",
+            type: "detail",
             index: index,
             store: secondLevelStore,
         }]))
         selectTab(tabs.length)
-
-    }, [tabs, store.pantherAPI])
+    }, [tabs, store.pantherAPI, store.comparisons])
     const removeTab = useCallback((index) => {
         let currentTabs = tabs.slice();
         currentTabs.splice(index, 1)
@@ -87,7 +84,7 @@ function VisTabs() {
     useEffect(() => {
         selectTab(tabs.length)
     }, [tabs.length]);
-    const tabElems = tabs.map((tab, i) => <Tab key={tab.type + tab.index} component="div" label={
+    const tabElems = tabs.map((tab, i) => <Tab key={tab.type + i} component="div" label={
         <span>
             {tab.type + " " + (tab.index + 1)}
             <IconButton onClick={() => removeTab(i)}>
@@ -97,34 +94,32 @@ function VisTabs() {
     }/>)
     const tabPanels = tabs.map((tab, i) => {
         if (tab.type === "intersect") {
-            return (<TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
-                <StoreProvider store={store.comparisons[tab.index].intersecting}>
-                    <IntersectVis conditions={store.conditions} analyzeDetail={addDetailTabI}/>
-                </StoreProvider>
-            </TabPanel>)
-        }
-        if (tab.type === "nonIntersect") {
-            return (<TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
-                <StoreProvider store={store.comparisons[tab.index].nonIntersecting}>
-                    <NIVis conditions={store.conditions} analyzeDetail={addDetailTabNI}/>
-                </StoreProvider>
-            </TabPanel>)
-        }
-        if (tab.type === "intersectDetail") {
             return (
-                <TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
-                    <StoreProvider store={tab.store}>
-                        <SecondLevelAnalysis conditions={store.conditions} isLoading={tab.store.isLoading}/>
+                <TabPanel key={tab.type + i} index={i + 1} value={selectedTab}>
+                    <StoreProvider store={store.comparisons[tab.index].intersecting}>
+                        <IntersectVis conditions={store.conditions} analyzeDetail={addDetailTabI}
+                                      isVisible={selectedTab === (i + 1)}/>
                     </StoreProvider>
                 </TabPanel>
             )
         }
-        if (tab.type === "nonintersectDetail") {
-            return (<TabPanel key={tab.type + tab.index} index={i + 1} value={selectedTab}>
-                <StoreProvider store={tab.store}>
-                    <SecondLevelAnalysis conditions={store.conditions} isLoading={tab.store.isLoading}/>
-                </StoreProvider>
-            </TabPanel>)
+        if (tab.type === "nonIntersect") {
+            return (
+                <TabPanel key={tab.type + i} index={i + 1} value={selectedTab}>
+                    <StoreProvider store={store.comparisons[tab.index].nonIntersecting}>
+                        <NIVis conditions={store.conditions} analyzeDetail={addDetailTabNI} isVisible={selectedTab === (i + 1)}/>
+                    </StoreProvider>
+                </TabPanel>
+            )
+        }
+        if (tab.type === "detail") {
+            return (
+                <TabPanel key={tab.type + i} index={i + 1} value={selectedTab}>
+                    <StoreProvider store={tab.store}>
+                        <SecondLevelAnalysis conditions={store.conditions} isVisible={selectedTab === (i + 1)}/>
+                    </StoreProvider>
+                </TabPanel>
+            )
         }
         return null;
     })

@@ -1,5 +1,8 @@
 import {extendObservable} from "mobx";
 
+/**
+ * store holding everything related to filtering for the intersecting/non-intersecting tabs
+ */
 export class FilterStore {
     constructor(parent) {
         this.parent = parent;

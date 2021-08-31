@@ -2,6 +2,9 @@ import {extendObservable} from "mobx";
 import {FilterStore} from "./FilterStore";
 import {clusterSizes, conditionMapping, geneCentricMapping} from "./HelperFunctions";
 
+/**
+ * holds data for a dataset of intersecting genes
+ */
 export class IntersectionDataset {
     constructor(intersecting, data, index) {
         extendObservable(this, {
@@ -27,27 +30,53 @@ export class IntersectionDataset {
                     return clusters
                 } else return this.clusters;
             },
+            /**
+             * get clusters that are highlighted
+             * @returns {*[]}
+             */
             get highlightedClusters() {
                 return this.parent.highlightedIntersections.map(intersection => intersection[this.index]);
             },
-
+            /**
+             * brings data in a convenient form for centroid profile plots
+             * @returns {{Object}}
+             */
             get conditionMapping() {
                 return conditionMapping(this.hoverClusters, this.genes, this.parent.dataStore.conditions);
             },
+            /**
+             * brings data in a convenient form for normal profile plots
+             * @returns {{Object}}
+             */
             get geneCentricMapping() {
                 return geneCentricMapping(this.hoverClusters, this.genes, this.parent.dataStore.conditions)
             },
+            /**
+             * gets selected genes in a convinent form for multi profile plots
+             * @returns {{Object}}
+             */
             get geneSelection() {
-                let clusters={}
-                Object.keys(this.parent.selectedGenesIntersections).forEach(intersection =>{
+                let clusters = {}
+                Object.keys(this.parent.selectedGenesIntersections).forEach(intersection => {
                     const key = intersection.split(',')[this.index];
-                    clusters[key]=this.parent.selectedGenesIntersections[intersection];
+                    if (!(key in clusters)) {
+                        clusters[key] = []
+                    }
+                    clusters[key].push(...this.parent.selectedGenesIntersections[intersection]);
                 })
                 return geneCentricMapping(clusters, this.genes, this.parent.dataStore.conditions)
             },
+            /**
+             * gets sizes of clusters
+             * @returns {{Object}}
+             */
             get clusterSizes() {
                 return clusterSizes(this.clusters);
             },
+            /**
+             * gets selected clusters
+             * @returns {[string]}
+             */
             get selectedClusters() {
                 let selectedClusters = []
                 this.parent.selectedIntersections.forEach(intersection => {
@@ -55,6 +84,12 @@ export class IntersectionDataset {
                 })
                 return selectedClusters;
             },
+            get filteredClusterNames() {
+                return this.parent.clusterNames.filter(cluster => this.clusterSizes[cluster] > 0)
+            },
+            /**
+             * update clusters based on intersections
+             */
             updateClusters() {
                 let clusters = {}
                 Object.keys(this.parent.filteredIntersections).forEach(intersection => {
@@ -67,7 +102,10 @@ export class IntersectionDataset {
                 })
                 this.clusters = clusters;
             },
-
+            /**
+             * highlight a cluster and the corresponding intersections
+             * @param {string} cluster
+             */
             setHighlightedCluster(cluster) {
                 this.parent.setHighlightedIntersection(Object.keys(this.parent.filteredIntersections)
                     .map(intersection => intersection.split(","))
@@ -76,6 +114,10 @@ export class IntersectionDataset {
                     ).filter(intersection => this.parent.filteredIntersections[intersection].length > 0)
                 )
             },
+            /**
+             * sekect a cluster and the corresponding intersections
+             * @param {string} cluster
+             */
             setSelectedCluster(cluster) {
                 this.parent.handleMultipleIntersectionSelection(Object.keys(this.parent.filteredIntersections)
                     .map(intersection => intersection.split(","))

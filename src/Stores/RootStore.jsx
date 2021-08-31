@@ -2,7 +2,6 @@ import React from "react";
 import {DataStore} from "./DataStore";
 import {UIStore} from "./UIStore";
 import {extendObservable} from "mobx";
-import {PantherAPI} from "./pantherAPI";
 
 /**
  * basic store holding all other stores
@@ -19,6 +18,7 @@ export class RootStore {
     /**
      * initialized data when data is loaded
      * @param {Object} data
+     * @param {number[]} initialVarFilter
      */
     init(data, initialVarFilter) {
         this.dataStore = new DataStore(data, initialVarFilter)

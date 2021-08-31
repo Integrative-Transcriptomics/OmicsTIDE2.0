@@ -9,7 +9,7 @@ const MultiClusterProfilePlot = observer((props) => {
     let lines = []
     const store = useStore();
     Object.keys(props.selection).forEach(cluster => {
-        lines = lines.concat(<g>
+        lines = lines.concat(<g key={cluster}>
             <ProfilePlot data={props.selection[cluster]} yScale={props.yScale}
                          xScale={props.xScale}
                          color={props.colorScale(cluster)} opacity={0.5}/>
@@ -28,7 +28,7 @@ const MultiClusterProfilePlot = observer((props) => {
 });
 
 MultiClusterProfilePlot.propTypes = {
-    selection: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any))).isRequired,
+    selection: PropTypes.objectOf(PropTypes.objectOf(PropTypes.any)).isRequired,
     yScale: PropTypes.func.isRequired,
     xScale: PropTypes.func.isRequired,
     colorScale: PropTypes.func.isRequired,

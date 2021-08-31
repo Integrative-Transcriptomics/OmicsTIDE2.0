@@ -6,15 +6,16 @@ import AppBar from "@material-ui/core/AppBar";
 import Typography from "@material-ui/core/Typography";
 
 const rootStore = new RootStore();
+
 function App() {
     const [dataLoaded, setDataLoaded] = useState(false);
     return (
         <div className="App">
             <AppBar position="static">
-                        <Typography >
-                            OmicsTIDE
-                        </Typography>
-                    </AppBar>
+                <Typography>
+                    OmicsTIDE
+                </Typography>
+            </AppBar>
             {dataLoaded ?
                 <StoreProvider store={rootStore.dataStore}>
                     <VisTabs/>

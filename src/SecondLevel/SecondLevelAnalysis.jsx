@@ -7,11 +7,12 @@ import PropTypes from "prop-types";
 import {Grid, Typography} from "@material-ui/core";
 import GoChart from "./GoChart";
 import Select from "react-select";
-import Alert from "@material-ui/lab/Alert";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Alert from "@material-ui/core/Alert";
+import {observer} from "mobx-react";
 
 
-function SecondLevelAnalysis(props) {
+const SecondLevelAnalysis = observer((props) => {
     const store = useStore();
     const plot = createRef();
     const margin = {
@@ -21,42 +22,39 @@ function SecondLevelAnalysis(props) {
         bot: 30,
     }
     const [width, setWidth] = useState(500)
-    const [isLoaded, setIsLoaded] = useState(store.goData.length > 0);
-    const [isLoading, setIsLoading] = useState(store.isLoading);
 
     const height = 400;
 
     const changeWidth = useCallback(() => {
-        if (plot.current != null) {
+        if (props.isVisible && plot.current !== null) {
             setWidth(plot.current.getBoundingClientRect().width)
         }
-    }, [plot]);
+    }, [plot, props.isVisible]);
     useEffect(() => {
         changeWidth()
         window.addEventListener("resize", changeWidth);
-    }, [plot, changeWidth]);
-    const calcEnrichment = function (selectedSpecies) {
-        setIsLoading(true);
-        store.calcOverrepresentation(selectedSpecies, () => {
-            setIsLoading(false);
-            setIsLoaded(true);
-        });
-    }
+        return () => {
+            window.removeEventListener('resize', changeWidth);
+        }
+    }, [changeWidth]);
+    const calcEnrichment = useCallback((selectedSpecies) => {
+        store.calcOverrepresentation(selectedSpecies);
+    }, [store]);
     let goVis = null;
+    // show progress vis when enrichment is calculated but calculations are not done
     if (store.isLoading) {
         goVis =
             <Grid item xs={12} align="center">
                 <Typography>Calculating GO-enrichment...</Typography>
-                {store.isLoading}
                 <CircularProgress/>
             </Grid>;
-    } else if (isLoaded) {
+    } else if (store.isLoaded) {
         const goEnrichment = store.goData.map((d, i) =>
-            <Grid item xs={4}>
+            <Grid item xs={4} key={store.pantherAPI.annoSets[i].id}>
                 <Typography variant="h6">{store.pantherAPI.annoSets[i].label}</Typography>
-                <GoChart data={d} maxVal={store.totalMax}/>
+                <GoChart data={d} maxVal={store.totalMax} isVisible={props.isVisible}/>
             </Grid>)
-        goVis = [<Grid item xs={12}>
+        goVis = [<Grid item xs={12} key={"OP"}>
             <div>
                 <svg width={20} height={12}>
                     <rect width={20} height={20} fill="red"/>
@@ -83,6 +81,7 @@ function SecondLevelAnalysis(props) {
     const axis2 = <Axis h={height - margin.top - margin.bot} w={width} axis={xAxis} axisType={'x'} label={""}/>
 
     // create one plot for each data set
+
     const plot1 =
         <svg key="ds1" width={width} height={height}>
             <g transform={"translate(" + margin.left + ",0)"}>
@@ -121,9 +120,11 @@ function SecondLevelAnalysis(props) {
                 </Grid>
                 <Grid item xs={6}>
                     {store.pantherAPI.genomesLoaded ?
-                        [<Typography variant="h5">GO-enrichment</Typography>,
-                            "Please select species to perform enrichment:",
-                            <Select options={store.pantherAPI.genomes}
+                        [<Typography key="title" variant="h5">GO-enrichment</Typography>,
+                            <Typography key="powerdBy">Powerd by <b>PANTHER</b> (<a
+                                href="http://pantherdb.org/">http://pantherdb.org/</a>)</Typography>,
+                            <Typography key="task">Please select species to perform enrichment:</Typography>,
+                            <Select key="select" options={store.pantherAPI.genomes}
                                     onChange={(val) => calcEnrichment(val.value)}/>]
                         : <Alert severity="warning">Sorry, it seems like we're unable to connect to <a
                             href="http://pantherdb.org/">http://pantherdb.org/</a> for GO Term enrichment. Please adapt
@@ -135,10 +136,11 @@ function SecondLevelAnalysis(props) {
             </Grid>
         </div>
     );
-}
+});
 
 SecondLevelAnalysis.propTypes = {
     conditions: PropTypes.arrayOf(PropTypes.string).isRequired,
+    isVisible: PropTypes.bool.isRequired,
 };
 
 export default SecondLevelAnalysis;

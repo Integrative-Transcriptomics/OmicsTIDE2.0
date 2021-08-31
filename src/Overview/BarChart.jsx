@@ -24,6 +24,7 @@ function BarChart(props) {
         })
     }
     let axis = null;
+    // only show axis once
     if (props.showAxis) {
         margins.bottom=35
         const xAxis = d3.axisBottom()

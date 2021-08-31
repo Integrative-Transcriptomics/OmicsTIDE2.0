@@ -2,6 +2,9 @@ import {observer} from "mobx-react";
 import PropTypes from "prop-types";
 import React from "react";
 import {useStore} from "../Stores/RootStore";
+import Tooltip from "@material-ui/core/Tooltip";
+import {v4 as uuidv4} from 'uuid';
+
 
 const Bands = observer((props) => {
     const store = useStore();
@@ -13,14 +16,14 @@ const Bands = observer((props) => {
     // helper to fill currPos2
     let currPos = 0;
     // fill currPos2 with y positions of nodes at ds2
-    store.clusterNames.forEach((cluster, i) => {
-        const height = props.yScale(props.clusters2[cluster])
+    store.ds2.filteredClusterNames.forEach((cluster, i) => {
+        const height = props.yScale(store.ds2.clusterSizes[cluster])
         currPos2.push(currPos)
         currPos += height + props.whiteSpace
     })
     // iterate through clusters of both data sets
-    store.clusterNames.forEach((cluster1) => {
-        store.clusterNames.forEach((cluster2, i2) => {
+    store.ds1.filteredClusterNames.forEach((cluster1) => {
+        store.ds2.filteredClusterNames.forEach((cluster2, i2) => {
             // if there is an intersection, draw a band
             if ([cluster1, cluster2] in props.intersections) {
                 const fill1 = props.colorScale(cluster1);
@@ -47,25 +50,32 @@ const Bands = observer((props) => {
                 const p4 = "C " + props.width / 2 + " " + (currPos2[i2] + height) + ", "
                     + props.width / 2 + " " + (currPos1 + height) + ", "
                     + "0 " + (currPos1 + height)
+                const gradientID = uuidv4();
                 paths.push(<g key={cluster1 + cluster2}>
                     <defs>
-                        <linearGradient id={cluster1 + cluster2} x1="0%" y1="0%" x2="100%" y2="0%">
+                        <linearGradient id={gradientID} x1="0%" y1="0%" x2="100%" y2="0%">
                             <stop offset="0%" style={{stopColor: fill2}}/>
                             <stop offset="100%" style={{stopColor: fill1}}/>
                         </linearGradient>
                     </defs>
-                    <path
-                        d={p1 + " " + p2 + " " + p3 + " " + p4 + " Z"} opacity={opacity}
-                        fill={"url(#" + cluster1 + cluster2 + ")"}
-                        onMouseEnter={() => store.setHighlightedIntersection([[cluster1, cluster2]])}
-                        onMouseLeave={() => store.setHighlightedIntersection([])}
-                        onClick={() => store.handleIntersectionSelection([cluster1, cluster2])}/>
+                    <Tooltip title={"Intersection size: " + props.intersections[cluster1 + "," + cluster2]}
+                             followCursor>
+                        <path
+                            d={p1 + " " + p2 + " " + p3 + " " + p4 + " Z"} opacity={opacity}
+                            fill={"url(#" + gradientID + ")"}
+                            onMouseEnter={() => store.setHighlightedIntersection([[cluster1, cluster2]])}
+                            onMouseLeave={() => store.setHighlightedIntersection([])}
+                            onClick={() => store.handleIntersectionSelection([cluster1, cluster2])}
+                            style={{cursor: "pointer"}}>
+                        </path>
+                    </Tooltip>
                 </g>)
                 // next position on ds1
                 currPos1 += height;
                 // save next position of ds2 for current ds2 cluster
                 currPos2[i2] += height;
             }
+
         })
         // add whitespace to currPos1 when finished with a cluster
         currPos1 += props.whiteSpace;
@@ -77,8 +87,6 @@ const Bands = observer((props) => {
 });
 
 Bands.propTypes = {
-    clusters1: PropTypes.objectOf(PropTypes.number).isRequired,
-    clusters2: PropTypes.objectOf(PropTypes.number).isRequired,
     intersections: PropTypes.objectOf(PropTypes.number).isRequired,
     yScale: PropTypes.func.isRequired,
     colorScale: PropTypes.func.isRequired,

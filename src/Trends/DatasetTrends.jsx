@@ -21,7 +21,7 @@ const DatasetTrends = observer((props) => {
     }
 
     // height and width of subplots
-    const height = (props.height - (props.clusterNames.length - 1) * (margin.top + margin.bot)) / props.clusterNames.length;
+    const height = (props.height - (props.numClusters- 1) * (margin.top + margin.bot)) / props.numClusters;
     const width = props.width - margin.left - margin.right
 
     // shared xScale and yScale
@@ -32,8 +32,7 @@ const DatasetTrends = observer((props) => {
     const yAxis = d3.axisLeft()
         .scale(yScale)
     const plots = [];
-    const filteredNames = props.clusterNames.filter(cluster => store.clusterSizes[cluster] > 0)
-    filteredNames.forEach((cluster, i) => {
+    store.filteredClusterNames.forEach((cluster, i) => {
             let plot = null;
 
             // highlighting
@@ -71,7 +70,7 @@ const DatasetTrends = observer((props) => {
                 }
 
                 plots.push(
-                    <svg key={cluster} width={props.width} height={props.height / props.clusterNames.length}
+                    <svg key={cluster} width={props.width} height={props.height / props.numClusters}
                          onClick={() => store.setSelectedCluster(cluster)}>
                         <g transform={"translate(" + margin.left + ",0)"}>
                             {plot}
@@ -88,7 +87,7 @@ const DatasetTrends = observer((props) => {
 });
 
 DatasetTrends.propTypes = {
-    clusterNames: PropTypes.arrayOf(PropTypes.string).isRequired,
+    numClusters:PropTypes.number.isRequired,
     colorScale: PropTypes.func.isRequired,
     conditions: PropTypes.arrayOf(PropTypes.string).isRequired,
     minValue: PropTypes.number.isRequired,

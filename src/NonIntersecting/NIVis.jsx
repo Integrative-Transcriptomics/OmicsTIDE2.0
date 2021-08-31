@@ -17,15 +17,19 @@ const NIVis = observer((props) => {
     const profiles = createRef();
     const [width, setWidth] = useState(1000);
     const height = 800;
+    const numClusters = Math.max(store.ds1.filteredClusterNames.length, store.ds2.filteredClusterNames.length);
     const changeWidth = useCallback(() => {
-        if (profiles.current != null) {
+        if (props.isVisible && profiles.current !== null) {
             setWidth(profiles.current.getBoundingClientRect().width)
         }
-    }, [profiles]);
+    }, [profiles, props.isVisible]);
     useEffect(() => {
         changeWidth()
         window.addEventListener("resize", changeWidth);
-    }, [profiles, changeWidth]);
+        return () => {
+            window.removeEventListener('resize', changeWidth);
+        }
+    }, [changeWidth]);
     const maxCluster = d3.max([d3.max(Object.keys(store.ds1.clusterSizes).map(cluster => store.ds1.clusterSizes[cluster]))
         , d3.max(Object.keys(store.ds2.clusterSizes).map(cluster => store.ds2.clusterSizes[cluster]))]);
     return (
@@ -59,7 +63,8 @@ const NIVis = observer((props) => {
                         <Grid item xs={4}>
                             <div ref={profiles}>
                                 <StoreProvider store={store.ds1}>
-                                    <DatasetTrends clusterNames={store.clusterNames} colorScale={store.colorScale}
+                                    <DatasetTrends colorScale={store.colorScale}
+                                                   numClusters={numClusters}
                                                    conditions={props.conditions}
                                                    minValue={store.minValue}
                                                    maxValue={store.maxValue}
@@ -79,7 +84,8 @@ const NIVis = observer((props) => {
 
                         <Grid item xs={4}>
                             <StoreProvider store={store.ds2}>
-                                <DatasetTrends clusterNames={store.clusterNames} colorScale={store.colorScale}
+                                <DatasetTrends colorScale={store.colorScale}
+                                               numClusters={numClusters}
                                                conditions={props.conditions}
                                                minValue={store.minValue}
                                                maxValue={store.maxValue}
@@ -106,5 +112,6 @@ const NIVis = observer((props) => {
 
 NIVis.propTypes = {
     conditions: PropTypes.arrayOf(PropTypes.string).isRequired,
+    isVisible: PropTypes.bool.isRequired,
 };
 export default NIVis;

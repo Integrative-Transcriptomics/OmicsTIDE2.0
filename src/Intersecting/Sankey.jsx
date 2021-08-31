@@ -17,7 +17,7 @@ const Sankey = observer((props) => {
         intersectionSizes[intersection] = store.filteredIntersections[intersection].length
     })
     // scale for heights of bands/nodes
-    const yScale = d3.scaleLinear().domain([0, store.genes.length]).range([0, props.height - store.clusterNames.length * whiteSpace])
+    const yScale = d3.scaleLinear().domain([0, store.genes.length]).range([0, props.height - props.numClusters * whiteSpace])
     const colorScale = d3.scaleOrdinal().domain(store.clusterNames).range(d3.schemeCategory10);
     return (
         <svg height={props.height} width={props.width}>
@@ -42,8 +42,7 @@ const Sankey = observer((props) => {
                 </StoreProvider>
             </g>
             <g transform={"translate(" + rectWidth + ",0)"}>
-                <Bands clusters1={store.ds1.clusterSizes} clusters2={store.ds2.clusterSizes}
-                       intersections={intersectionSizes}
+                <Bands intersections={intersectionSizes}
                        yScale={yScale} whiteSpace={whiteSpace}
                        colorScale={colorScale}
                        width={props.width - 2 * rectWidth}/>
@@ -56,5 +55,6 @@ const Sankey = observer((props) => {
 Sankey.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
+    numClusters: PropTypes.number.isRequired,
 };
 export default Sankey;

@@ -9,12 +9,16 @@ import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
 import Container from "@material-ui/core/Container";
 import PropTypes from "prop-types";
+import styled from "@emotion/styled";
 
 
 function Overview(props) {
     const store = useStore();
+    const LegendDiv = styled('div')(({theme}) => ({float: "left"}));
     const width = 300;
     let domain = ["concordant", "discordant"]
+    let legendNames = ["Concordant genes",
+        "Discordant genes"]
 
     // get sum of all genes and create domain for color scale
     const sumGenes = d3.max(store.comparisons.map(comparison => {
@@ -26,9 +30,11 @@ function Overview(props) {
             sum += Object.keys(comparison.nonIntersecting.ds1.genes).length + Object.keys(comparison.nonIntersecting.ds2.genes).length;
             if (!(domain.includes(comparison.file1))) {
                 domain.push(comparison.file1);
+                legendNames.push(comparison.file1 + " non-intersecting genes")
             }
             if (!(domain.includes(comparison.file2))) {
                 domain.push(comparison.file2);
+                legendNames.push(comparison.file2 + " non-intersecting genes")
             }
         }
         return sum;
@@ -58,7 +64,7 @@ function Overview(props) {
                 <Typography>{comparison.file1 + " - " + comparison.file2}</Typography>
             </TableCell>
             <TableCell>
-                <BarChart showAxis={i === store.comparisons.length-1} data={barChartData} xScale={xScale}
+                <BarChart showAxis={i === store.comparisons.length - 1} data={barChartData} xScale={xScale}
                           colorScale={colorScale}/>
             </TableCell>
             <TableCell>
@@ -73,11 +79,11 @@ function Overview(props) {
             </TableCell>
         </TableRow>);
     });
-    const legend = colorScale.domain().map(elem => <div key={elem}>
+    const legend = colorScale.domain().map((elem, i) => <div key={elem}>
         <svg width={20} height={12}>
             <rect width={20} height={20} fill={colorScale(elem)}/>
         </svg>
-        {elem}
+        {legendNames[i]}
     </div>)
     return (
         <Container maxWidth={false}>
@@ -93,6 +99,7 @@ function Overview(props) {
         </Container>
     );
 }
+
 Overview.propTypes = {
     addNITab: PropTypes.func.isRequired,
     addIntersectTab: PropTypes.func.isRequired,

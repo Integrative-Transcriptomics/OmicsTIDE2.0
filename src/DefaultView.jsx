@@ -8,19 +8,17 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
-import makeStyles from "@material-ui/core/styles/makeStyles";
+import {makeStyles} from "@material-ui/styles";
 import Grid from "@material-ui/core/Grid";
-import Alert from "@material-ui/lab/Alert";
+import Alert from "@material-ui/core/Alert";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import {observer} from "mobx-react";
 
 
-function DefaultView(props) {
+const DefaultView = observer((props) => {
     const useStyles = makeStyles((theme) => ({
         formControl: {
-            margin: theme.spacing(1),
             minWidth: 150,
-        },
-        selectEmpty: {
-            marginTop: theme.spacing(2),
         },
         centerText: {
             display: "flex",
@@ -36,6 +34,7 @@ function DefaultView(props) {
     const [testData, setTestData] = useState("")
     const [files, setFiles] = useState([]);
     const [selectionType, setSelectionType] = useState("none");
+    const [dataLoading, setDataLoading] = useState(false);
     const selectTestData = useCallback((data) => {
         setTestData(data);
         setSelectionType("test");
@@ -46,6 +45,7 @@ function DefaultView(props) {
     }, [])
     const launch = useCallback(
         () => {
+            setDataLoading(true);
             const formData = new FormData();
             formData.append("k", k);
             formData.append("lowerVariancePercentage", varFilter[0]);
@@ -55,12 +55,14 @@ function DefaultView(props) {
                     .then((response) => {
                         store.init(response.data, varFilter);
                         props.setDataLoaded(true);
+                        setDataLoading(false)
                     })
             } else if (testData === "s") {
                 axios.post("/load_test_data_streptomyces", formData)
                     .then((response) => {
                         store.init(response.data, varFilter);
                         props.setDataLoaded(true);
+                        setDataLoading(false)
                     })
             } else {
                 files.forEach(file => formData.append("files[]", file));
@@ -68,6 +70,8 @@ function DefaultView(props) {
                     .then((response) => {
                         store.init(response.data, varFilter);
                         props.setDataLoaded(true);
+                        setDataLoading(false)
+
                     })
             }
         },
@@ -115,7 +119,7 @@ function DefaultView(props) {
                                 <div className={classes.centerText}>
                                     or
                                 </div>
-                                <FormControl className={classes.formControl}>
+                                <FormControl className={classes.formControl} variant="standard">
                                     <InputLabel id="demo-simple-select-label">Select Test Data</InputLabel>
                                     <Select
                                         labelId="demo-simple-select-label"
@@ -143,6 +147,7 @@ function DefaultView(props) {
                                 value={k}
                                 aria-labelledby="discrete-slider"
                                 valueLabelDisplay="auto"
+                                disabled={dataLoading}
                                 step={1}
                                 marks
                                 onChange={(e, v) => setK(v)}
@@ -161,6 +166,7 @@ function DefaultView(props) {
                             <Slider
                                 value={varFilter}
                                 onChange={(e, v) => setVarFilter(v)}
+                                disabled={dataLoading}
                                 valueLabelDisplay="auto"
                                 aria-labelledby="range-slider"
                             />
@@ -169,13 +175,17 @@ function DefaultView(props) {
                             {varFilter[0] + "< var <" + varFilter[1]}
                         </Grid>
                     </Grid>
-                    <Button onClick={launch} variant="contained">Launch</Button>
+                    <Button onClick={launch} disabled={dataLoading || (files.length === 0 && testData ==="")} variant="contained">Launch</Button>
 
                 </Grid>
+                {dataLoading ?
+                    <Grid item xs={12}>
+                        <CircularProgress/>
+                    </Grid> : null}
             </Grid>
         </div>
 
     );
-}
+});
 
 export default DefaultView;

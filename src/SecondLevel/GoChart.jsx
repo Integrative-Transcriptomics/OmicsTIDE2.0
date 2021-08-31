@@ -3,9 +3,11 @@ import Axis from "../Trends/Axis";
 import * as d3 from "d3";
 import PropTypes from "prop-types";
 import {Typography} from "@material-ui/core";
+import Tooltip from "@material-ui/core/Tooltip";
+import {observer} from "mobx-react";
 
 
-function GoChart(props) {
+const GoChart = observer((props) => {
     const plot = createRef();
     const margin = {
         left: 0,
@@ -17,37 +19,43 @@ function GoChart(props) {
     const [width, setWidth] = useState(500)
 
     const changeWidth = useCallback(() => {
-        if (plot.current !== null) {
+        if (props.isVisible && plot.current !== null) {
             setWidth(plot.current.getBoundingClientRect().width)
         }
-    }, [plot]);
+    }, [plot, props.isVisible]);
     useEffect(() => {
         changeWidth()
         window.addEventListener("resize", changeWidth);
+        return () => {
+            window.removeEventListener('resize', changeWidth);
+        }
     }, [plot, changeWidth]);
     let vis = <Typography>No significant enrichments</Typography>;
     if (props.data.length > 0) {
-
-
-        const xScale = d3.scaleLinear().domain([0, props.maxVal]).range([0, width - margin.left - margin.right - textWidth]);
+        const xScale = d3.scaleLinear().domain([0, props.maxVal]).range([0, width - margin.left - margin.right - textWidth-10]);
         const xAxis = d3.axisBottom()
             .scale(xScale)
         const axis = <Axis h={margin.top} w={width - margin.left - margin.right - textWidth} axis={xAxis}
                            axisType={'x'} label={"-log2(FDR)"}/>
         const rects = props.data.map((category, i) =>
-            <div>
-                <div style={{
-                    width: textWidth,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    float: "left",
-                }}>{category.termName}</div>
-                <svg width={xScale(category.negLogFDR)} height={12}>
-                    <rect width={xScale(category.negLogFDR)} height={12}
-                          fill={category.plus_minus === "+" ? "red" : "blue"}/>
-                </svg>
-            </div>)
+            <Tooltip key={category.termID}
+                     title={category.termID + " (" + category.termName + "): " + category.padj.toExponential(2)}
+                     followCursor>
+
+                <div>
+                    <div style={{
+                        width: textWidth,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        float: "left",
+                    }}>{category.termName}</div>
+                    <svg width={xScale(category.negLogFDR)} height={12}>
+                        <rect width={xScale(category.negLogFDR)} height={12}
+                              fill={category.plus_minus === "+" ? "red" : "blue"}/>
+                    </svg>
+                </div>
+            </Tooltip>)
         vis =
             <div ref={plot}>
                 <div style={{overflowY: "auto", maxHeight: "400px"}}>
@@ -61,10 +69,11 @@ function GoChart(props) {
             </div>;
     }
     return (vis);
-}
+});
 
 GoChart.propTypes = {
     data: PropTypes.arrayOf(PropTypes.object).isRequired,
+    isVisible: PropTypes.bool.isRequired,
 };
 
 export default GoChart;

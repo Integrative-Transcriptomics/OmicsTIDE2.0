@@ -1,6 +1,5 @@
 import json
 import os
-import tempfile
 from datetime import datetime
 from itertools import combinations
 # import cairosvg
@@ -223,8 +222,8 @@ def load_test_data_streptomyces():
         comparison1["files"] = ["Transcriptome_M1152.csv", "Transcriptome_M145.csv"]
         data.append(comparison1)
         comparison2 = pairwise_trendcomparison(preprocess_file(trans_m1152), preprocess_file(prot_m1152),
-                                                           lower_variance_percentile,
-                                                           upper_variance_percentile, k)
+                                               lower_variance_percentile,
+                                               upper_variance_percentile, k)
         comparison2["files"] = ["Transcriptome_M1152.csv", "Proteome_M1152.csv"]
         data.append(comparison2)
 
@@ -352,6 +351,3 @@ if __name__ == '__main__':
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
     app.run(host=os.getenv('IP', '0.0.0.0'),
             port=int(os.getenv('PORT', 4444)))
-
-
-

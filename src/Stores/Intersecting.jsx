@@ -16,6 +16,7 @@ export class Intersecting {
             // highlighted genes (by hovering over lines in profile plots)
             highlightedGenes: [],
             plotType: "centroid",
+            sizeIntersectionFilter: 0,
             get concordantDiscordant() {
                 return this.calculateConcordantDiscordant(this.filteredIntersections)
             },
@@ -25,10 +26,15 @@ export class Intersecting {
              */
             get filteredIntersections() {
                 let intersections = {}
+                let deleteKeys = [];
                 Object.keys(this.intersections).forEach(intersection => {
                     intersections[intersection] = this.intersections[intersection]
                         .filter(gene => this.ds1.filterStore.isinRange(gene) && this.ds2.filterStore.isinRange(gene))
+                    if (intersections[intersection].length < this.sizeIntersectionFilter) {
+                        deleteKeys.push(intersection)
+                    }
                 })
+                deleteKeys.forEach(key => delete intersections[key]);
                 return intersections
             },
             /**
@@ -41,6 +47,11 @@ export class Intersecting {
                     intersections[intersection] = this.filteredIntersections[intersection].length
                 )
                 return intersections;
+            },
+            get nextToMaxIntersection() {
+                const sizes = Object.values(this.intersections).map(d=>d.length);
+                sizes.sort((a, b) => a - b);
+                return sizes[sizes.length-2];
             },
             /**
              * gets all genes in filtered intersections
@@ -75,7 +86,11 @@ export class Intersecting {
                 })
                 return intersections;
             },
-            get selectedGenes(){
+            /**
+             * get genes in selected intersections
+             * @returns {FlatArray<string[], 1>[]}
+             */
+            get selectedGenes() {
                 return Object.values(this.selectedGenesIntersections).flat();
             },
             /**
@@ -118,8 +133,11 @@ export class Intersecting {
                         .forEach(currInd => this.selectedIntersections.push(currInd))
                 }
             },
-            clearSelection(){
-                this.selectedIntersections=[]
+            /**
+             * clears selection completely
+             */
+            clearSelection() {
+                this.selectedIntersections = []
             },
             /**
              * sets current plot type
@@ -127,6 +145,9 @@ export class Intersecting {
              */
             setPlotType(newPlotType) {
                 this.plotType = newPlotType
+            },
+            setSizeIntersectionFilter(filter) {
+                this.sizeIntersectionFilter = filter;
             }
         })
         this.dataStore = dataStore;

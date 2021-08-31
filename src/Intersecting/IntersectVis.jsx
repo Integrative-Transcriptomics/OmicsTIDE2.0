@@ -10,6 +10,8 @@ import SelectionTable from "./SelectionTable";
 import {Typography} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import Slider from "@material-ui/core/Slider";
+import FormLabel from "@material-ui/core/FormLabel";
 
 const IntersectVis = observer((props) => {
     const store = useStore();
@@ -19,29 +21,51 @@ const IntersectVis = observer((props) => {
     const profiles = createRef();
 
     // states for widths of plots
-    const [sankeyWidth, setSankeyWidth] = useState(1);
-    const [profilesWidth, setProfilesWidth] = useState(1);
+    const [sankeyWidth, setSankeyWidth] = useState(100);
+    const [profilesWidth, setProfilesWidth] = useState(100);
+    const [intersectSize, setIntersectSize] = useState(0);
+    const numClusters = Math.max(store.ds1.filteredClusterNames.length, store.ds2.filteredClusterNames.length)
     const height = 800;
     const changeWidth = useCallback(() => {
-        if (sankey.current != null) {
-            setSankeyWidth(sankey.current.getBoundingClientRect().width)
+        if (props.isVisible && sankey.current !== null && profiles.current !== null) {
+            const sankeyWidth = sankey.current.getBoundingClientRect().width;
+            const profilesWidth = profiles.current.getBoundingClientRect().width;
+            setSankeyWidth(sankeyWidth)
+            setProfilesWidth(profilesWidth)
         }
-        if (profiles.current != null) {
-            setProfilesWidth(profiles.current.getBoundingClientRect().width)
-        }
-    }, [sankey, profiles]);
+    }, [props.isVisible, sankey, profiles])
 
     // change width when window is resized
     useEffect(() => {
         changeWidth();
         window.addEventListener("resize", changeWidth);
-    }, [profiles, sankey, changeWidth]);
-
+        return () => {
+            window.removeEventListener('resize', changeWidth);
+        }
+    }, [changeWidth]);
     return (
         <div style={{padding: 10}}>
             <Grid container spacing={3}>
                 <Grid item xs={3}>
-                    <Controls/>
+                    <Controls>
+                        <FormLabel component="legend">
+                            Filter intersections by size
+                        </FormLabel>
+                        <Slider
+                            value={intersectSize}
+                            onChange={(e, v) => {
+                                setIntersectSize(v)
+                            }}
+                            onChangeCommitted={() => {
+                                store.setSizeIntersectionFilter(intersectSize);
+                            }}
+                            min={0}
+                            max={store.nextToMaxIntersection + 1}
+                            valueLabelDisplay="auto"
+                            aria-labelledby="range-slider"
+                        />
+                    </Controls>
+
                     {store.selectedIntersections.length > 0 ?
                         <div>
                             <Typography>Selection</Typography>
@@ -74,7 +98,8 @@ const IntersectVis = observer((props) => {
                         <Grid item xs={3}>
                             <div ref={profiles}>
                                 <StoreProvider store={store.ds1}>
-                                    <DatasetTrends clusterNames={store.clusterNames} colorScale={store.colorScale}
+                                    <DatasetTrends colorScale={store.colorScale}
+                                                   numClusters={numClusters}
                                                    conditions={props.conditions}
                                                    minValue={store.minValue}
                                                    maxValue={store.maxValue}
@@ -87,12 +112,14 @@ const IntersectVis = observer((props) => {
                         </Grid>
                         <Grid item xs={6}>
                             <div ref={sankey}>
-                                <Sankey width={sankeyWidth} height={height} colorScale={store.colorScale}/>
+                                <Sankey numClusters={numClusters} width={sankeyWidth} height={height}
+                                        colorScale={store.colorScale}/>
                             </div>
                         </Grid>
                         <Grid item xs={3}>
                             <StoreProvider store={store.ds2}>
-                                <DatasetTrends clusterNames={store.clusterNames} colorScale={store.colorScale}
+                                <DatasetTrends colorScale={store.colorScale}
+                                               numClusters={numClusters}
                                                conditions={props.conditions}
                                                minValue={store.minValue}
                                                maxValue={store.maxValue}
@@ -112,5 +139,6 @@ const IntersectVis = observer((props) => {
 
 IntersectVis.propTypes = {
     conditions: PropTypes.arrayOf(PropTypes.string).isRequired,
+    isVisible: PropTypes.bool.isRequired,
 };
 export default IntersectVis;
