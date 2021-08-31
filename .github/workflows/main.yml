@@ -14,19 +14,17 @@ on:
       - master
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 12
-      - run: npm build
-
   rsync-deployment:
-    needs: build
     runs-on: ubuntu-latest
     steps:
+    - name: build
+    - uses: actions/checkout@v2 
+    - uses: actions/setup-node@v2
+      with:
+          node-version: 12
+    - run: npm ci
+    - run: npm build
+    - run: ls
     - name: Install SSH Key
       uses: shimataro/ssh-key-action@v2.3.1
       with:
@@ -35,4 +33,4 @@ jobs:
         config: ${{ secrets.SSH_CONFIG }} 
         known_hosts: ${{ secrets.KNOWN_HOSTS }} 
     - name: Deploy with rsync
-      run: rsync -azv -O --no-perms --exclude='node_modules' --exclude='src' --exclude='.gitignore' --exclude='README.md' . ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_TARGET }}
+      run: rsync -azvn --exclude='node_modules' --exclude='src' --exclude='.gitignore' --exclude='README.md' . ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_TARGET }}
