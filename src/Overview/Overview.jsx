@@ -9,12 +9,10 @@ import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
 import Container from "@material-ui/core/Container";
 import PropTypes from "prop-types";
-import styled from "@emotion/styled";
 
 
 function Overview(props) {
     const store = useStore();
-    const LegendDiv = styled('div')(({theme}) => ({float: "left"}));
     const width = 300;
     let domain = ["concordant", "discordant"]
     let legendNames = ["Concordant genes",
