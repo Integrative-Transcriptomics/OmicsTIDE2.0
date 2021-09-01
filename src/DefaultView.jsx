@@ -82,7 +82,7 @@ const DefaultView = observer((props) => {
         selectionText = files.length + " files selected";
     } else if (selectionType === "test")
         if (testData === "bc") {
-            selectionText = "Bloodcell study selected"
+            selectionText = "Neutrophil differentiation study selected"
         } else {
             selectionText = "Streptomyces study selected"
         }
@@ -127,8 +127,8 @@ const DefaultView = observer((props) => {
                                         value={testData}
                                         onChange={(e) => selectTestData(e.target.value)}
                                     >
-                                        <MenuItem value={"bc"}>Blood Cell Study</MenuItem>
-                                        <MenuItem value={"s"}>Streptomyces Study</MenuItem>
+                                        <MenuItem value={"bc"}>Neutrophil differentiation study (Hoogendijk et al., 2019)</MenuItem>
+                                        <MenuItem value={"s"}>Streptomyces study (Sulheim et al., 2020)</MenuItem>
                                     </Select>
                                 </FormControl>
 
