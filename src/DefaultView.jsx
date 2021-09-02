@@ -13,6 +13,7 @@ import Grid from "@material-ui/core/Grid";
 import Alert from "@material-ui/core/Alert";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import {observer} from "mobx-react";
+import Papa from 'papaparse';
 
 
 const DefaultView = observer((props) => {
@@ -33,6 +34,7 @@ const DefaultView = observer((props) => {
     const [k, setK] = useState(3)
     const [testData, setTestData] = useState("")
     const [files, setFiles] = useState([]);
+    const [idMappingFile, setIDMappingFile] = useState(null);
     const [selectionType, setSelectionType] = useState("none");
     const [dataLoading, setDataLoading] = useState(false);
     const selectTestData = useCallback((data) => {
@@ -45,37 +47,51 @@ const DefaultView = observer((props) => {
     }, [])
     const launch = useCallback(
         () => {
+            const readFile = (file) => {
+                return new Promise((resolve, reject) => {
+                    Papa.parse(idMappingFile, {
+                        complete: (results) => {
+                            resolve(results.data)
+                        }
+                    });
+                });
+            }
+            const getData = (url, formData) => {
+                return new Promise((resolve, reject) => {
+                    axios.post(url, formData)
+                        .then((response) => {
+                            resolve(response.data);
+                        })
+                })
+
+            }
             setDataLoading(true);
+            let mappingPromise = null;
+            if (idMappingFile !== null) {
+                mappingPromise = readFile(idMappingFile);
+            }
             const formData = new FormData();
+            let url = "";
             formData.append("k", k);
             formData.append("lowerVariancePercentage", varFilter[0]);
             formData.append("upperVariancePercentage", varFilter[1]);
             if (testData === "bc") {
-                axios.post("/load_test_data_bloodcell", formData)
-                    .then((response) => {
-                        store.init(response.data, varFilter);
-                        props.setDataLoaded(true);
-                        setDataLoading(false)
-                    })
+                url = "/load_test_data_bloodcell";
             } else if (testData === "s") {
-                axios.post("/load_test_data_streptomyces", formData)
-                    .then((response) => {
-                        store.init(response.data, varFilter);
-                        props.setDataLoaded(true);
-                        setDataLoading(false)
-                    })
+                url = "/load_test_data_streptomyces";
             } else {
                 files.forEach(file => formData.append("files[]", file));
-                axios.post("/load_data", formData)
-                    .then((response) => {
-                        store.init(response.data, varFilter);
-                        props.setDataLoaded(true);
-                        setDataLoading(false)
-
-                    })
+                url = "/load_data";
             }
+            let dataPromise = getData(url, formData);
+            Promise.all([mappingPromise, dataPromise]).then(values => {
+                store.init(values[1], values[0], varFilter);
+                props.setDataLoaded(true);
+                setDataLoading(false)
+
+            })
         },
-        [varFilter, k, testData, files, store, props],
+        [varFilter, k, testData, files, store, props, idMappingFile],
     );
     let selectionText = null;
     if (selectionType === "files") {
@@ -127,7 +143,8 @@ const DefaultView = observer((props) => {
                                         value={testData}
                                         onChange={(e) => selectTestData(e.target.value)}
                                     >
-                                        <MenuItem value={"bc"}>Neutrophil differentiation study (Hoogendijk et al., 2019)</MenuItem>
+                                        <MenuItem value={"bc"}>Neutrophil differentiation study (Hoogendijk et al.,
+                                            2019)</MenuItem>
                                         <MenuItem value={"s"}>Streptomyces study (Sulheim et al., 2020)</MenuItem>
                                     </Select>
                                 </FormControl>
@@ -136,6 +153,20 @@ const DefaultView = observer((props) => {
                         </Grid>
                         <Grid item xs={3} className={classes.centerText}>
                             {selectionText}
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={10}>
+                        <Grid item xs={9}>
+                            <form style={{display: 'flex'}}>
+                                <Button component="label">Select ID mapping file
+                                    <input type="file"
+                                           onChange={(e) => setIDMappingFile([...e.target.files][0])}
+                                           hidden/>
+                                </Button>
+                            </form>
+                        </Grid>
+                        <Grid item xs={3} className={classes.centerText}>
+                            {idMappingFile !== null ? idMappingFile.name : null}
                         </Grid>
                     </Grid>
                     <Typography id="discrete-slider" gutterBottom>
@@ -175,7 +206,8 @@ const DefaultView = observer((props) => {
                             {varFilter[0] + "< var <" + varFilter[1]}
                         </Grid>
                     </Grid>
-                    <Button onClick={launch} disabled={dataLoading || (files.length === 0 && testData ==="")} variant="contained">Launch</Button>
+                    <Button onClick={launch} disabled={dataLoading || (files.length === 0 && testData === "")}
+                            variant="contained">Launch</Button>
 
                 </Grid>
                 {dataLoading ?

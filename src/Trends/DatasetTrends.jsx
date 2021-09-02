@@ -1,7 +1,7 @@
 import {observer} from "mobx-react";
 import PropTypes from "prop-types";
 import React from "react";
-import {StoreProvider, useStore} from "../Stores/RootStore";
+import {useStore} from "../Stores/RootStore";
 import ProfilePlot from "./ProfilePlot";
 import * as d3 from "d3";
 import Axis from "./Axis";
@@ -21,7 +21,7 @@ const DatasetTrends = observer((props) => {
     }
 
     // height and width of subplots
-    const height = (props.height - (props.numClusters- 1) * (margin.top + margin.bot)) / props.numClusters;
+    const height = (props.height - (props.numClusters - 1) * (margin.top + margin.bot)) / props.numClusters;
     const width = props.width - margin.left - margin.right
 
     // shared xScale and yScale
@@ -50,9 +50,7 @@ const DatasetTrends = observer((props) => {
                     plot = <g>
                         <ProfilePlot data={data} yScale={yScale} xScale={xScale}
                                      color={props.colorScale(cluster)} opacity={opacity}/>
-                        <StoreProvider store={store.parent}>
-                            <HighlightLines data={data} yScale={yScale} xScale={xScale}/>
-                        </StoreProvider>
+                        <HighlightLines data={data} yScale={yScale} xScale={xScale} genes={store.parent.highlightedGenes} stroke={"black"}/>
 
                     </g>
                 } else if (props.plotType === "centroid") {
@@ -71,7 +69,7 @@ const DatasetTrends = observer((props) => {
 
                 plots.push(
                     <svg key={cluster} width={props.width} height={props.height / props.numClusters}
-                         onClick={() => store.setSelectedCluster(cluster)}>
+                         onClick={() => store.setSelectedCluster(cluster)} onMouseLeave={()=>store.parent.setHighlightedGenes([])}>
                         <g transform={"translate(" + margin.left + ",0)"}>
                             {plot}
                             <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={"z-score"}/>
@@ -87,7 +85,7 @@ const DatasetTrends = observer((props) => {
 });
 
 DatasetTrends.propTypes = {
-    numClusters:PropTypes.number.isRequired,
+    numClusters: PropTypes.number.isRequired,
     colorScale: PropTypes.func.isRequired,
     conditions: PropTypes.arrayOf(PropTypes.string).isRequired,
     minValue: PropTypes.number.isRequired,

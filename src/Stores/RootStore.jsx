@@ -20,8 +20,8 @@ export class RootStore {
      * @param {Object} data
      * @param {number[]} initialVarFilter
      */
-    init(data, initialVarFilter) {
-        this.dataStore = new DataStore(data, initialVarFilter)
+    init(data, mapping, initialVarFilter) {
+        this.dataStore = new DataStore(data, mapping, initialVarFilter)
         this.dataLoaded = true;
     }
 }

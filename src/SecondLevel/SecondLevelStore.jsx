@@ -7,6 +7,7 @@ import * as d3 from "d3";
 export class SecondLevelStore {
     constructor(pantherAPI, parent, ds1selection, ds2selection) {
         this.pantherAPI = pantherAPI;
+        // intersecting/nonintersecting store
         this.parent = parent;
         // gene selection in both data sets (same genes in intersecting, different genes in non-intersecting)
         this.ds1selection = ds1selection;
@@ -21,6 +22,12 @@ export class SecondLevelStore {
             //loading status
             isLoading: false,
             isLoaded: false,
+
+            searchGenes: [],
+
+            setSearchGenes(genes) {
+                this.searchGenes = genes;
+            },
 
             // calculates overrepresentation and sets loading status
             calcOverrepresentation(organism) {

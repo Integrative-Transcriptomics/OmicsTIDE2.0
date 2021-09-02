@@ -64,6 +64,9 @@ export class Intersecting {
                 })
                 return genes
             },
+            get filteredGenes(){
+                return Object.values(this.filteredIntersections).flat()
+            },
             /**
              * gets genes that are in the currently highlighted intersections
              * @returns {{}}

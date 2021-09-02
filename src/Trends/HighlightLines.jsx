@@ -1,13 +1,10 @@
-import {observer} from "mobx-react";
 import PropTypes from "prop-types";
 import React from "react";
-import {useStore} from "../Stores/RootStore";
 
-const HighlightLines = observer((props) => {
-    const store = useStore();
+function HighlightLines(props) {
     // create lines
     const lines = [];
-    store.highlightedGenes.forEach(gene => {
+    props.genes.forEach(gene => {
         // create points for each line
         if (gene in props.data) {
             let points = "";
@@ -15,8 +12,7 @@ const HighlightLines = observer((props) => {
                 const point = props.xScale(elem.cond) + "," + props.yScale(elem.value);
                 points += point + " "
             })
-            lines.push(<polyline key={gene} points={points} fill="none" stroke="black" strokeWidth={2}
-                                 onMouseLeave={() => store.setHighlightedGenes([])}/>)
+            lines.push(<polyline key={gene} points={points} fill="none" stroke={props.stroke} strokeWidth={2}/>)
         }
     });
     return (
@@ -26,7 +22,7 @@ const HighlightLines = observer((props) => {
 
 
     );
-});
+}
 
 HighlightLines.propTypes = {
     data: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any))).isRequired,

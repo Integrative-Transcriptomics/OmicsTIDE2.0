@@ -7,6 +7,7 @@ import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import Slider from "@material-ui/core/Slider";
 import {useStore} from "./Stores/RootStore";
+import GeneSearch from "./GeneSearch";
 
 const Controls = observer((props) => {
     const store = useStore();
@@ -16,7 +17,6 @@ const Controls = observer((props) => {
     const [var2, setVar2] = useState([store.ds2.filterStore.varianceMinFilter, store.ds2.filterStore.varianceMaxFilter])
     const [abu1, setAbu1] = useState([store.ds1.filterStore.abundanceMinFilter, store.ds1.filterStore.abundanceMaxFilter])
     const [abu2, setAbu2] = useState([store.ds2.filterStore.abundanceMinFilter, store.ds2.filterStore.abundanceMaxFilter])
-
     return (
         <div>
             <FormControl component="fieldset">
@@ -86,7 +86,9 @@ const Controls = observer((props) => {
                     valueLabelDisplay="auto"
                     aria-labelledby="range-slider"
                 />
+
                 {props.children}
+               <GeneSearch filteredGenes={store.filteredGenes} setSearchGenes={(genes)=>store.setHighlightedGenes(genes)}/>
             </FormControl>
         </div>
     );

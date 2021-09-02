@@ -24,6 +24,12 @@ export class NonIntersecting {
             },
             get selectedGenes() {
                 return(this.ds1.selectedGenes.concat(this.ds2.selectedGenes))
+            },
+            get genes(){
+                return Object.keys(this.ds1.genes).concat(Object.keys(this.ds2.genes));
+            },
+            get filteredGenes(){
+                return this.ds1.filteredGenes.concat(this.ds2.filteredGenes);
             }
         })
         this.dataStore = dataStore;

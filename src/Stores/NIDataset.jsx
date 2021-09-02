@@ -81,6 +81,9 @@ export class NIDataset {
                 })
                 return (genes);
             },
+            get filteredGenes(){
+                return Object.values(this.clusters).flat()
+            },
             get filteredClusterNames() {
                 return this.parent.clusterNames.filter(cluster => this.clusterSizes[cluster] > 0)
             },

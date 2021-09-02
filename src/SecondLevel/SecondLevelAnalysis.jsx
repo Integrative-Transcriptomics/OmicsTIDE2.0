@@ -10,6 +10,7 @@ import Select from "react-select";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Alert from "@material-ui/core/Alert";
 import {observer} from "mobx-react";
+import GeneSearch from "../GeneSearch";
 
 
 const SecondLevelAnalysis = observer((props) => {
@@ -83,11 +84,12 @@ const SecondLevelAnalysis = observer((props) => {
     // create one plot for each data set
 
     const plot1 =
-        <svg key="ds1" width={width} height={height}>
+        <svg key="ds1" width={width} height={height} onMouseLeave={()=>store.parent.setHighlightedGenes([])}>
             <g transform={"translate(" + margin.left + ",0)"}>
                 <StoreProvider store={store.parent.ds1}>
                     <MultiClusterProfilePlot selection={store.ds1selection} yScale={yScale} xScale={xScale}
-                                             colorScale={store.parent.colorScale}/>
+                                             colorScale={store.parent.colorScale} searchGenes={store.searchGenes}
+                                             highlightedGenes={store.parent.highlightedGenes}/>
                 </StoreProvider>
                 {axis1}
                 {axis2}
@@ -98,7 +100,8 @@ const SecondLevelAnalysis = observer((props) => {
             <g transform={"translate(" + margin.left + ",0)"}>
                 <StoreProvider store={store.parent.ds2}>
                     <MultiClusterProfilePlot selection={store.ds2selection} yScale={yScale} xScale={xScale}
-                                             colorScale={store.parent.colorScale}/>
+                                             colorScale={store.parent.colorScale} searchGenes={store.searchGenes}
+                                             highlightedGenes={store.parent.highlightedGenes}/>
                 </StoreProvider>
                 {axis1}
                 {axis2}
@@ -108,15 +111,20 @@ const SecondLevelAnalysis = observer((props) => {
     return (
         <div style={{padding: 10}}>
             <Grid container spacing={3}>
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                     <Typography>{store.parent.comparison.file1}</Typography>
                     <div ref={plot}>
                         {plot1}
                     </div>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                     <Typography>{store.parent.comparison.file2}</Typography>
                     {plot2}
+                </Grid>
+                <Grid item xs={4}>
+                    <StoreProvider store={store.parent}>
+                        <GeneSearch filteredGenes={store.genes} setSearchGenes={(genes)=>store.setSearchGenes(genes)}/>
+                    </StoreProvider>
                 </Grid>
                 <Grid item xs={6}>
                     {store.pantherAPI.genomesLoaded ?
