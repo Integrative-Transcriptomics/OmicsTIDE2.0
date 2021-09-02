@@ -88,7 +88,7 @@ const Controls = observer((props) => {
                 />
 
                 {props.children}
-               <GeneSearch filteredGenes={store.filteredGenes} setSearchGenes={(genes)=>store.setHighlightedGenes(genes)}/>
+               <GeneSearch filteredGenes={store.filteredGenes} setSearchGenes={(genes)=>store.setSearchGenes(genes)}/>
             </FormControl>
         </div>
     );

@@ -23,6 +23,7 @@ const SecondLevelAnalysis = observer((props) => {
         bot: 30,
     }
     const [width, setWidth] = useState(500)
+    const [calculationText, setCalculationText] = useState(null)
 
     const height = 400;
 
@@ -46,7 +47,8 @@ const SecondLevelAnalysis = observer((props) => {
     if (store.isLoading) {
         goVis =
             <Grid item xs={12} align="center">
-                <Typography>Calculating GO-enrichment...</Typography>
+                <Typography>Calculating GO-Term Enrichment...</Typography>
+                <Typography>{calculationText}</Typography>
                 <CircularProgress/>
             </Grid>;
     } else if (store.isLoaded) {
@@ -70,7 +72,11 @@ const SecondLevelAnalysis = observer((props) => {
             </div>
         </Grid>].concat(goEnrichment)
     }
-
+    const startTimer = () => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => resolve(), 30000);
+        })
+    }
 
     const yScale = d3.scaleLinear().domain([store.parent.maxValue, store.parent.minValue]).range([0, height - margin.top - margin.bot]);
     const xScale = d3.scalePoint().domain(props.conditions).range([0, width - margin.left - margin.right]);
@@ -84,7 +90,7 @@ const SecondLevelAnalysis = observer((props) => {
     // create one plot for each data set
 
     const plot1 =
-        <svg key="ds1" width={width} height={height} onMouseLeave={()=>store.parent.setHighlightedGenes([])}>
+        <svg key="ds1" width={width} height={height} onMouseLeave={() => store.parent.setHighlightedGenes([])}>
             <g transform={"translate(" + margin.left + ",0)"}>
                 <StoreProvider store={store.parent.ds1}>
                     <MultiClusterProfilePlot selection={store.ds1selection} yScale={yScale} xScale={xScale}
@@ -123,7 +129,8 @@ const SecondLevelAnalysis = observer((props) => {
                 </Grid>
                 <Grid item xs={4}>
                     <StoreProvider store={store.parent}>
-                        <GeneSearch filteredGenes={store.genes} setSearchGenes={(genes)=>store.setSearchGenes(genes)}/>
+                        <GeneSearch filteredGenes={store.genes}
+                                    setSearchGenes={(genes) => store.setSearchGenes(genes)}/>
                     </StoreProvider>
                 </Grid>
                 <Grid item xs={6}>
@@ -133,7 +140,13 @@ const SecondLevelAnalysis = observer((props) => {
                                 href="http://pantherdb.org/">http://pantherdb.org/</a>)</Typography>,
                             <Typography key="task">Please select species to perform enrichment:</Typography>,
                             <Select key="select" options={store.pantherAPI.genomes}
-                                    onChange={(val) => calcEnrichment(val.value)}/>]
+                                    onChange={(val) => {
+                                        setCalculationText(null)
+                                        calcEnrichment(val.value)
+                                        startTimer().then(() => {
+                                            setCalculationText("This seems to take longer than normally. There might be a problem with PANTHER")
+                                        })
+                                    }}/>]
                         : <Alert severity="warning">Sorry, it seems like we're unable to connect to <a
                             href="http://pantherdb.org/">http://pantherdb.org/</a> for GO Term enrichment. Please adapt
                             your

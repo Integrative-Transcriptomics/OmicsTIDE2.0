@@ -16,11 +16,11 @@ const GeneSearch = observer((props) => {
     const [selectedGenes, setSelectedGens] = useState([]);
     let options = [];
     if (searchName) {
-        options = props.filteredGenes.map(id => {
+        options = props.filteredGenes.sort().map(id => {
             return ({label: store.dataStore.idToName[id], id: id.toString()})
         });
     } else {
-        options = props.filteredGenes.map(id => {
+        options = props.filteredGenes.sort().map(id => {
             return ({label: id, id: id})
         });
     }
@@ -44,13 +44,15 @@ const GeneSearch = observer((props) => {
             <div>
                 <Autocomplete
                     multiple
+                    disableCloseOnSelect
+                    filterSelectedOptions
+                    freeSolo
                     getOptionLabel={(option) => option.label}
                     options={options}
                     value={selectedGenes}
                     onChange={(e, v) => {
                         setSelectedGens(v)
                         props.setSearchGenes(v.map(d=>d.id));
-                        console.log(v)
                     }}
                     renderInput={(params) => (
                         <TextField

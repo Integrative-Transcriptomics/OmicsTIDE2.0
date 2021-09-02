@@ -15,6 +15,7 @@ export class Intersecting {
             selectedIntersections: [],
             // highlighted genes (by hovering over lines in profile plots)
             highlightedGenes: [],
+            searchGenes: [],
             plotType: "centroid",
             sizeIntersectionFilter: 0,
             get concordantDiscordant() {
@@ -49,9 +50,9 @@ export class Intersecting {
                 return intersections;
             },
             get nextToMaxIntersection() {
-                const sizes = Object.values(this.intersections).map(d=>d.length);
+                const sizes = Object.values(this.intersections).map(d => d.length);
                 sizes.sort((a, b) => a - b);
-                return sizes[sizes.length-2];
+                return sizes[sizes.length - 2];
             },
             /**
              * gets all genes in filtered intersections
@@ -64,7 +65,7 @@ export class Intersecting {
                 })
                 return genes
             },
-            get filteredGenes(){
+            get filteredGenes() {
                 return Object.values(this.filteredIntersections).flat()
             },
             /**
@@ -109,6 +110,9 @@ export class Intersecting {
              */
             setHighlightedGenes(genes) {
                 this.highlightedGenes = genes;
+            },
+            setSearchGenes(genes) {
+                this.searchGenes = genes;
             },
             /**
              * selects an intersection

@@ -12,7 +12,7 @@ function HighlightLines(props) {
                 const point = props.xScale(elem.cond) + "," + props.yScale(elem.value);
                 points += point + " "
             })
-            lines.push(<polyline key={gene} points={points} fill="none" stroke={props.stroke} strokeWidth={2}/>)
+            lines.push(<polyline key={gene} points={points} fill="none" stroke={props.stroke} strokeWidth={2} opacity={0.5}/>)
         }
     });
     return (

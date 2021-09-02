@@ -45,23 +45,22 @@ const DatasetTrends = observer((props) => {
             }
             if (store.clusterSizes[cluster] > 0) {
                 // create plots based on plotTypes
+                const geneCentricData = store.geneCentricMapping[cluster]
+                const conditionCentricData = store.conditionMapping[cluster];
                 if (props.plotType === "profile") {
-                    const data = store.geneCentricMapping[cluster]
                     plot = <g>
-                        <ProfilePlot data={data} yScale={yScale} xScale={xScale}
+                        <ProfilePlot data={geneCentricData} yScale={yScale} xScale={xScale}
                                      color={props.colorScale(cluster)} opacity={opacity}/>
-                        <HighlightLines data={data} yScale={yScale} xScale={xScale} genes={store.parent.highlightedGenes} stroke={"black"}/>
-
+                        <HighlightLines data={geneCentricData} yScale={yScale} xScale={xScale}
+                                        genes={store.parent.highlightedGenes} stroke={"black"}/>
                     </g>
                 } else if (props.plotType === "centroid") {
                     // if there is only one gene in the cluster we create a profile plot instead of a centroid profile plot
                     if (Object.keys(store.geneCentricMapping[cluster]).length === 1) {
-                        const data = store.geneCentricMapping[cluster]
-                        plot = <ProfilePlot data={data} yScale={yScale} xScale={xScale}
+                        plot = <ProfilePlot data={geneCentricData} yScale={yScale} xScale={xScale}
                                             color={props.colorScale(cluster)} opacity={opacity}/>
                     } else {
-                        const data = store.conditionMapping[cluster]
-                        plot = <CentroidProfilePlot data={data} conditions={props.conditions}
+                        plot = <CentroidProfilePlot data={conditionCentricData} conditions={props.conditions}
                                                     yScale={yScale} xScale={xScale}
                                                     color={props.colorScale(cluster)} opacity={opacity}/>
                     }
@@ -69,9 +68,14 @@ const DatasetTrends = observer((props) => {
 
                 plots.push(
                     <svg key={cluster} width={props.width} height={props.height / props.numClusters}
-                         onClick={() => store.setSelectedCluster(cluster)} onMouseLeave={()=>store.parent.setHighlightedGenes([])}>
+                         onClick={() => store.setSelectedCluster(cluster)}
+                         onMouseLeave={() => store.parent.setHighlightedGenes([])}>
                         <g transform={"translate(" + margin.left + ",0)"}>
-                            {plot}
+                            <g>
+                                {plot}
+                                <HighlightLines data={geneCentricData} yScale={yScale} xScale={xScale}
+                                                genes={store.parent.searchGenes} stroke={"black"}/>
+                            </g>
                             <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={"z-score"}/>
                             <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={""}/>
                         </g>
