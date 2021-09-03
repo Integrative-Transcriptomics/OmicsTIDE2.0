@@ -35,12 +35,14 @@ export class DataStore {
      */
     initIdMapping(mapping) {
         mapping.forEach(entry => {
-            this.idToName[entry[0]] = entry[1]
-            // we cannot assume unique gene names, so we need to be prepared that multiple ids map to a gene name
-            if (!(entry[1] in this.nameToID)) {
-                this.nameToID[entry[1]] = [entry[0]]
-            } else {
-                this.nameToID[entry[1]].push(entry[0]);
+            if (entry[1] !== null) {
+                this.idToName[entry[0]] = entry[1]
+                // we cannot assume unique gene names, so we need to be prepared that multiple ids map to a gene name
+                if (!(entry[1] in this.nameToID)) {
+                    this.nameToID[entry[1]] = [entry[0]]
+                } else {
+                    this.nameToID[entry[1]].push(entry[0]);
+                }
             }
         })
     }

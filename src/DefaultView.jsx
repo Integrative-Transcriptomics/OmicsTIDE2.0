@@ -13,8 +13,40 @@ import Grid from "@material-ui/core/Grid";
 import Alert from "@material-ui/core/Alert";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import {observer} from "mobx-react";
-import Papa from 'papaparse';
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import Box from "@material-ui/core/Box";
+import PropTypes from "prop-types";
+import Tooltip from "@material-ui/core/Tooltip";
+import InfoIcon from '@material-ui/icons/Info';
+import Backdrop from "@material-ui/core/Backdrop";
 
+
+function TabPanel(props) {
+    const {children, value, index, ...other} = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box sx={{p: 3, backgroundColor: "#e6e6e6"}}>
+                    <Typography>{children}</Typography>
+                </Box>
+            )}
+        </div>
+    );
+}
+
+TabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+};
 
 const DefaultView = observer((props) => {
     const useStyles = makeStyles((theme) => ({
@@ -35,73 +67,42 @@ const DefaultView = observer((props) => {
     const [testData, setTestData] = useState("")
     const [files, setFiles] = useState([]);
     const [idMappingFile, setIDMappingFile] = useState(null);
-    const [selectionType, setSelectionType] = useState("none");
     const [dataLoading, setDataLoading] = useState(false);
+    const [selectedTab, setSelectedTab] = useState(0)
     const selectTestData = useCallback((data) => {
         setTestData(data);
-        setSelectionType("test");
     }, [])
     const selectFiles = useCallback((files) => {
         setFiles(files)
-        setSelectionType("files");
     }, [])
     const launch = useCallback(
         () => {
-            const readFile = (file) => {
-                return new Promise((resolve, reject) => {
-                    Papa.parse(idMappingFile, {
-                        complete: (results) => {
-                            resolve(results.data)
-                        }
-                    });
-                });
-            }
-            const getData = (url, formData) => {
-                return new Promise((resolve, reject) => {
-                    axios.post(url, formData)
-                        .then((response) => {
-                            resolve(response.data);
-                        })
-                })
-
-            }
             setDataLoading(true);
-            let mappingPromise = null;
-            if (idMappingFile !== null) {
-                mappingPromise = readFile(idMappingFile);
-            }
             const formData = new FormData();
             let url = "";
             formData.append("k", k);
             formData.append("lowerVariancePercentage", varFilter[0]);
             formData.append("upperVariancePercentage", varFilter[1]);
-            if (testData === "bc") {
-                url = "/load_test_data_bloodcell";
-            } else if (testData === "s") {
-                url = "/load_test_data_streptomyces";
+            if (selectedTab === 1) {
+                if (testData === "bc") {
+                    url = "/load_test_data_bloodcell";
+                } else if (testData === "s") {
+                    url = "/load_test_data_streptomyces";
+                }
             } else {
-                files.forEach(file => formData.append("files[]", file));
                 url = "/load_data";
+                files.forEach(file => formData.append("files[]", file));
+                formData.append("mappingFile", idMappingFile);
             }
-            let dataPromise = getData(url, formData);
-            Promise.all([mappingPromise, dataPromise]).then(values => {
-                store.init(values[1], values[0], varFilter);
-                props.setDataLoaded(true);
-                setDataLoading(false)
-
-            })
+            axios.post(url, formData)
+                .then((response) => {
+                    store.init(response.data.data, response.data.mapping, varFilter);
+                    props.setDataLoaded(true);
+                    setDataLoading(false)
+                })
         },
-        [varFilter, k, testData, files, store, props, idMappingFile],
+        [varFilter, k, testData, files, store, props, idMappingFile, selectedTab],
     );
-    let selectionText = null;
-    if (selectionType === "files") {
-        selectionText = files.length + " files selected";
-    } else if (selectionType === "test")
-        if (testData === "bc") {
-            selectionText = "Neutrophil differentiation study selected"
-        } else {
-            selectionText = "Streptomyces study selected"
-        }
     return (
         <div style={{padding: 10}}>
             <Alert severity="info">
@@ -123,50 +124,63 @@ const DefaultView = observer((props) => {
                 </ul></Alert>
             <Grid container spacing={10}>
                 <Grid item xs={6}>
-                    <Grid container spacing={10}>
-                        <Grid item xs={9}>
-                            <form style={{display: 'flex'}}>
-                                <Button component="label">Select Files
-                                    <input type="file"
-                                           multiple
-                                           onChange={(e) => selectFiles([...e.target.files])}
-                                           hidden/>
-                                </Button>
-                                <div className={classes.centerText}>
-                                    or
-                                </div>
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <Tabs value={selectedTab} onChange={(e, v) => setSelectedTab(v)}
+                                  aria-label="basic tabs example">
+                                <Tab label="Upload"/>
+                                <Tab label="Test data"/>
+                            </Tabs>
+                        </Grid>
+                        <Grid item xs={10}>
+                            <TabPanel value={selectedTab} index={0}>
+                                <Grid container spacing={1}>
+                                    <Grid item xs={8}>
+                                        <Button component="label" variant="contained">Select Files
+                                            <input type="file"
+                                                   multiple
+                                                   onChange={(e) => selectFiles([...e.target.files])}
+                                                   hidden/>
+                                        </Button>
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <Typography align="center">
+                                            {files.length !== 0 ? files.length + " files selected" : null}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={8}>
+                                        <Button component="label" variant="contained">Select ID mapping file
+                                            <input type="file"
+                                                   onChange={(e) => setIDMappingFile([...e.target.files][0])}
+                                                   hidden/>
+                                        </Button>
+                                        <Tooltip
+                                            title="Upload gene mapping file to be able to search for specific genes (optional).">
+                                            <InfoIcon/>
+                                        </Tooltip>
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <Typography align="center">
+                                            {idMappingFile !== null ? idMappingFile.name : null}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            </TabPanel>
+                            <TabPanel value={selectedTab} index={1}>
                                 <FormControl className={classes.formControl} variant="standard">
                                     <InputLabel id="demo-simple-select-label">Select Test Data</InputLabel>
-                                    <Select
-                                        labelId="demo-simple-select-label"
-                                        id="demo-simple-select"
-                                        value={testData}
-                                        onChange={(e) => selectTestData(e.target.value)}
+                                    <Select autoWidth={true}
+                                            labelId="demo-simple-select-label"
+                                            id="demo-simple-select"
+                                            value={testData}
+                                            onChange={(e) => selectTestData(e.target.value)}
                                     >
                                         <MenuItem value={"bc"}>Neutrophil differentiation study (Hoogendijk et al.,
                                             2019)</MenuItem>
                                         <MenuItem value={"s"}>Streptomyces study (Sulheim et al., 2020)</MenuItem>
                                     </Select>
                                 </FormControl>
-
-                            </form>
-                        </Grid>
-                        <Grid item xs={3} className={classes.centerText}>
-                            {selectionText}
-                        </Grid>
-                    </Grid>
-                    <Grid container spacing={10}>
-                        <Grid item xs={9}>
-                            <form style={{display: 'flex'}}>
-                                <Button component="label">Select ID mapping file
-                                    <input type="file"
-                                           onChange={(e) => setIDMappingFile([...e.target.files][0])}
-                                           hidden/>
-                                </Button>
-                            </form>
-                        </Grid>
-                        <Grid item xs={3} className={classes.centerText}>
-                            {idMappingFile !== null ? idMappingFile.name : null}
+                            </TabPanel>
                         </Grid>
                     </Grid>
                     <Typography id="discrete-slider" gutterBottom>
@@ -178,7 +192,6 @@ const DefaultView = observer((props) => {
                                 value={k}
                                 aria-labelledby="discrete-slider"
                                 valueLabelDisplay="auto"
-                                disabled={dataLoading}
                                 step={1}
                                 marks
                                 onChange={(e, v) => setK(v)}
@@ -197,7 +210,6 @@ const DefaultView = observer((props) => {
                             <Slider
                                 value={varFilter}
                                 onChange={(e, v) => setVarFilter(v)}
-                                disabled={dataLoading}
                                 valueLabelDisplay="auto"
                                 aria-labelledby="range-slider"
                             />
@@ -206,15 +218,16 @@ const DefaultView = observer((props) => {
                             {varFilter[0] + "< var <" + varFilter[1]}
                         </Grid>
                     </Grid>
-                    <Button onClick={launch} disabled={dataLoading || (files.length === 0 && testData === "")}
+                    <Button onClick={launch}
                             variant="contained">Launch</Button>
-
                 </Grid>
-                {dataLoading ?
-                    <Grid item xs={12}>
-                        <CircularProgress/>
-                    </Grid> : null}
             </Grid>
+            <Backdrop
+                sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1}}
+                open={dataLoading}
+            >
+                <CircularProgress color="inherit"/>
+            </Backdrop>
         </div>
 
     );

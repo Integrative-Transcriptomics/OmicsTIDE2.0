@@ -6,6 +6,7 @@ from itertools import combinations
 from zipfile import ZipFile
 
 import pandas as pd
+import simplejson as json
 from flask import jsonify, request, send_from_directory, send_file, Flask
 
 from server.data_quality_assurance import valid_cluster_header, valid_cluster_values, invalid_cluster_value_pos, \
@@ -152,6 +153,7 @@ def get_var_values(data, ds):
 def load_data():
     data = []
     files = request.files.getlist("files[]")
+    mapping_file = request.files.get("mappingFile")
     k = int(request.form.to_dict()['k'])
     lower_variance_percentile = int(request.form.to_dict()['lowerVariancePercentage'])
     upper_variance_percentile = int(request.form.to_dict()['upperVariancePercentage'])
@@ -165,6 +167,10 @@ def load_data():
                                                   upper_variance_percentile, k)
             comparison["files"] = [combination[0]["filename"], combination[1]["filename"]]
             data.append(comparison)
+            if mapping_file is not None:
+                mapping = pd.read_csv(mapping_file, sep=",").to_numpy().tolist()
+            else:
+                mapping = None
         except TypeError as te:
             if str(te) == "object of type 'builtin_function_or_method' has no len()":
                 return jsonify(message='ID column has to be named "gene"'), 500
@@ -173,18 +179,20 @@ def load_data():
             if str(ve).startswith("Length mismatch: Expected axis has"):
                 return jsonify(message='Number of columns/conditions for the loaded files not identical!'), 500
 
-    return jsonify(data)
+    return json.dumps({"data": data, "mapping": mapping}, ignore_nan=True)
 
 
 @app.route('/load_test_data_bloodcell', methods=['GET', 'POST'])
 def load_test_data_bloodcell():
     data = []
+    mapping = []
     k = int(request.form.to_dict()['k'])
     lower_variance_percentile = int(request.form.to_dict()['lowerVariancePercentage'])
     upper_variance_percentile = int(request.form.to_dict()['upperVariancePercentage'])
 
     transcriptome_data = os.path.join(app.config['FILES_BLOODCELLS'], "Transcriptome.csv")
     proteome_data = os.path.join(app.config['FILES_BLOODCELLS'], "Proteome.csv")
+    mapping_file = os.path.join(app.config['FILES_BLOODCELLS'], "id_mapping.csv")
 
     try:
         comparison = pairwise_trendcomparison(preprocess_file(transcriptome_data), preprocess_file(proteome_data),
@@ -192,6 +200,7 @@ def load_test_data_bloodcell():
                                               upper_variance_percentile, k)
         comparison["files"] = ["Transcriptome.csv", "Proteome.csv"]
         data.append(comparison)
+        mapping = pd.read_csv(mapping_file, sep=",").to_numpy().tolist()
 
     except TypeError as te:
         if str(te) == "object of type 'builtin_function_or_method' has no len()":
@@ -200,8 +209,7 @@ def load_test_data_bloodcell():
     except ValueError as ve:
         if str(ve).startswith("Length mismatch: Expected axis has"):
             return jsonify(message='Number of columns/conditions for the loaded files not identical!'), 500
-
-    return jsonify(data)
+    return json.dumps({"data": data, "mapping": mapping}, ignore_nan=True)
 
 
 @app.route('/load_test_data_streptomyces', methods=['GET', 'POST'])
@@ -234,7 +242,7 @@ def load_test_data_streptomyces():
     except ValueError as ve:
         if str(ve).startswith("Length mismatch: Expected axis has"):
             return jsonify(message='Number of columns/conditions for the loaded files not identical!'), 500
-    return jsonify(data)
+    return json.dumps({"data": data, "mapping": None}, ignore_nan=True)
 
 
 @app.route('/download_session', methods=['GET', 'POST'])

@@ -11,9 +11,13 @@ export class NonIntersecting {
         extendObservable(this, {
             // highlighted genes (by hovering over lines in profile plots)
             highlightedGenes: [],
+            searchGenes: [],
             plotType: "centroid",
             setHighlightedGenes(genes) {
                 this.highlightedGenes = genes;
+            },
+            setSearchGenes(genes){
+                this.searchGenes = genes;
             },
             setPlotType(newPlotType) {
                 this.plotType = newPlotType

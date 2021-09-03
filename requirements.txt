@@ -51,3 +51,4 @@ tinycss2==1.0.2
 urllib3==1.25.8
 webencodings==0.5.1
 Werkzeug==0.16.0
+simplejson==3.17.5
