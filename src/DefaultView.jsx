@@ -158,6 +158,9 @@ const DefaultView = observer((props) => {
                                             title="Upload gene mapping file to be able to search for specific genes (optional).">
                                             <InfoIcon/>
                                         </Tooltip>
+                                        <Typography>
+                                            (optional)
+                                        </Typography>
                                     </Grid>
                                     <Grid item xs={4}>
                                         <Typography align="center">
@@ -219,7 +222,8 @@ const DefaultView = observer((props) => {
                         </Grid>
                     </Grid>
                     <Button onClick={launch}
-                            variant="contained">Launch</Button>
+                            variant="contained"
+                            disabled={(selectedTab === 0 && files.length === 0) || (selectedTab === 1 && testData === "")}>Launch</Button>
                 </Grid>
             </Grid>
             <Backdrop
