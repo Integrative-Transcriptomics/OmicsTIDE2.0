@@ -183,6 +183,41 @@ const DefaultView = observer((props) => {
                                         <MenuItem value={"s"}>Streptomyces study (Sulheim et al., 2020)</MenuItem>
                                     </Select>
                                 </FormControl>
+                                {testData === "bc" ?
+                                    <Alert severity="info">
+                                        <Typography>This dataset originates from a study about the regulation of the
+                                            neutrophil differentiation in humans examining granulopoiesis in vivo. The
+                                            experimental design uses both transcriptome and proteome data from five
+                                            differentiation stages: (pro)myelocytes (<b>PM</b>s), metamyelocytes
+                                            (<b>MM</b>s), immature neutrophils with band-shaped nucleus (<b>BN</b>),
+                                            mature neutrophils with segmented nucleus (<b>SN</b>s) and peripheral mature
+                                            neutrophils derived from the blood stream (<b>PMN</b>s). The data was taken
+                                            from the supplementary material of the publication that contained quantified
+                                            transcripts and proteins in the form of FPKM and imputed log2 LFQ measures.
+                                            For the analysis using OmicsTIDE the mean values of all biological
+                                            replicates for each of the five conditions is used. <a
+                                                href="https://doi.org/10.1016/j.celrep.2019.10.082"
+                                                target="_blank">https://doi.org/10.1016/j.celrep.2019.10.082</a></Typography>
+                                    </Alert> : testData === "s" ? <Alert severity="info">
+                                        <Typography>
+                                            This data set originates from a study exploring
+                                            two <i>Streptomyces coelicolor</i> strains with respect to changes in their
+                                            metabolisms under phosphate-starving growth conditions in a time-course
+                                            experiment. The strains <b>M145</b> and <b>M1152</b> were used to study the
+                                            role of <i>biosynthetic gene clusters</i> (BGCs) for the production of
+                                            antibiotics. M1152 is a genetically-engineered derivate of the
+                                            M145 wild-type strain that was subject to the deletion of different BGCs.
+                                            For both strains samples were taken at several timepoints. Phosphate was
+                                            depleted between timepoint 3 and timepoint 4. Transcriptomics as well as
+                                            proteomics data were produced across eight corresponding time points and for
+                                            both strains. Both, transcriptome and proteome data was initially quantified
+                                            and log2-transformed. For OmicsTIDE the data was normalized by an
+                                            intra-strain and intra-omics quantile-normalization across all replicates.
+                                            The mean of the three replicates was calculated for each strain, time point
+                                            and omics layer separately. <a
+                                            href="https://doi.org/10.1016/j.isci.2020.101525"
+                                            target={"_blank"}>https://doi.org/10.1016/j.isci.2020.101525</a>
+                                        </Typography></Alert> : null}
                             </TabPanel>
                         </Grid>
                     </Grid>
