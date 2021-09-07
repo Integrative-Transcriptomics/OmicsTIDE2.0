@@ -197,7 +197,7 @@ const DefaultView = observer((props) => {
                                             For the analysis using OmicsTIDE the mean values of all biological
                                             replicates for each of the five conditions is used. <a
                                                 href="https://doi.org/10.1016/j.celrep.2019.10.082"
-                                                target="_blank">https://doi.org/10.1016/j.celrep.2019.10.082</a></Typography>
+                                                rel="noreferrer" target="_blank">https://doi.org/10.1016/j.celrep.2019.10.082</a></Typography>
                                     </Alert> : testData === "s" ? <Alert severity="info">
                                         <Typography>
                                             This data set originates from a study exploring
@@ -216,7 +216,7 @@ const DefaultView = observer((props) => {
                                             The mean of the three replicates was calculated for each strain, time point
                                             and omics layer separately. <a
                                             href="https://doi.org/10.1016/j.isci.2020.101525"
-                                            target={"_blank"}>https://doi.org/10.1016/j.isci.2020.101525</a>
+                                            rel="noreferrer" target="_blank">https://doi.org/10.1016/j.isci.2020.101525</a>
                                         </Typography></Alert> : null}
                             </TabPanel>
                         </Grid>
