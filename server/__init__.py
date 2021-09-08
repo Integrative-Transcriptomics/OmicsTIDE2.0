@@ -1,7 +1,5 @@
-import json
 import os
 from datetime import datetime
-# import cairosvg
 from zipfile import ZipFile
 
 import numpy as np
