@@ -20,6 +20,7 @@ import PropTypes from "prop-types";
 import Tooltip from "@material-ui/core/Tooltip";
 import InfoIcon from '@material-ui/icons/Info';
 import Backdrop from "@material-ui/core/Backdrop";
+import ComparisonTable from "./ComparisonTable";
 
 
 function TabPanel(props) {
@@ -69,11 +70,16 @@ const DefaultView = observer((props) => {
     const [idMappingFile, setIDMappingFile] = useState(null);
     const [dataLoading, setDataLoading] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0)
+    const [comparisons, setComparisons] = useState([])
     const selectTestData = useCallback((data) => {
         setTestData(data);
     }, [])
     const selectFiles = useCallback((files) => {
         setFiles(files)
+        setComparisons(files.flatMap((file1, i) =>
+            files.slice(i + 1).map(file2 => {
+                return ({files: [file1.name, file2.name], selected: true})
+            })));
     }, [])
     const launch = useCallback(
         () => {
@@ -92,6 +98,7 @@ const DefaultView = observer((props) => {
             } else {
                 url = "/load_data";
                 files.forEach(file => formData.append("files[]", file));
+                formData.append("comparisons", JSON.stringify(comparisons.filter(d=>d.selected).map(d=>d.files)))
                 formData.append("mappingFile", idMappingFile);
             }
             axios.post(url, formData)
@@ -101,7 +108,7 @@ const DefaultView = observer((props) => {
                     setDataLoading(false)
                 })
         },
-        [varFilter, k, testData, files, store, props, idMappingFile, selectedTab],
+        [varFilter, k, testData, files, store, props, idMappingFile, selectedTab, comparisons],
     );
     return (
         <div style={{padding: 10}}>
@@ -167,6 +174,14 @@ const DefaultView = observer((props) => {
                                             {idMappingFile !== null ? idMappingFile.name : null}
                                         </Typography>
                                     </Grid>
+                                    {files.length > 2 ?
+                                        <Grid item xs={12}>
+                                            <Typography>
+                                                Select comparisons of interest
+                                            </Typography>
+                                            <ComparisonTable comparisons={comparisons}
+                                                             setComparisons={(newComparisons) => setComparisons(newComparisons)}/>
+                                        </Grid> : null}
                                 </Grid>
                             </TabPanel>
                             <TabPanel value={selectedTab} index={1}>
@@ -197,7 +212,8 @@ const DefaultView = observer((props) => {
                                             For the analysis using OmicsTIDE the mean values of all biological
                                             replicates for each of the five conditions is used. <a
                                                 href="https://doi.org/10.1016/j.celrep.2019.10.082"
-                                                rel="noreferrer" target="_blank">https://doi.org/10.1016/j.celrep.2019.10.082</a></Typography>
+                                                rel="noreferrer"
+                                                target="_blank">https://doi.org/10.1016/j.celrep.2019.10.082</a></Typography>
                                     </Alert> : testData === "s" ? <Alert severity="info">
                                         <Typography>
                                             This data set originates from a study exploring
@@ -216,7 +232,8 @@ const DefaultView = observer((props) => {
                                             The mean of the three replicates was calculated for each strain, time point
                                             and omics layer separately. <a
                                             href="https://doi.org/10.1016/j.isci.2020.101525"
-                                            rel="noreferrer" target="_blank">https://doi.org/10.1016/j.isci.2020.101525</a>
+                                            rel="noreferrer"
+                                            target="_blank">https://doi.org/10.1016/j.isci.2020.101525</a>
                                         </Typography></Alert> : null}
                             </TabPanel>
                         </Grid>

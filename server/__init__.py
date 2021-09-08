@@ -1,10 +1,10 @@
 import json
 import os
 from datetime import datetime
-from itertools import combinations
 # import cairosvg
 from zipfile import ZipFile
 
+import numpy as np
 import pandas as pd
 import simplejson as json
 from flask import jsonify, request, send_from_directory, send_file, Flask
@@ -153,24 +153,22 @@ def get_var_values(data, ds):
 def load_data():
     data = []
     files = request.files.getlist("files[]")
+    comparisons = np.array(json.loads(request.form.getlist('comparisons')[0]))
     mapping_file = request.files.get("mappingFile")
     k = int(request.form.to_dict()['k'])
     lower_variance_percentile = int(request.form.to_dict()['lowerVariancePercentage'])
     upper_variance_percentile = int(request.form.to_dict()['upperVariancePercentage'])
-    ds = []
+    ds = dict()
     for file in files:
-        ds.append({"filename": file.filename, "data": preprocess_file(file)})
-    for combination in combinations(ds, 2):
+        if file.filename in comparisons.flatten():
+            ds[file.filename] = preprocess_file(file)
+    for combination in comparisons:
         try:
-            comparison = pairwise_trendcomparison(combination[0]["data"], combination[1]["data"],
+            comparison = pairwise_trendcomparison(ds[combination[0]], ds[combination[1]],
                                                   lower_variance_percentile,
                                                   upper_variance_percentile, k)
-            comparison["files"] = [combination[0]["filename"], combination[1]["filename"]]
+            comparison["files"] = [combination[0], combination[1]]
             data.append(comparison)
-            if mapping_file is not None:
-                mapping = pd.read_csv(mapping_file, sep=",").to_numpy().tolist()
-            else:
-                mapping = None
         except TypeError as te:
             if str(te) == "object of type 'builtin_function_or_method' has no len()":
                 return jsonify(message='ID column has to be named "gene"'), 500
@@ -178,6 +176,14 @@ def load_data():
         except ValueError as ve:
             if str(ve).startswith("Length mismatch: Expected axis has"):
                 return jsonify(message='Number of columns/conditions for the loaded files not identical!'), 500
+    try:
+        if mapping_file is not None:
+            mapping = pd.read_csv(mapping_file, sep=",").to_numpy().tolist()
+        else:
+            mapping = None
+    except TypeError as te:
+        if str(te) == "object of type 'builtin_function_or_method' has no len()":
+            return jsonify(message='ID column has to be named "gene"'), 500
 
     return json.dumps({"data": data, "mapping": mapping}, ignore_nan=True)
 
