@@ -8,6 +8,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import Slider from "@material-ui/core/Slider";
 import {useStore} from "./Stores/RootStore";
 import {Button} from "@material-ui/core";
+import axios from "axios";
 
 const Controls = observer((props) => {
     const store = useStore();
@@ -89,7 +90,26 @@ const Controls = observer((props) => {
 
                 {props.children}
             </FormControl>
-            <Button variant="contained">Download Cluster Assignments</Button>
+            <Button variant="contained" onClick={() => {
+                const json = {
+                    ds1: store.ds1.genes,
+                    ds2: store.ds2.genes,
+                    filtered: store.filteredGenes,
+                    conditions: store.comparison.dataStore.conditions,
+                    file1: store.comparison.file1,
+                    file2: store.comparison.file2,
+                    type: store.type,
+                };
+                axios.post("/download_session", json)
+                    .then((response) => {
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', 'file.csv'); //or any other extension
+                        document.body.appendChild(link);
+                        link.click();
+                    })
+            }}>Download Cluster Assignments</Button>
         </div>
     )
         ;

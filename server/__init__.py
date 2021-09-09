@@ -4,9 +4,10 @@ from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
+
 pd.options.mode.chained_assignment = None  # default='warn'
 import simplejson as json
-from flask import jsonify, request, send_from_directory, send_file, Flask
+from flask import make_response, jsonify, request, send_from_directory, Flask
 
 from server.data_quality_assurance import valid_cluster_header, valid_cluster_values, invalid_cluster_value_pos, \
     has_equal_number_of_timepoints
@@ -250,27 +251,77 @@ def load_test_data_streptomyces():
     return json.dumps({"data": data, "mapping": None}, ignore_nan=True)
 
 
+def create_ds_col_names(ds_name, conditions):
+    col_names = []
+    for cond in conditions:
+        col_names.append(ds_name + ":" + cond + "_VALUE")
+    col_names.append(ds_name + "_VAR")
+    col_names.append(ds_name + "_MEDIAN")
+    col_names.append(ds_name + "_CLUSTER")
+    return col_names
+
+
+def fill_columns(ds_name, conditions, variance, median, cluster, values):
+    row_dict = dict()
+    row_dict[ds_name + "_VAR"] = variance
+    row_dict[ds_name + "_MEDIAN"] = median
+    row_dict[ds_name + "_CLUSTER"] = cluster
+    for i, cond in enumerate(conditions):
+        if values != "NA":
+            row_dict[ds_name + ":" + cond + "_VALUE"] = values[i]
+        else:
+            row_dict[ds_name + ":" + cond + "_VALUE"] = "NA"
+    return row_dict
+
+
 @app.route('/download_session', methods=['GET', 'POST'])
 def download_session():
     if request.method == 'POST':
-        path_session = os.path.join(app.config['UPLOAD_FOLDER'], 'download_session.csv')
-
-        ptcf_session = pd.read_json(request.form.to_dict()['ptcf'], orient='records')
-        ptcf_session.set_index('gene', inplace=True)
-        ptcf_session.to_csv(path_session)
-
-        time_id = str(datetime.now())
-        time_id = time_id.replace(" ", "_")
-        time_id = time_id.replace(":", "_")
-        time_id = time_id.split(".")[0]
-        time_id = time_id.replace("_", "")
-
-        timestamp_name = "OmicsTIDE_" + time_id
-
-        return send_file(path_session,
-                         mimetype='text/csv',
-                         attachment_filename=timestamp_name + ".csv",
-                         as_attachment=True)
+        session_data = request.json
+        col_names = ["GENE", "FILTERED"]
+        col_names.extend(create_ds_col_names(session_data["file1"], session_data["conditions"]))
+        col_names.extend(create_ds_col_names(session_data["file2"], session_data["conditions"]))
+        rows = []
+        for gene in session_data["ds1"]:
+            row_dict = dict()
+            row_dict["GENE"] = gene
+            if not(gene in session_data["filtered"]):
+                row_dict["FILTERED"] = "TRUE"
+            else:
+                row_dict["FILTERED"] = "FALSE"
+            row_dict.update(
+                fill_columns(session_data["file1"], session_data["conditions"], session_data["ds1"][gene]["variance"],
+                             session_data["ds1"][gene]["median"], session_data["ds1"][gene]["cluster"],
+                             session_data["ds1"][gene]["values"]))
+            if session_data["type"] == "intersecting":
+                row_dict.update(
+                    fill_columns(session_data["file2"], session_data["conditions"],
+                                 session_data["ds2"][gene]["variance"],
+                                 session_data["ds2"][gene]["median"], session_data["ds2"][gene]["cluster"],
+                                 session_data["ds2"][gene]["values"]))
+            else:
+                row_dict.update(
+                    fill_columns(session_data["file2"], session_data["conditions"], "NA", "NA", "NA", "NA"))
+            rows.append(row_dict)
+        if session_data["type"] == "nonIntersecting":
+            for gene in session_data["ds2"]:
+                row_dict = dict()
+                row_dict["Gene"] = gene
+                if gene in session_data["filtered"]:
+                    row_dict["filtered"] = "TRUE"
+                else:
+                    row_dict["filtered"] = "FALSE"
+                row_dict.update(
+                    fill_columns(session_data["file2"], session_data["conditions"],
+                                 session_data["ds2"][gene]["variance"],
+                                 session_data["ds2"][gene]["median"], session_data["ds2"][gene]["cluster"],
+                                 session_data["ds2"][gene]["values"]))
+                rows.append(row_dict)
+        df = pd.DataFrame(rows)
+        response = make_response(df.to_csv(index=False))
+        response.headers.set("Content-Disposition", "attachment", filename="file.csv")
+        response.mimetype = 'text/csv'
+        return response
 
 
 @app.route('/send_svg', methods=['GET', 'POST'])
