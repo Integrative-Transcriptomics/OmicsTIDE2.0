@@ -1,6 +1,5 @@
 import React from "react";
 import {DataStore} from "./DataStore";
-import {UIStore} from "./UIStore";
 import {extendObservable} from "mobx";
 
 /**

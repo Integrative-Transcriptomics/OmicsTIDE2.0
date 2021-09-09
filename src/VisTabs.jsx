@@ -17,7 +17,6 @@ function TabPanel(props) {
 
     return (
         <div
-            role="tabpanel"
             hidden={value !== index}
             id={`scrollable-auto-tabpanel-${index}`}
             aria-labelledby={`scrollable-auto-tab-${index}`}
@@ -134,7 +133,7 @@ function VisTabs() {
                 {tabElems}
             </Tabs>
             {/* eslint-disable-next-line react/jsx-no-undef */}
-            <TabPanel value={selectedTab} index={0}>
+            <TabPanel key="Home" value={selectedTab} index={0}>
                 <Overview addIntersectTab={addIntersectTab} addNITab={addNITab}/>
             </TabPanel>
             {tabPanels}

@@ -1,4 +1,4 @@
-import {extendObservable, reaction} from "mobx";
+import {extendObservable} from "mobx";
 import * as d3 from "d3";
 import {NIDataset} from "./NIDataset";
 import {sortClusters} from "./HelperFunctions";

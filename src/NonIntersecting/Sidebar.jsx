@@ -1,5 +1,5 @@
 import {observer} from "mobx-react";
-import React, {useState} from "react";
+import React from "react";
 import {useStore} from "../Stores/RootStore";
 import Controls from "../Controls";
 import SelectionTable from "./SelectionTable";
@@ -51,7 +51,7 @@ const Sidebar = observer((props) => {
             </Accordion>
             {store.ds1.selectedClusters.length > 0 || store.ds2.selectedClusters.length > 0 ?
                 <Accordion expanded={store.uiStore.selectionExpanded}
-                       onChange={() => store.uiStore.setSelectionExpanded(!store.uiStore.selectionExpanded)}>
+                           onChange={() => store.uiStore.setSelectionExpanded(!store.uiStore.selectionExpanded)}>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon/>}
                         aria-controls="panel1a-content"
