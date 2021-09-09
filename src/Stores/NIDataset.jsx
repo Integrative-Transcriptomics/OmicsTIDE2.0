@@ -1,4 +1,4 @@
-import {extendObservable} from "mobx";
+import {extendObservable, reaction} from "mobx";
 import {FilterStore} from "./FilterStore";
 import {clusterSizes, conditionMapping, geneCentricMapping} from "./HelperFunctions";
 import * as d3 from 'd3';
@@ -99,13 +99,14 @@ export class NIDataset {
              * @param {string} cluster
              */
             setSelectedCluster(cluster) {
-                const index = this.selectedClusters.indexOf(cluster);
+                const localCopy=this.selectedClusters.slice();
+                const index = localCopy.indexOf(cluster);
                 if (index !== -1) {
-                    this.selectedClusters.splice(index, 1);
+                    localCopy.splice(index, 1);
                 } else {
-                    this.selectedClusters.push(cluster)
+                    localCopy.push(cluster)
                 }
-
+                this.selectedClusters=localCopy;
             },
             /**
              * clears selection completely
@@ -114,6 +115,11 @@ export class NIDataset {
                 this.selectedClusters = [];
             }
         })
+         reaction(
+            () => this.selectedClusters,
+            (current, previous) => {
+                this.parent.updateSidebar(current,previous, this.index)
+            });
 
     }
 

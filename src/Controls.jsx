@@ -7,7 +7,7 @@ import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import Slider from "@material-ui/core/Slider";
 import {useStore} from "./Stores/RootStore";
-import GeneSearch from "./GeneSearch";
+import {Button} from "@material-ui/core";
 
 const Controls = observer((props) => {
     const store = useStore();
@@ -88,10 +88,11 @@ const Controls = observer((props) => {
                 />
 
                 {props.children}
-               <GeneSearch filteredGenes={store.filteredGenes} setSearchGenes={(genes)=>store.setSearchGenes(genes)}/>
             </FormControl>
+            <Button variant="contained">Download Cluster Assignments</Button>
         </div>
-    );
+    )
+        ;
 });
 
 export default Controls;

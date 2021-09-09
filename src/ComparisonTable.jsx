@@ -22,13 +22,13 @@ function ComparisonTable(props) {
     }
     const cells = props.comparisons.map((comparison, i) =>
         <TableRow>
-            <TableCell>{comparison.files[0]}</TableCell>
+            <TableCell>{comparison.files[0].slice(0,-4)}</TableCell>
             <TableCell>
                 <IconButton onClick={() => switchFiles(i)}>
                     <CompareArrowsIcon/>
                 </IconButton>
             </TableCell>
-            <TableCell>{comparison.files[1]}</TableCell>
+            <TableCell>{comparison.files[1].slice(0,-4)}</TableCell>
             <TableCell><Checkbox checked={comparison.selected} onChange={() => selectFile(i)}/>
             </TableCell>
         </TableRow>)

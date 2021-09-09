@@ -1,17 +1,13 @@
 import {observer} from "mobx-react";
 import React, {createRef, useCallback, useEffect, useState} from "react";
+import {StoreProvider, useStore} from "../Stores/RootStore";
+import Grid from "@material-ui/core/Grid";
+import {Typography} from "@material-ui/core";
 import DatasetTrends from "../Trends/DatasetTrends";
 import Sankey from "./Sankey";
 import PropTypes from "prop-types";
-import {StoreProvider, useStore} from "../Stores/RootStore";
-import Controls from "../Controls";
-import Grid from "@material-ui/core/Grid";
-import SelectionTable from "./SelectionTable";
-import {Typography} from "@material-ui/core";
-import Button from "@material-ui/core/Button";
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import Slider from "@material-ui/core/Slider";
-import FormLabel from "@material-ui/core/FormLabel";
+import Sidebar from "./Sidebar";
+
 
 const IntersectVis = observer((props) => {
     const store = useStore();
@@ -23,7 +19,6 @@ const IntersectVis = observer((props) => {
     // states for widths of plots
     const [sankeyWidth, setSankeyWidth] = useState(100);
     const [profilesWidth, setProfilesWidth] = useState(100);
-    const [intersectSize, setIntersectSize] = useState(0);
     const numClusters = Math.max(store.ds1.filteredClusterNames.length, store.ds2.filteredClusterNames.length)
     const height = 800;
     const changeWidth = useCallback(() => {
@@ -47,37 +42,7 @@ const IntersectVis = observer((props) => {
         <div style={{padding: 10}}>
             <Grid container spacing={3}>
                 <Grid item xs={3}>
-                    <Controls>
-                        <FormLabel component="legend">
-                            Filter intersections by size
-                        </FormLabel>
-                        <Slider
-                            value={intersectSize}
-                            onChange={(e, v) => {
-                                setIntersectSize(v)
-                            }}
-                            onChangeCommitted={() => {
-                                store.setSizeIntersectionFilter(intersectSize);
-                            }}
-                            min={0}
-                            max={store.nextToMaxIntersection + 1}
-                            valueLabelDisplay="auto"
-                            aria-labelledby="range-slider"
-                        />
-                    </Controls>
-
-                    {store.selectedIntersections.length > 0 ?
-                        <div>
-                            <Typography>Selection</Typography>
-                            <SelectionTable colorScale={store.colorScale}/>
-                            <Button variant="contained" endIcon={<OpenInNewIcon/>}
-                                    onClick={() => {
-                                        props.analyzeDetail(store.comparison.index, store.ds1.geneSelection, store.ds2.geneSelection)
-                                        store.clearSelection();
-                                    }}>
-                                Start detailed analysis
-                            </Button>
-                        </div> : null}
+                    <Sidebar analyzeDetail={props.analyzeDetail}/>
                 </Grid>
                 <Grid item xs={9}>
                     <Grid container spacing={3}>
@@ -140,5 +105,6 @@ const IntersectVis = observer((props) => {
 IntersectVis.propTypes = {
     conditions: PropTypes.arrayOf(PropTypes.string).isRequired,
     isVisible: PropTypes.bool.isRequired,
+    analyzeDetail: PropTypes.func.isRequired,
 };
 export default IntersectVis;

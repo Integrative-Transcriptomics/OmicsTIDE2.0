@@ -1,13 +1,16 @@
-import {extendObservable} from "mobx";
+import {extendObservable, reaction} from "mobx";
 import * as d3 from "d3";
 import {NIDataset} from "./NIDataset";
 import {sortClusters} from "./HelperFunctions";
+import {UIStore} from "./UIStore";
 
 /**
  * store with information on intersecting genes
  */
 export class NonIntersecting {
     constructor(comparison, dataStore, data) {
+        this.uiStore = new UIStore(this)
+        this.type = "nonintersecting"
         extendObservable(this, {
             // highlighted genes (by hovering over lines in profile plots)
             highlightedGenes: [],
@@ -16,26 +19,38 @@ export class NonIntersecting {
             setHighlightedGenes(genes) {
                 this.highlightedGenes = genes;
             },
-            setSearchGenes(genes){
+            setSearchGenes(genes) {
                 this.searchGenes = genes;
             },
             setPlotType(newPlotType) {
                 this.plotType = newPlotType
             },
-            clearSelection(){
+            clearSelection() {
                 this.ds1.clearSelection();
                 this.ds2.clearSelection();
             },
-            get selectedGenes() {
-                return(this.ds1.selectedGenes.concat(this.ds2.selectedGenes))
+            updateSidebar(current, previous, index) {
+                let others=this.ds2.selectedClusters;
+                if(index ===1){
+                    others=this.ds1.selectedClusters;
+                }
+                if (previous.length === 0 && others.length === 0) {
+                    this.uiStore.expandSelectOnly()
+                } else if (current.length === 0 && others.length === 0) {
+                    this.uiStore.expandOthersButSelect()
+                }
             },
-            get genes(){
+            get selectedGenes() {
+                return (this.ds1.selectedGenes.concat(this.ds2.selectedGenes))
+            },
+            get genes() {
                 return Object.keys(this.ds1.genes).concat(Object.keys(this.ds2.genes));
             },
-            get filteredGenes(){
+            get filteredGenes() {
                 return this.ds1.filteredGenes.concat(this.ds2.filteredGenes);
             }
         })
+
         this.dataStore = dataStore;
         this.comparison = comparison;
         // both data sets
@@ -53,8 +68,6 @@ export class NonIntersecting {
         // reproducibility when loading the same data multiple times
         this.clusterNames = sortClusters(this.ds1.clusters);
         this.colorScale = d3.scaleOrdinal().domain(this.clusterNames).range(d3.schemeCategory10);
-
-
     }
 
 

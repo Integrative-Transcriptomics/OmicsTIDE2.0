@@ -9,7 +9,6 @@ import {extendObservable} from "mobx";
 export class RootStore {
     constructor() {
         this.dataStore = null
-        this.uiStore = new UIStore(this)
         extendObservable(this, {
             dataLoaded: false,
         })

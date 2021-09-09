@@ -2,12 +2,15 @@ import {extendObservable, reaction} from "mobx";
 import * as d3 from "d3";
 import {IntersectionDataset} from "./IntersectionDataset";
 import {sortClusters} from "./HelperFunctions";
+import {UIStore} from "./UIStore";
 
 /**
  * store with information on intersecting genes
  */
 export class Intersecting {
     constructor(comparison, dataStore, data) {
+        this.uiStore = new UIStore(this)
+        this.type = "intersecting"
         extendObservable(this, {
             // highlighted intersections (by hovering over intersections or nodes)
             highlightedIntersections: [],
@@ -120,6 +123,9 @@ export class Intersecting {
              */
             handleIntersectionSelection(intersection) {
                 // intersection is already contained
+                if (this.selectedIntersections.length === 0) {
+                    this.uiStore.expandSelectOnly();
+                }
                 const index = this.getIntersectionIndex(intersection)
                 if (index !== -1) {
                     this.selectedIntersections.splice(index, 1)
@@ -132,6 +138,9 @@ export class Intersecting {
              * @param {string[]} intersections
              */
             handleMultipleIntersectionSelection(intersections) {
+                if (this.selectedIntersections.length === 0) {
+                    this.uiStore.expandSelectOnly();
+                }
                 const indices = intersections.map(currInt => this.getIntersectionIndex(currInt));
                 if (indices.every(index => index !== -1)) {
                     indices.sort().reverse().forEach(index => this.selectedIntersections.splice(index, 1));
@@ -145,6 +154,7 @@ export class Intersecting {
              */
             clearSelection() {
                 this.selectedIntersections = []
+                this.uiStore.expandOthersButSelect();
             },
             /**
              * sets current plot type

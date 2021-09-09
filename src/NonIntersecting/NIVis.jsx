@@ -4,13 +4,10 @@ import DatasetTrends from "../Trends/DatasetTrends";
 import PropTypes from "prop-types";
 import {StoreProvider, useStore} from "../Stores/RootStore";
 import * as d3 from "d3";
-import Controls from "../Controls";
 import Grid from "@material-ui/core/Grid";
 import {Typography} from "@material-ui/core";
 import Bars from "./Bars";
-import SelectionTable from "./SelectionTable";
-import Button from "@material-ui/core/Button";
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import Sidebar from "./Sidebar";
 
 const NIVis = observer((props) => {
     const store = useStore();
@@ -36,19 +33,7 @@ const NIVis = observer((props) => {
         <div style={{padding: 10}}>
             <Grid container spacing={3}>
                 <Grid item xs={3}>
-                    <Controls/>
-                    {store.ds1.selectedClusters > 0 || store.ds2.selectedClusters > 0 ?
-                        <div>
-                            <Typography>Selection</Typography>
-                            <SelectionTable colorScale={store.colorScale}/>
-                            <Button variant="contained" endIcon={<OpenInNewIcon/>}
-                                    onClick={() => {
-                                        props.analyzeDetail(store.comparison.index, store.ds1.geneSelection, store.ds2.geneSelection)
-                                        store.clearSelection();
-                                    }}>Start
-                                detailed analysis</Button>
-                        </div> : null
-                    }
+                    <Sidebar analyzeDetail={props.analyzeDetail}/>
                 </Grid>
                 <Grid item xs={9}>
                     <Grid container spacing={3}>
@@ -91,7 +76,7 @@ const NIVis = observer((props) => {
                                                maxValue={store.maxValue}
                                                plotType={store.plotType}
                                                width={width} height={height}
-                                               handleClick={store.ds1.setSelectedCluster}/>
+                                               handleClick={store.ds2.setSelectedCluster}/>
                             </StoreProvider>
                         </Grid>
                         <Grid item xs={2}>

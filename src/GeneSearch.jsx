@@ -4,7 +4,6 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
 import {useStore} from "./Stores/RootStore";
 import Autocomplete from "@material-ui/core/Autocomplete";
 import TextField from "@material-ui/core/TextField";
@@ -28,7 +27,6 @@ const GeneSearch = observer((props) => {
         <div>
             {store.dataStore.mappingLoaded ?
                 <FormControl component="fieldset">
-                    <FormLabel component="legend">Search for</FormLabel>
                     <RadioGroup row aria-label="gender" name="row-radio-buttons-group"
                                 value={searchName ? "name" : "id"}
                                 onChange={(event) => {
