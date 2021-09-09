@@ -9,7 +9,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import PropTypes from "prop-types";
 import FormControl from "@material-ui/core/FormControl";
 import GeneSearch from "../GeneSearch";

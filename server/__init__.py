@@ -251,16 +251,6 @@ def load_test_data_streptomyces():
     return json.dumps({"data": data, "mapping": None}, ignore_nan=True)
 
 
-def create_ds_col_names(ds_name, conditions):
-    col_names = []
-    for cond in conditions:
-        col_names.append(ds_name + ":" + cond + "_VALUE")
-    col_names.append(ds_name + "_VAR")
-    col_names.append(ds_name + "_MEDIAN")
-    col_names.append(ds_name + "_CLUSTER")
-    return col_names
-
-
 def fill_columns(ds_name, conditions, variance, median, cluster, values):
     row_dict = dict()
     row_dict[ds_name + "_VAR"] = variance
@@ -278,9 +268,6 @@ def fill_columns(ds_name, conditions, variance, median, cluster, values):
 def download_session():
     if request.method == 'POST':
         session_data = request.json
-        col_names = ["GENE", "FILTERED"]
-        col_names.extend(create_ds_col_names(session_data["file1"], session_data["conditions"]))
-        col_names.extend(create_ds_col_names(session_data["file2"], session_data["conditions"]))
         rows = []
         for gene in session_data["ds1"]:
             row_dict = dict()
