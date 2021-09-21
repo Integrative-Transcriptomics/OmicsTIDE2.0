@@ -4,13 +4,15 @@ import Axis from "../Trends/Axis";
 import * as d3 from "d3";
 import MultiClusterProfilePlot from "./MultiClusterProfilePlot";
 import PropTypes from "prop-types";
-import {Grid, Typography} from "@material-ui/core";
+import {Button, Grid, Typography} from "@material-ui/core";
 import GoChart from "./GoChart";
 import Select from "react-select";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Alert from "@material-ui/core/Alert";
 import {observer} from "mobx-react";
 import GeneSearch from "../GeneSearch";
+import DownloadIcon from '@mui/icons-material/Download';
+import IconButton from "@material-ui/core/IconButton";
 
 
 const SecondLevelAnalysis = observer((props) => {
@@ -54,7 +56,8 @@ const SecondLevelAnalysis = observer((props) => {
     } else if (store.isLoaded) {
         const goEnrichment = store.goData.map((d, i) =>
             <Grid item xs={4} key={store.pantherAPI.annoSets[i].id}>
-                <Typography variant="h6">{store.pantherAPI.annoSets[i].label}</Typography>
+                <Typography variant="h6">{store.pantherAPI.annoSets[i].label}
+                    <IconButton onClick={()=>store.createDownload(store.pantherAPI.annoSets[i].id)}><DownloadIcon/></IconButton></Typography>
                 <GoChart data={d} maxVal={store.totalMax} isVisible={props.isVisible}/>
             </Grid>)
         goVis = [<Grid item xs={12} key={"OP"}>
@@ -71,6 +74,8 @@ const SecondLevelAnalysis = observer((props) => {
                 Underrepresented
             </div>
         </Grid>].concat(goEnrichment)
+            .concat(<Button variant="outlined" onClick={()=>store.createDownload(null)}>Download all</Button>
+            )
     }
     const startTimer = () => {
         return new Promise((resolve, reject) => {
