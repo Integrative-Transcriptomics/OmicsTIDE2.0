@@ -1,4 +1,4 @@
-import {action, extendObservable, toJS} from "mobx";
+import {extendObservable, toJS} from "mobx";
 import * as d3 from "d3";
 
 /**
@@ -25,20 +25,30 @@ export class SecondLevelStore {
 
             searchGenes: [],
 
+            setGoData(data){
+                this.goData = data;
+            },
+            setIsLoading(loading){
+                this.isLoading = loading;
+            },
+            setIsLoaded(loaded){
+                this.isLoaded = loaded
+            },
+
             setSearchGenes(genes) {
                 this.searchGenes = genes;
             },
 
             // calculates overrepresentation and sets loading status
-            calcOverrepresentation: action(organism => {
+            calcOverrepresentation(organism) {
                 this.isLoading = true;
                 this.isLoaded = false;
                 this.pantherAPI.calcOverrepresentation(this.genes, organism, (response) => {
-                    this.goData = response;
-                    this.isLoading = false;
-                    this.isLoaded = true;
+                    this.setGoData(response);
+                    this.setIsLoading(false);
+                    this.setIsLoaded(true);
                 })
-            }),
+            },
 
             // get total max value of -log(FDR) for axes
             get totalMax() {
