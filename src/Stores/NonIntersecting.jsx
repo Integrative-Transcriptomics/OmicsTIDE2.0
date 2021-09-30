@@ -70,7 +70,7 @@ export class NonIntersecting {
         this.clusterOrder = sortClusters(this.ds1.clusters);
         Object.keys(this.ds2.clusters).forEach(cluster=>{
             if(!(this.clusterNames.includes(cluster))){
-                this.clusterNames.push(cluster);
+                this.clusterOrder.push(cluster);
             }
         })
         this.colorScale = d3.scaleOrdinal().domain(this.clusterOrder).range(d3.schemeCategory10);

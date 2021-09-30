@@ -103,6 +103,7 @@ const DefaultView = observer((props) => {
             }
             axios.post(url, formData)
                 .then((response) => {
+                    console.log(response.data.data);
                     store.init(response.data.data, response.data.mapping, varFilter);
                     props.setDataLoaded(true);
                     setDataLoading(false)
@@ -250,6 +251,7 @@ const DefaultView = observer((props) => {
                                 step={1}
                                 marks
                                 onChange={(e, v) => setK(v)}
+                                min={2}
                                 max={10}
                             />
                         </Grid>
@@ -270,7 +272,7 @@ const DefaultView = observer((props) => {
                             />
                         </Grid>
                         <Grid item xs={3} className={classes.centerText}>
-                            {varFilter[0] + "< var <" + varFilter[1]}
+                            {varFilter[0] + " ≤ var ≤ " + varFilter[1]}
                         </Grid>
                     </Grid>
                     <Button onClick={launch}

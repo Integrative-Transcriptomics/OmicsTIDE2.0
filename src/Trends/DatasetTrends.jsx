@@ -20,7 +20,7 @@ const DatasetTrends = observer((props) => {
     }
 
     // height and width of subplots
-    const height = (props.height - (props.numClusters - 1) * (margin.top + margin.bot)) / props.numClusters;
+    const height = (props.height - (props.numClusters) * (margin.top + margin.bot)) / props.numClusters;
     const width = props.width - margin.left - margin.right
 
     // shared xScale and yScale

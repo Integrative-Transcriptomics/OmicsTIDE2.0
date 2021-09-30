@@ -17,7 +17,7 @@ const Bars = observer((props) => {
     }
 
     // height and width of subplots
-    const height = (props.height - (props.numClusters - 1) * (margin.top + margin.bot)) / props.numClusters;
+    const height = (props.height - (props.numClusters) * (margin.top + margin.bot)) / props.numClusters;
     const width = props.width - margin.left - margin.right
     const barHeight = height/3;
     // shared xScale and yScale
@@ -26,7 +26,7 @@ const Bars = observer((props) => {
         .scale(xScale)
     const bars = store.filteredClusterNames.map((cluster, i) => {
             let axis = null;
-            if (i === store.filteredClusterNames.length - 1) {
+            if (i === store.filteredClusterNames.length - 1 || store.filteredClusterNames.length === 1) {
                 axis = <g transform={"translate(" + (margin.left) + ",0)"}>
                     <Axis h={height} w={width} axis={xAxis}
                           axisType={'x'} label={"Cluster size"}/>
