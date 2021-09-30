@@ -8,9 +8,11 @@ import Grid from "@material-ui/core/Grid";
 import {Typography} from "@material-ui/core";
 import Bars from "./Bars";
 import Sidebar from "./Sidebar";
+import {v4 as uuidv4} from "uuid";
 
 const NIVis = observer((props) => {
     const store = useStore();
+    const id = "id" + uuidv4()
     const profiles = createRef();
     const [width, setWidth] = useState(1000);
     const height = 800;
@@ -33,9 +35,9 @@ const NIVis = observer((props) => {
         <div style={{padding: 10}}>
             <Grid container spacing={3}>
                 <Grid item xs={3}>
-                    <Sidebar analyzeDetail={props.analyzeDetail}/>
+                    <Sidebar analyzeDetail={props.analyzeDetail} viewID={id}/>
                 </Grid>
-                <Grid item xs={9}>
+                <Grid id={id} item xs={9}>
                     <Grid container spacing={3}>
                         <Grid item xs={6}>
                             <Typography>{store.comparison.file1 + ": " + store.ds1.numFilteredGenes + " genes"}</Typography>
@@ -61,12 +63,12 @@ const NIVis = observer((props) => {
                         </Grid>
                         <Grid item xs={2}>
                             <StoreProvider store={store.ds1}>
-                                <Bars clusterNames={store.clusterNames} colorScale={store.colorScale}
+                                <Bars colorScale={store.colorScale}
+                                      numClusters={numClusters}
                                       conditions={props.conditions} maxValue={maxCluster}
                                       width={width / 2} height={height}/>
                             </StoreProvider>
                         </Grid>
-
                         <Grid item xs={4}>
                             <StoreProvider store={store.ds2}>
                                 <DatasetTrends colorScale={store.colorScale}
@@ -81,7 +83,8 @@ const NIVis = observer((props) => {
                         </Grid>
                         <Grid item xs={2}>
                             <StoreProvider store={store.ds2}>
-                                <Bars clusterNames={store.clusterNames} colorScale={store.colorScale}
+                                <Bars colorScale={store.colorScale}
+                                      numClusters={numClusters}
                                       conditions={props.conditions} maxValue={maxCluster}
                                       width={width / 2} height={height}/>
                             </StoreProvider>

@@ -17,25 +17,23 @@ const Bars = observer((props) => {
     }
 
     // height and width of subplots
-    const height = (props.height - (props.clusterNames.length - 1) * (margin.top + margin.bot)) / props.clusterNames.length;
+    const height = (props.height - (props.numClusters - 1) * (margin.top + margin.bot)) / props.numClusters;
     const width = props.width - margin.left - margin.right
-
     const barHeight = height/3;
     // shared xScale and yScale
     const xScale = d3.scaleLinear().domain([0, props.maxValue]).range([0, width]);
     const xAxis = d3.axisBottom()
         .scale(xScale)
-    const filteredNames = props.clusterNames.filter(cluster => store.clusterSizes[cluster] > 0)
-    const bars = filteredNames.map((cluster, i) => {
+    const bars = store.filteredClusterNames.map((cluster, i) => {
             let axis = null;
-            if (i === filteredNames.length - 1) {
+            if (i === store.filteredClusterNames.length - 1) {
                 axis = <g transform={"translate(" + (margin.left) + ",0)"}>
                     <Axis h={height} w={width} axis={xAxis}
                           axisType={'x'} label={"Cluster size"}/>
                 </g>
             }
             return (
-                <svg key={cluster} width={props.width} height={props.height / props.clusterNames.length}>
+                <svg key={cluster} width={props.width} height={props.height / props.numClusters}>
                     <g transform={"translate(" + (margin.left) + "," + ((height - barHeight) / 2) + ")"}>
                         <rect height={barHeight} width={xScale(store.clusterSizes[cluster])}
                               fill={props.colorScale(cluster)}/>
@@ -53,7 +51,6 @@ const Bars = observer((props) => {
 });
 
 Bars.propTypes = {
-    clusterNames: PropTypes.arrayOf(PropTypes.string).isRequired,
     colorScale: PropTypes.func.isRequired,
     conditions: PropTypes.arrayOf(PropTypes.string).isRequired,
     maxValue: PropTypes.number.isRequired,

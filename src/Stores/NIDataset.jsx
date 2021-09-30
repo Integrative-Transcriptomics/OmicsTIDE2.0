@@ -85,7 +85,7 @@ export class NIDataset {
                 return Object.values(this.clusters).flat()
             },
             get filteredClusterNames() {
-                return this.parent.clusterNames.filter(cluster => this.clusterSizes[cluster] > 0)
+                return this.parent.clusterOrder.filter(cluster => this.clusterSizes[cluster] > 0)
             },
             /**
              * sets highlighted cluster

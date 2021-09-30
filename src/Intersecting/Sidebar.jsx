@@ -34,7 +34,7 @@ const Sidebar = observer((props) => {
                     <Typography>Controls</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <Controls>
+                    <Controls viewID={props.viewID}>
                         <FormLabel component="legend">
                             Filter intersections by size
                         </FormLabel>
@@ -71,26 +71,26 @@ const Sidebar = observer((props) => {
                 </AccordionDetails>
             </Accordion>
             {store.selectedIntersections.length > 0 ?
-                    <Accordion expanded={store.uiStore.selectionExpanded}
-                       onChange={() => store.uiStore.setSelectionExpanded(!store.uiStore.selectionExpanded)}>
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon/>}
-                            aria-controls="panel1a-content"
-                            id="panel1a-header"
-                        >
-                            <Typography>Selection</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            <SelectionTable colorScale={store.colorScale}/>
-                            <Button variant="contained" endIcon={<OpenInNewIcon/>}
-                                    onClick={() => {
-                                        props.analyzeDetail(store.comparison.index, store.ds1.geneSelection, store.ds2.geneSelection)
-                                        store.clearSelection();
-                                    }}>
-                                Start detailed analysis
-                            </Button>
-                        </AccordionDetails>
-                    </Accordion> : null}
+                <Accordion expanded={store.uiStore.selectionExpanded}
+                           onChange={() => store.uiStore.setSelectionExpanded(!store.uiStore.selectionExpanded)}>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon/>}
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
+                    >
+                        <Typography>Selection</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <SelectionTable colorScale={store.colorScale}/>
+                        <Button variant="contained" endIcon={<OpenInNewIcon/>}
+                                onClick={() => {
+                                    props.analyzeDetail(store.comparison.index, store.ds1.geneSelection, store.ds2.geneSelection)
+                                    store.clearSelection();
+                                }}>
+                            Start detailed analysis
+                        </Button>
+                    </AccordionDetails>
+                </Accordion> : null}
         </div>
 
     );
@@ -98,5 +98,6 @@ const Sidebar = observer((props) => {
 
 Sidebar.propTypes = {
     analyzeDetail: PropTypes.func.isRequired,
+    viewID: PropTypes.string.isRequired,
 };
 export default Sidebar;

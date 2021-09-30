@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {createRef, useCallback, useEffect, useState} from "react";
 import Tabs from "@material-ui/core/Tabs";
 import PropTypes from "prop-types";
 import Overview from "./Overview/Overview";
@@ -14,6 +14,7 @@ import {SecondLevelStore} from "./SecondLevel/SecondLevelStore";
 
 function TabPanel(props) {
     const {children, value, index, ...other} = props;
+    const ref= createRef();
 
     return (
         <div
@@ -22,7 +23,7 @@ function TabPanel(props) {
             aria-labelledby={`scrollable-auto-tab-${index}`}
             {...other}
         >
-            <div>
+            <div ref={ref}>
                 {children}
             </div>
         </div>
@@ -106,7 +107,8 @@ function VisTabs() {
             return (
                 <TabPanel key={tab.type + i} index={i + 1} value={selectedTab}>
                     <StoreProvider store={store.comparisons[tab.index].nonIntersecting}>
-                        <NIVis conditions={store.conditions} analyzeDetail={addDetailTabNI} isVisible={selectedTab === (i + 1)}/>
+                        <NIVis conditions={store.conditions} analyzeDetail={addDetailTabNI}
+                               isVisible={selectedTab === (i + 1)}/>
                     </StoreProvider>
                 </TabPanel>
             )

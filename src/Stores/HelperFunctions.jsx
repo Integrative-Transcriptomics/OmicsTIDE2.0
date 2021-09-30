@@ -1,3 +1,8 @@
+import 'svg2pdf.js';
+import {jsPDF} from 'jspdf'
+import html2canvas from "html2canvas";
+
+
 /**
  * maps the data in a way that is optimal for visualizing data in line charts
  * @param {Object} clusters
@@ -60,4 +65,19 @@ export function sortClusters(clusters) {
     });
     clusterList.sort((a, b) => (a.len < b.len) ? 1 : -1)
     return clusterList.map(d => d.name);
+}
+
+export function exportPDF(id, type) {
+    const vis = document.getElementById(id);
+    html2canvas(vis, {
+        scale: 4,
+        width: vis.getBoundingClientRect().width,
+        height: vis.getBoundingClientRect().height
+    }).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        // Multiplying by 1.33 because canvas.toDataURL increases the size of the image by 33%
+        const pdf = new jsPDF('l', 'px', [canvas.width * 1.33, canvas.height * 1.33]);
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save("download.pdf");
+    });
 }

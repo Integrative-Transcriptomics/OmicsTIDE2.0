@@ -9,6 +9,10 @@ import Slider from "@material-ui/core/Slider";
 import {useStore} from "./Stores/RootStore";
 import {Button} from "@material-ui/core";
 import axios from "axios";
+import 'svg2pdf.js'
+import {exportPDF} from "./Stores/HelperFunctions";
+import PropTypes from "prop-types";
+
 
 const Controls = observer((props) => {
     const store = useStore();
@@ -110,9 +114,13 @@ const Controls = observer((props) => {
                         link.click();
                     })
             }}>Download Cluster Assignments</Button>
+            <Button variant="contained" onClick={()=>exportPDF(props.viewID)}>Export View</Button>
+
         </div>
-    )
-        ;
+    );
 });
+Controls.propTypes = {
+    viewID: PropTypes.string.isRequired,
+};
 
 export default Controls;

@@ -7,10 +7,14 @@ import DatasetTrends from "../Trends/DatasetTrends";
 import Sankey from "./Sankey";
 import PropTypes from "prop-types";
 import Sidebar from "./Sidebar";
+import { v4 as uuidv4 } from 'uuid';
 
 
 const IntersectVis = observer((props) => {
     const store = useStore();
+    const ref=createRef();
+
+    const id = "id" + uuidv4()
 
     // refs to dynamically adapt sizes of plots
     const sankey = createRef();
@@ -42,9 +46,9 @@ const IntersectVis = observer((props) => {
         <div style={{padding: 10}}>
             <Grid container spacing={3}>
                 <Grid item xs={3}>
-                    <Sidebar analyzeDetail={props.analyzeDetail}/>
+                    <Sidebar analyzeDetail={props.analyzeDetail} viewID={id}/>
                 </Grid>
-                <Grid item xs={9}>
+                <Grid id={id} ref={ref} item xs={9}>
                     <Grid container spacing={3}>
                         <Grid item xs={3}>
                             <Typography>{store.comparison.file1}</Typography>

@@ -189,7 +189,14 @@ export class Intersecting {
         // sort clusterNames by cluster size of first data set to ensure
         // reproducibility when loading the same data multiple times
         this.clusterNames = sortClusters(this.ds1.clusters);
-        this.colorScale = d3.scaleOrdinal().domain(this.clusterNames).range(d3.schemeCategory10);
+        this.clusterOrder = sortClusters(this.ds1.clusters);
+        Object.keys(this.ds2.clusters).forEach(cluster=>{
+            if(!(this.clusterNames.includes(cluster))){
+                this.clusterOrder.push(cluster);
+            }
+        })
+        console.log(this.clusterOrder)
+        this.colorScale = d3.scaleOrdinal().domain(this.clusterOrder).range(d3.schemeCategory10);
 
         // reaction that updates clusters when intersections are filterd
         reaction(

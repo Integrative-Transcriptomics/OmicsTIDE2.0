@@ -30,7 +30,7 @@ const Sidebar = observer((props) => {
                     <Typography>Controls</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <Controls/>
+                    <Controls viewID={props.viewID}/>
                 </AccordionDetails>
             </Accordion>
             <Accordion expanded={store.uiStore.searchExpanded}
@@ -77,5 +77,6 @@ const Sidebar = observer((props) => {
 
 Sidebar.propTypes = {
     analyzeDetail: PropTypes.func.isRequired,
+    viewID: PropTypes.string.isRequired,
 };
 export default Sidebar;

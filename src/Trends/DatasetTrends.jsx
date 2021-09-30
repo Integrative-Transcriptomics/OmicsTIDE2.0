@@ -11,7 +11,6 @@ import HighlightLines from "./HighlightLines";
 
 const DatasetTrends = observer((props) => {
     const store = useStore()
-
     // margins for subplots
     const margin = {
         left: 50,
@@ -32,6 +31,7 @@ const DatasetTrends = observer((props) => {
     const yAxis = d3.axisLeft()
         .scale(yScale)
     const plots = [];
+    console.log(store.filteredClusterNames);
     store.filteredClusterNames.forEach((cluster, i) => {
             let plot = null;
 
@@ -43,7 +43,6 @@ const DatasetTrends = observer((props) => {
                     opacity = 1;
                 }
             }
-            if (store.clusterSizes[cluster] > 0) {
                 // create plots based on plotTypes
                 const geneCentricData = store.geneCentricMapping[cluster]
                 const conditionCentricData = store.conditionMapping[cluster];
@@ -80,7 +79,6 @@ const DatasetTrends = observer((props) => {
                             <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={""}/>
                         </g>
                     </svg>)
-            }
         }
     )
     return (
