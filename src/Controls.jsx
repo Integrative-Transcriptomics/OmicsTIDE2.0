@@ -12,6 +12,7 @@ import axios from "axios";
 import 'svg2pdf.js'
 import {exportPDF} from "./Stores/HelperFunctions";
 import PropTypes from "prop-types";
+import Box from "@material-ui/core/Box";
 
 
 const Controls = observer((props) => {
@@ -22,6 +23,7 @@ const Controls = observer((props) => {
     const [var2, setVar2] = useState([store.ds2.filterStore.varianceMinFilter, store.ds2.filterStore.varianceMaxFilter])
     const [abu1, setAbu1] = useState([store.ds1.filterStore.abundanceMinFilter, store.ds1.filterStore.abundanceMaxFilter])
     const [abu2, setAbu2] = useState([store.ds2.filterStore.abundanceMinFilter, store.ds2.filterStore.abundanceMaxFilter])
+    const [expType, setExptype] = useState("pdf")
     return (
         <div>
             <FormControl component="fieldset">
@@ -94,28 +96,36 @@ const Controls = observer((props) => {
 
                 {props.children}
             </FormControl>
-            <Button variant="contained" onClick={() => {
-                const json = {
-                    ds1: store.ds1.genes,
-                    ds2: store.ds2.genes,
-                    filtered: store.filteredGenes,
-                    conditions: store.comparison.dataStore.conditions,
-                    file1: store.comparison.file1,
-                    file2: store.comparison.file2,
-                    type: store.type,
-                };
-                axios.post("/download_session", json)
-                    .then((response) => {
-                        const url = window.URL.createObjectURL(new Blob([response.data]));
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.setAttribute('download', 'file.csv'); //or any other extension
-                        document.body.appendChild(link);
-                        link.click();
-                    })
-            }}>Download Cluster Assignments</Button>
-            <Button variant="contained" onClick={()=>exportPDF(props.viewID)}>Export View</Button>
-
+                <Button variant="contained" style={{marginBottom: 5}} onClick={() => {
+                    const json = {
+                        ds1: store.ds1.genes,
+                        ds2: store.ds2.genes,
+                        filtered: store.filteredGenes,
+                        conditions: store.comparison.dataStore.conditions,
+                        file1: store.comparison.file1,
+                        file2: store.comparison.file2,
+                        type: store.type,
+                    };
+                    axios.post("/download_session", json)
+                        .then((response) => {
+                            const url = window.URL.createObjectURL(new Blob([response.data]));
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.setAttribute('download', 'file.csv'); //or any other extension
+                            document.body.appendChild(link);
+                            link.click();
+                        })
+                }}>Download Cluster Assignments</Button>
+                <RadioGroup
+                    row
+                    value={expType}
+                    onChange={(e) => setExptype(e.target.value)}
+                >
+                    <Button variant="contained" onClick={() => exportPDF(props.viewID, expType === "png")}>Export
+                        View</Button>
+                    <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
+                    <FormControlLabel value="png" control={<Radio/>} label="PNG"/>
+                </RadioGroup>
         </div>
     );
 });

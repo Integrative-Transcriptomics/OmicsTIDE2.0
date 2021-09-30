@@ -31,7 +31,6 @@ const DatasetTrends = observer((props) => {
     const yAxis = d3.axisLeft()
         .scale(yScale)
     const plots = [];
-    console.log(store.filteredClusterNames);
     store.filteredClusterNames.forEach((cluster, i) => {
             let plot = null;
 

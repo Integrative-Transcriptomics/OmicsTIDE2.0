@@ -67,7 +67,7 @@ export function sortClusters(clusters) {
     return clusterList.map(d => d.name);
 }
 
-export function exportPDF(id, type) {
+export function exportPDF(id, asPNG) {
     const vis = document.getElementById(id);
     html2canvas(vis, {
         scale: 4,
@@ -75,9 +75,16 @@ export function exportPDF(id, type) {
         height: vis.getBoundingClientRect().height
     }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
-        // Multiplying by 1.33 because canvas.toDataURL increases the size of the image by 33%
-        const pdf = new jsPDF('l', 'px', [canvas.width * 1.33, canvas.height * 1.33]);
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save("download.pdf");
+        if (!asPNG) {
+            // Multiplying by 1.33 because canvas.toDataURL increases the size of the image by 33%
+            const pdf = new jsPDF('l', 'px', [canvas.width * 1.33, canvas.height * 1.33]);
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save("download.pdf");
+        } else {
+            const aDownloadLink = document.createElement('a');
+            aDownloadLink.download = 'download.png';
+            aDownloadLink.href = imgData;
+            aDownloadLink.click();
+        }
     });
 }
