@@ -78,7 +78,6 @@ def get_genes_subset(file1, file2, comparison_type):
         if not file2.empty:
             tmp_col_list = list(range(1, len(list(file2))))
             tmp_col_list.append("dataset")
-    print(tmp_col_list)
     if len(tmp_col_list) != 0:
         if not file1.empty:
             file1.columns = tmp_col_list
@@ -117,6 +116,5 @@ def cluster(file1, file2, cluster, comparison_type):
 
     # run kmeans
     combined = run_k_means(combined, cluster)
-    print(combined)
 
     return combined

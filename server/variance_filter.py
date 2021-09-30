@@ -15,5 +15,4 @@ def filter_variance(data, lower, upper):
     quantile_filtered = data[data['row_variance'].ge(lower_quantile) & data['row_variance'].le(upper_quantile)]
 
     quantile_filtered.drop(columns=['row_variance'], inplace=True)
-    print(len(quantile_filtered.index))
     return quantile_filtered
