@@ -12,8 +12,6 @@ import axios from "axios";
 import 'svg2pdf.js'
 import {exportPDF} from "./Stores/HelperFunctions";
 import PropTypes from "prop-types";
-import Box from "@material-ui/core/Box";
-
 
 const Controls = observer((props) => {
     const store = useStore();

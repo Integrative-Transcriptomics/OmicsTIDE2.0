@@ -13,6 +13,11 @@ import {observer} from "mobx-react";
 import GeneSearch from "../GeneSearch";
 import DownloadIcon from '@mui/icons-material/Download';
 import IconButton from "@material-ui/core/IconButton";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import {exportPDF} from "../Stores/HelperFunctions";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Radio from "@material-ui/core/Radio";
+import {v4 as uuidv4} from "uuid";
 
 
 const SecondLevelAnalysis = observer((props) => {
@@ -26,6 +31,10 @@ const SecondLevelAnalysis = observer((props) => {
     }
     const [width, setWidth] = useState(500)
     const [calculationText, setCalculationText] = useState(null)
+    const [expType, setExptype] = useState("pdf")
+
+    const id = "id" + uuidv4()
+
 
     const height = 400;
 
@@ -57,7 +66,8 @@ const SecondLevelAnalysis = observer((props) => {
         const goEnrichment = store.goData.map((d, i) =>
             <Grid item xs={4} key={store.pantherAPI.annoSets[i].id}>
                 <Typography variant="h6">{store.pantherAPI.annoSets[i].label}
-                    <IconButton onClick={()=>store.createDownload(store.pantherAPI.annoSets[i].id)}><DownloadIcon/></IconButton></Typography>
+                    <IconButton
+                        onClick={() => store.createDownload(store.pantherAPI.annoSets[i].id)}><DownloadIcon/></IconButton></Typography>
                 <GoChart data={d} maxVal={store.totalMax} isVisible={props.isVisible}/>
             </Grid>)
         goVis = [<Grid item xs={12} key={"OP"}>
@@ -74,7 +84,7 @@ const SecondLevelAnalysis = observer((props) => {
                 Underrepresented
             </div>
         </Grid>].concat(goEnrichment)
-            .concat(<Button variant="outlined" onClick={()=>store.createDownload(null)}>Download all</Button>
+            .concat(<Button variant="outlined" onClick={() => store.createDownload(null)}>Download all</Button>
             )
     }
     const startTimer = () => {
@@ -122,21 +132,37 @@ const SecondLevelAnalysis = observer((props) => {
     return (
         <div style={{padding: 10}}>
             <Grid container spacing={3}>
-                <Grid item xs={4}>
-                    <Typography>{store.parent.comparison.file1}</Typography>
-                    <div ref={plot}>
-                        {plot1}
-                    </div>
-                </Grid>
-                <Grid item xs={4}>
-                    <Typography>{store.parent.comparison.file2}</Typography>
-                    {plot2}
+                <Grid item xs={8}>
+                    <Grid container id={id}>
+                        <Grid item xs={6}>
+                            <Typography>{store.parent.comparison.file1}</Typography>
+                            <div ref={plot}>
+                                {plot1}
+                            </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Typography>{store.parent.comparison.file2}</Typography>
+                            {plot2}
+                        </Grid>
+                    </Grid>
                 </Grid>
                 <Grid item xs={4}>
                     <StoreProvider store={store.parent}>
+                        <Typography>Search</Typography>
                         <GeneSearch filteredGenes={store.genes}
                                     setSearchGenes={(genes) => store.setSearchGenes(genes)}/>
                     </StoreProvider>
+                    <Typography>Export</Typography>
+                    <RadioGroup
+                        row
+                        value={expType}
+                        onChange={(e) => setExptype(e.target.value)}
+                    >
+                        <Button variant="contained" onClick={() => exportPDF(id, expType === "png")}>Export
+                            View</Button>
+                        <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
+                        <FormControlLabel value="png" control={<Radio/>} label="PNG"/>
+                    </RadioGroup>
                 </Grid>
                 <Grid item xs={6}>
                     {store.pantherAPI.genomesLoaded ?
