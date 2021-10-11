@@ -6,7 +6,6 @@ import MultiClusterProfilePlot from "./MultiClusterProfilePlot";
 import PropTypes from "prop-types";
 import {Button, Grid, Typography} from "@material-ui/core";
 import GoChart from "./GoChart";
-import Select from "react-select";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Alert from "@material-ui/core/Alert";
 import {observer} from "mobx-react";
@@ -18,6 +17,8 @@ import {exportPDF} from "../Stores/HelperFunctions";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Radio from "@material-ui/core/Radio";
 import {v4 as uuidv4} from "uuid";
+import Autocomplete from "@material-ui/core/Autocomplete";
+import TextField from "@material-ui/core/TextField";
 
 
 const SecondLevelAnalysis = observer((props) => {
@@ -170,14 +171,28 @@ const SecondLevelAnalysis = observer((props) => {
                             <Typography key="powerdBy">Powerd by <b>PANTHER</b> (<a
                                 href="http://pantherdb.org/">http://pantherdb.org/</a>)</Typography>,
                             <Typography key="task">Please select species to perform enrichment:</Typography>,
-                            <Select key="select" options={store.pantherAPI.genomes}
-                                    onChange={(val) => {
-                                        setCalculationText(null)
-                                        calcEnrichment(val.value)
-                                        startTimer().then(() => {
-                                            setCalculationText("This seems to take longer than normally. There might be a problem with PANTHER")
-                                        })
-                                    }}/>]
+                            <Autocomplete
+                                key="select"
+                                disableClearable
+                                getOptionLabel={(option) => option.label}
+                                options={store.pantherAPI.genomes}
+                                onChange={(e, v) => {
+                                    setCalculationText(null)
+                                    calcEnrichment(v.value)
+                                    startTimer().then(() => {
+                                        setCalculationText("This seems to take longer than normally. There might be a problem with PANTHER")
+                                    })
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Select Genome Reference"
+                                        margin="normal"
+                                        variant="outlined"
+                                        InputProps={{...params.InputProps, type: 'search'}}
+                                    />
+                                )}
+                            />]
                         : <Alert severity="warning">Sorry, it seems like we're unable to connect to <a
                             href="http://pantherdb.org/">http://pantherdb.org/</a> for GO Term enrichment. Please adapt
                             your
