@@ -23,8 +23,8 @@ def run_k_means(data, k):
             km.fit_predict(data.loc[:, data.columns != 'dataset'])
         data['cluster'] = km.labels_
         return data
-    except ValueError:
-        print("Empty Input!!!")
+    except ValueError as e:
+        print(e)
 
 
 def get_genes_subset(file1, file2, comparison_type):
@@ -60,6 +60,7 @@ def get_genes_subset(file1, file2, comparison_type):
     file1['dataset'] = 1
     file2['dataset'] = 2
     combined = file1.append(file2)
+    combined.dropna(inplace=True)
     return combined
 
 
