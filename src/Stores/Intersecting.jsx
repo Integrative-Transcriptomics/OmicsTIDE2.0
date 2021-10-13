@@ -179,7 +179,6 @@ export class Intersecting {
         this.minValue = d3.min(values);
         // maximum value obsereved
         this.maxValue = d3.max(values);
-        console.log(this.minValue,this.maxValue)
         // complete intersections (unfiltered)
         this.intersections = this.initIntersections(data)
         this.initialConcordantDiscordant = this.calculateConcordantDiscordant(this.intersections);
@@ -196,7 +195,6 @@ export class Intersecting {
                 this.clusterOrder.push(cluster);
             }
         })
-        console.log(this.clusterOrder)
         this.colorScale = d3.scaleOrdinal().domain(this.clusterOrder).range(d3.schemeCategory10);
 
         // reaction that updates clusters when intersections are filterd

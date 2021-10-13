@@ -233,13 +233,11 @@ def load_test_data_streptomyces():
         comparison1 = pairwise_trendcomparison(preprocess_file(trans_m1152), preprocess_file(trans_m145),
                                                lower_variance_percentile,
                                                upper_variance_percentile, k)
-        print(comparison1)
         comparison1["files"] = ["Transcriptome_M1152.csv", "Transcriptome_M145.csv"]
         data.append(comparison1)
         comparison2 = pairwise_trendcomparison(preprocess_file(trans_m1152), preprocess_file(prot_m1152),
                                                lower_variance_percentile,
                                                upper_variance_percentile, k)
-        print(comparison2)
         comparison2["files"] = ["Transcriptome_M1152.csv", "Proteome_M1152.csv"]
         data.append(comparison2)
 
