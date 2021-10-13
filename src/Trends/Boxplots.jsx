@@ -49,7 +49,7 @@ const Boxplots = observer((props) => {
                 </g>
 
             }))
-        }, [yScale, xScale, props.color, props.conditions, props.opacity])
+        }, [props.conditions, props.color, props.opacity, xScale, boxWidth, yScale])
 
 
         const statistics = calculateStatistics(props.data)
