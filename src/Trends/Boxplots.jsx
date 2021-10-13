@@ -23,17 +23,20 @@ const Boxplots = observer((props) => {
                 const closestMax = values.reduce((prev, curr) =>
                     Math.abs(curr - max) < Math.abs(prev - max) ? curr : prev);
                 const outliers = values.filter(value => value > closestMax || value < closestMin);
-                statistics[cond] = {quantiles: [closestMin, twentyFive, median, seventyFive, closestMax], outliers: outliers}
+                statistics[cond] = {
+                    quantiles: [closestMin, twentyFive, median, seventyFive, closestMax],
+                    outliers: outliers
+                }
                 bandPoints.upper.push({cond: cond, value: seventyFive})
                 bandPoints.lower.push({cond: cond, value: twentyFive})
             })
             return {statistics, bandPoints};
         }, [props.conditions]);
 
-        const boxWidth = 20;
-
         const yScale = props.yScale;
         const xScale = props.xScale;
+
+        const boxWidth = (xScale(xScale.domain()[1]) - xScale(xScale.domain()[0]))*(1/3);
 
         const createBoxplots = useCallback((statistics) => {
             return (props.conditions.map(cond => {
