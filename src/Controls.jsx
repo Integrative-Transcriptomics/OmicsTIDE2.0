@@ -30,6 +30,8 @@ const Controls = observer((props) => {
                             onChange={(e) => store.setPlotType(e.target.value)}>
                     <FormControlLabel value="centroid" control={<Radio/>} label="Centroid Profile Plots"/>
                     <FormControlLabel value="profile" control={<Radio/>} label="Profile Plots"/>
+                    <FormControlLabel value="box" control={<Radio/>} label="Box Plots"/>
+
                 </RadioGroup>
                 <FormLabel component="legend">
                     {"Variance Filter " + store.comparison.file1}
@@ -94,36 +96,36 @@ const Controls = observer((props) => {
 
                 {props.children}
             </FormControl>
-                <Button variant="contained" style={{marginBottom: 5}} onClick={() => {
-                    const json = {
-                        ds1: store.ds1.genes,
-                        ds2: store.ds2.genes,
-                        filtered: store.filteredGenes,
-                        conditions: store.comparison.dataStore.conditions,
-                        file1: store.comparison.file1,
-                        file2: store.comparison.file2,
-                        type: store.type,
-                    };
-                    axios.post("/download_session", json)
-                        .then((response) => {
-                            const url = window.URL.createObjectURL(new Blob([response.data]));
-                            const link = document.createElement('a');
-                            link.href = url;
-                            link.setAttribute('download', 'file.csv'); //or any other extension
-                            document.body.appendChild(link);
-                            link.click();
-                        })
-                }}>Download Cluster Assignments</Button>
-                <RadioGroup
-                    row
-                    value={expType}
-                    onChange={(e) => setExptype(e.target.value)}
-                >
-                    <Button variant="contained" onClick={() => exportPDF(props.viewID, expType === "png")}>Export
-                        View</Button>
-                    <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
-                    <FormControlLabel value="png" control={<Radio/>} label="PNG"/>
-                </RadioGroup>
+            <Button variant="contained" style={{marginBottom: 5}} onClick={() => {
+                const json = {
+                    ds1: store.ds1.genes,
+                    ds2: store.ds2.genes,
+                    filtered: store.filteredGenes,
+                    conditions: store.comparison.dataStore.conditions,
+                    file1: store.comparison.file1,
+                    file2: store.comparison.file2,
+                    type: store.type,
+                };
+                axios.post("/download_session", json)
+                    .then((response) => {
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', 'file.csv'); //or any other extension
+                        document.body.appendChild(link);
+                        link.click();
+                    })
+            }}>Download Cluster Assignments</Button>
+            <RadioGroup
+                row
+                value={expType}
+                onChange={(e) => setExptype(e.target.value)}
+            >
+                <Button variant="contained" onClick={() => exportPDF(props.viewID, expType === "png")}>Export
+                    View</Button>
+                <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
+                <FormControlLabel value="png" control={<Radio/>} label="PNG"/>
+            </RadioGroup>
         </div>
     );
 });

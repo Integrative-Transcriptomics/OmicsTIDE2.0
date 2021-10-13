@@ -179,6 +179,7 @@ export class Intersecting {
         this.minValue = d3.min(values);
         // maximum value obsereved
         this.maxValue = d3.max(values);
+        console.log(this.minValue,this.maxValue)
         // complete intersections (unfiltered)
         this.intersections = this.initIntersections(data)
         this.initialConcordantDiscordant = this.calculateConcordantDiscordant(this.intersections);

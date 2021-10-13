@@ -1,8 +1,4 @@
 from sklearn.cluster import KMeans
-from sklearn.cluster import DBSCAN
-import pandas as pd
-
-
 
 from server.enums import ComparisonType
 
@@ -20,16 +16,13 @@ def run_k_means(data, k):
     try:
         if len(data.index) >= k:
             km = KMeans(n_clusters=k)
-            y_km = km.fit_predict(data)
+            km.fit_predict(data.loc[:, data.columns != 'dataset'])
         # if k > num genes change k to num genes
         else:
             km = KMeans(n_clusters=len(data.index))
-            y_km = km.fit_predict(data)
-
-        data.loc[:, 'cluster'] = km.labels_
-
+            km.fit_predict(data.loc[:, data.columns != 'dataset'])
+        data['cluster'] = km.labels_
         return data
-
     except ValueError:
         print("Empty Input!!!")
 
@@ -64,35 +57,9 @@ def get_genes_subset(file1, file2, comparison_type):
         file1 = file1[file1.index.isin(file1_only)]
         file2 = file2[file2.index.isin(file2_only)]
 
-    if not file1.empty:
-        file1.loc[:, 'dataset'] = 1
-    if not file2.empty:
-        file2.loc[:, 'dataset'] = 2
-
-    # general col list while clustering
-    tmp_col_list = list()
-    if not file1.empty:
-        tmp_col_list = list(range(1, len(list(file1))))
-        tmp_col_list.append("dataset")
-    else:
-        if not file2.empty:
-            tmp_col_list = list(range(1, len(list(file2))))
-            tmp_col_list.append("dataset")
-    if len(tmp_col_list) != 0:
-        if not file1.empty:
-            file1.columns = tmp_col_list
-        if not file2.empty:
-            file2.columns = tmp_col_list
-    if not file1.empty and not file2.empty:
-        combined = file1.append(file2)
-    else:
-        if file1.empty and not file2.empty:
-            combined = file2
-        else:
-            if file2.empty and not file1.empty:
-                combined = file1
-            else:
-                combined = pd.Dataframe()
+    file1['dataset'] = 1
+    file2['dataset'] = 2
+    combined = file1.append(file2)
     return combined
 
 
@@ -113,8 +80,6 @@ def cluster(file1, file2, cluster, comparison_type):
 
     # get intersecting or non-intersecting genes only - depending on comparison_type parameter
     combined = get_genes_subset(file1, file2, comparison_type)
-
     # run kmeans
     combined = run_k_means(combined, cluster)
-
     return combined

@@ -6,7 +6,6 @@ def filter_variance(data, lower, upper):
 
     :return: filtered abundance data frame
     """
-    print(len(data.index))
     data.loc[:, 'row_variance'] = data.var(axis=1)
 
     lower_quantile = data['row_variance'].quantile(round(lower / 100, 1))

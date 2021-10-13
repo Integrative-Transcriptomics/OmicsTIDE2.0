@@ -7,41 +7,42 @@ import * as d3 from "d3";
 import Axis from "./Axis";
 import CentroidProfilePlot from "./CentroidProfilePlot";
 import HighlightLines from "./HighlightLines";
+import Boxplots from "./Boxplots";
 
 
 const DatasetTrends = observer((props) => {
-    const store = useStore()
-    // margins for subplots
-    const margin = {
-        left: 50,
-        right: 10,
-        top: 10,
-        bot: 30,
-    }
+        const store = useStore()
+        // margins for subplots
+        const margin = {
+            left: 50,
+            right: 10,
+            top: 10,
+            bot: 30,
+        }
 
-    // height and width of subplots
-    const height = (props.height - (props.numClusters) * (margin.top + margin.bot)) / props.numClusters;
-    const width = props.width - margin.left - margin.right
+        // height and width of subplots
+        const height = (props.height - (props.numClusters) * (margin.top + margin.bot)) / props.numClusters;
+        const width = props.width - margin.left - margin.right
 
-    // shared xScale and yScale
-    const yScale = d3.scaleLinear().domain([props.maxValue, props.minValue]).range([0, height]);
-    const xScale = d3.scalePoint().domain(props.conditions).range([0, width]);
-    const xAxis = d3.axisBottom()
-        .scale(xScale)
-    const yAxis = d3.axisLeft()
-        .scale(yScale)
-    const plots = [];
-    store.filteredClusterNames.forEach((cluster, i) => {
-            let plot = null;
+        // shared xScale and yScale
+        const yScale = d3.scaleLinear().domain([props.maxValue, props.minValue]).range([0, height]);
+        const xScale = d3.scalePoint().domain(props.conditions).range([0, width]);
+        const xAxis = d3.axisBottom()
+            .scale(xScale)
+        const yAxis = d3.axisLeft()
+            .scale(yScale)
+        const plots = [];
+        store.filteredClusterNames.forEach((cluster, i) => {
+                let plot = null;
 
-            // highlighting
-            let opacity = 0.7;
-            if (store.highlightedClusters.length > 0) {
-                opacity = 0.2;
-                if (store.highlightedClusters.includes(cluster)) {
-                    opacity = 1;
+                // highlighting
+                let opacity = 0.7;
+                if (store.highlightedClusters.length > 0) {
+                    opacity = 0.2;
+                    if (store.highlightedClusters.includes(cluster)) {
+                        opacity = 1;
+                    }
                 }
-            }
                 // create plots based on plotTypes
                 const geneCentricData = store.geneCentricMapping[cluster]
                 const conditionCentricData = store.conditionMapping[cluster];
@@ -62,6 +63,15 @@ const DatasetTrends = observer((props) => {
                                                     yScale={yScale} xScale={xScale}
                                                     color={props.colorScale(cluster)} opacity={opacity}/>
                     }
+                } else if (props.plotType === "box") {
+                     if (Object.keys(store.geneCentricMapping[cluster]).length === 1) {
+                        plot = <ProfilePlot data={geneCentricData} yScale={yScale} xScale={xScale}
+                                            color={props.colorScale(cluster)} opacity={opacity}/>
+                    } else {
+                        plot = <Boxplots data={conditionCentricData} conditions={props.conditions}
+                                         yScale={yScale} xScale={xScale}
+                                         color={props.colorScale(cluster)} opacity={opacity}/>
+                    }
                 }
 
                 plots.push(
@@ -78,12 +88,13 @@ const DatasetTrends = observer((props) => {
                             <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={""}/>
                         </g>
                     </svg>)
-        }
-    )
-    return (
-        <div>{plots}</div>
-    );
-});
+            }
+        )
+        return (
+            <div>{plots}</div>
+        );
+    })
+;
 
 DatasetTrends.propTypes = {
     numClusters: PropTypes.number.isRequired,
