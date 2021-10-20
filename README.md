@@ -21,19 +21,18 @@ cd to the directory where the venv should be located and create the venv
 user@example:~$ cd <path/to/venv-parent-dir>
 user@example:~/path/to/venv-parent-dir$ virtualenv <your-venv>
 ```
-### 2) Install javascript packages
-cd to the project directory
-```console
-user@example:~$ cd <path/to/project-dir>
-user@example:~/path/to/project-dir$ npm install
-```
-### 3) Required Python packages
+### 3) Install required Python packages
 Install required Python packages by referring to the requirements.txt-file.
 ```console
 user@example:~$ source <your-venv>/bin/activate
 (<your-venv>) user@example:~$ pip install -r <path/to/OmicsTIDE>/requirements.txt
 ```
-
+### 4) Install required javascript packages
+cd to the project directory
+```console
+user@example:~$ cd <path/to/project-dir>
+user@example:~/path/to/project-dir$ npm install
+```
 ## Running OmicsTIDE
 Activate venv and run the python file which will open the web application in a new browser window. 
 ```console
