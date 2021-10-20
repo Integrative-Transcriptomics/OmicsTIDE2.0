@@ -15,13 +15,18 @@ The following steps are required to set up and run OmicsTIDE. The installation p
 ### 1) Basic Requirements
 Python, pip and virtualenv version should be >= 3.7, >= 20.2.3 and >=20.0.23, respectively.
 
-### 1) Setting up a Virtual Environment (venv) in Python
+### 2) Setting up a Virtual Environment (venv) in Python
 cd to the directory where the venv should be located and create the venv
 ```console
 user@example:~$ cd <path/to/venv-parent-dir>
 user@example:~/path/to/venv-parent-dir$ virtualenv <your-venv>
 ```
-
+### 2) Install javascript packages
+cd to the project directory
+```console
+user@example:~$ cd <path/to/project-dir>
+user@example:~/path/to/project-dir$ npm install
+```
 ### 3) Required Python packages
 Install required Python packages by referring to the requirements.txt-file.
 ```console
