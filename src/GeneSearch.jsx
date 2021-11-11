@@ -45,6 +45,7 @@ const GeneSearch = observer((props) => {
                     disableCloseOnSelect
                     filterSelectedOptions
                     freeSolo
+                    fullWidth
                     getOptionLabel={(option) => option.label}
                     options={options}
                     value={selectedGenes}

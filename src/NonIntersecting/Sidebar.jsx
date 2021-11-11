@@ -11,7 +11,6 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import PropTypes from "prop-types";
-import FormControl from "@material-ui/core/FormControl";
 import GeneSearch from "../GeneSearch";
 
 
@@ -43,10 +42,8 @@ const Sidebar = observer((props) => {
                     <Typography>Search</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <FormControl>
-                        <GeneSearch filteredGenes={store.filteredGenes}
-                                    setSearchGenes={(genes) => store.setSearchGenes(genes)}/>
-                    </FormControl>
+                    <GeneSearch filteredGenes={store.filteredGenes}
+                                setSearchGenes={(genes) => store.setSearchGenes(genes)}/>
                 </AccordionDetails>
             </Accordion>
             {store.ds1.selectedClusters.length > 0 || store.ds2.selectedClusters.length > 0 ?
