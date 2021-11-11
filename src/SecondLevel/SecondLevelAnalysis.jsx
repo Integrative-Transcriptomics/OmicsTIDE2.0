@@ -20,7 +20,16 @@ import {v4 as uuidv4} from "uuid";
 import Autocomplete from "@material-ui/core/Autocomplete";
 import TextField from "@material-ui/core/TextField";
 
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
 
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+}
 const SecondLevelAnalysis = observer((props) => {
     const store = useStore();
     const plot = createRef();
@@ -164,6 +173,7 @@ const SecondLevelAnalysis = observer((props) => {
                         <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
                         <FormControlLabel value="png" control={<Radio/>} label="PNG"/>
                     </RadioGroup>
+                    <Button variant="contained" onClick={() => download("selection.txt", store.genes.join("\n"))}>Save gene list to file</Button>
                 </Grid>
                 <Grid item xs={6}>
                     {store.pantherAPI.genomesLoaded ?
