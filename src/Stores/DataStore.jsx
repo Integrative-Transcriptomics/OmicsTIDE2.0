@@ -5,11 +5,11 @@ import {PantherAPI} from "./pantherAPI";
  * store responsible for holding the data
  */
 export class DataStore {
-    constructor(data, mapping, initialVarFilter) {
+    constructor(data, mapping, initialVarFilter,pantherAPI) {
         // array containing min and max variance values that the data was filtered by before clustering.
         this.initialVarFilter = initialVarFilter;
         this.conditions = data[0].conditions;
-        this.pantherAPI = new PantherAPI();
+        this.pantherAPI = pantherAPI;
         this.comparisons = this.initComparisons(data);
         this.mappingLoaded = false;
         this.nameToID = {};

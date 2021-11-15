@@ -7,7 +7,6 @@ import PropTypes from "prop-types";
 import {Button, Grid, Typography} from "@material-ui/core";
 import GoChart from "./GoChart";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import Alert from "@material-ui/core/Alert";
 import {observer} from "mobx-react";
 import GeneSearch from "../GeneSearch";
 import DownloadIcon from '@mui/icons-material/Download';
@@ -17,19 +16,18 @@ import {exportPDF} from "../Stores/HelperFunctions";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Radio from "@material-ui/core/Radio";
 import {v4 as uuidv4} from "uuid";
-import Autocomplete from "@material-ui/core/Autocomplete";
-import TextField from "@material-ui/core/TextField";
 
 function download(filename, text) {
-  var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  element.setAttribute('download', filename);
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
 
-  element.style.display = 'none';
-  document.body.appendChild(element);
-  element.click();
-  document.body.removeChild(element);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
 }
+
 const SecondLevelAnalysis = observer((props) => {
     const store = useStore();
     const plot = createRef();
@@ -60,9 +58,15 @@ const SecondLevelAnalysis = observer((props) => {
             window.removeEventListener('resize', changeWidth);
         }
     }, [changeWidth]);
-    const calcEnrichment = useCallback((selectedSpecies) => {
-        store.calcOverrepresentation(selectedSpecies);
-    }, [store]);
+
+    useEffect(() => {
+        setCalculationText(null)
+        store.calcOverrepresentation(store.pantherAPI.selectedSpecies);
+        startTimer().then(() => {
+            setCalculationText("This seems to take longer than normally. There might be a problem with PANTHER")
+        })
+    },[store, store.species])
+
     let goVis = null;
     // show progress vis when enrichment is calculated but calculations are not done
     if (store.isLoading) {
@@ -173,40 +177,8 @@ const SecondLevelAnalysis = observer((props) => {
                         <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
                         <FormControlLabel value="png" control={<Radio/>} label="PNG"/>
                     </RadioGroup>
-                    <Button variant="contained" onClick={() => download("selection.txt", store.genes.join("\n"))}>Save gene list to file</Button>
-                </Grid>
-                <Grid item xs={6}>
-                    {store.pantherAPI.genomesLoaded ?
-                        [<Typography key="title" variant="h5">GO-enrichment</Typography>,
-                            <Typography key="powerdBy">Powerd by <b>PANTHER</b> (<a
-                                href="http://pantherdb.org/">http://pantherdb.org/</a>)</Typography>,
-                            <Typography key="task">Please select species to perform enrichment:</Typography>,
-                            <Autocomplete
-                                key="select"
-                                disableClearable
-                                getOptionLabel={(option) => option.label}
-                                options={store.pantherAPI.genomes}
-                                onChange={(e, v) => {
-                                    setCalculationText(null)
-                                    calcEnrichment(v.value)
-                                    startTimer().then(() => {
-                                        setCalculationText("This seems to take longer than normally. There might be a problem with PANTHER")
-                                    })
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="Select Genome Reference"
-                                        margin="normal"
-                                        variant="outlined"
-                                        InputProps={{...params.InputProps, type: 'search'}}
-                                    />
-                                )}
-                            />]
-                        : <Alert severity="warning">Sorry, it seems like we're unable to connect to <a
-                            href="http://pantherdb.org/">http://pantherdb.org/</a> for GO Term enrichment. Please adapt
-                            your
-                            browser settings to allow mixed content and check if their website is down.</Alert>}
+                    <Button variant="contained" onClick={() => download("selection.txt", store.genes.join("\n"))}>Save
+                        gene list to file</Button>
                 </Grid>
                 <Grid item xs={6}/>
                 {goVis}

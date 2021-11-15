@@ -41,9 +41,10 @@ export class SecondLevelStore {
 
             // calculates overrepresentation and sets loading status
             calcOverrepresentation(organism) {
+                console.log(organism)
                 this.isLoading = true;
                 this.isLoaded = false;
-                this.pantherAPI.calcOverrepresentation(this.genes, organism, (response) => {
+                this.pantherAPI.calcOverrepresentation(this.genes, parent.genes,organism, (response) => {
                     this.setGoData(response);
                     this.setIsLoading(false);
                     this.setIsLoaded(true);

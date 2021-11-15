@@ -21,6 +21,8 @@ import Tooltip from "@material-ui/core/Tooltip";
 import InfoIcon from '@material-ui/icons/Info';
 import Backdrop from "@material-ui/core/Backdrop";
 import ComparisonTable from "./ComparisonTable";
+import Autocomplete from "@material-ui/core/Autocomplete";
+import TextField from "@material-ui/core/TextField";
 
 
 function TabPanel(props) {
@@ -36,7 +38,7 @@ function TabPanel(props) {
         >
             {value === index && (
                 <Box sx={{p: 3, backgroundColor: "#e6e6e6"}}>
-                   {children}
+                    {children}
                 </Box>
             )}
         </div>
@@ -98,7 +100,7 @@ const DefaultView = observer((props) => {
             } else {
                 url = "/load_data";
                 files.forEach(file => formData.append("files[]", file));
-                formData.append("comparisons", JSON.stringify(comparisons.filter(d=>d.selected).map(d=>d.files)))
+                formData.append("comparisons", JSON.stringify(comparisons.filter(d => d.selected).map(d => d.files)))
                 formData.append("mappingFile", idMappingFile);
             }
             axios.post(url, formData)
@@ -273,6 +275,35 @@ const DefaultView = observer((props) => {
                         <Grid item xs={3} className={classes.centerText}>
                             {varFilter[0] + " ≤ var ≤ " + varFilter[1]}
                         </Grid>
+                    </Grid>
+                    <Grid item xs={9}>
+                        {store.pantherAPI.genomesLoaded ?
+                            [<Typography key="task">Select species: (optional, required for functional analysis)</Typography>,
+                                <Typography key="powerdBy">Powerd by <b>PANTHER</b> (<a
+                                    href="http://pantherdb.org/">http://pantherdb.org/</a>)</Typography>,
+                                <Autocomplete
+                                    key="select"
+                                    disableClearable
+                                    getOptionLabel={(option) => option.label}
+                                    options={store.pantherAPI.genomes}
+                                    onChange={(e, v) => {
+                                        store.pantherAPI.setSelectedSpecies(v.value);
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Select Genome Reference"
+                                            margin="normal"
+                                            variant="outlined"
+                                            InputProps={{...params.InputProps, type: 'search'}}
+                                        />
+                                    )}
+                                />]
+                            : <Alert severity="warning">Sorry, it seems like we're unable to connect to <a
+                                href="http://pantherdb.org/">http://pantherdb.org/</a> Please
+                                adapt
+                                your
+                                browser settings to allow mixed content and check if their website is down.</Alert>}
                     </Grid>
                     <Button onClick={launch}
                             variant="contained"

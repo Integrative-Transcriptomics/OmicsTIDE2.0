@@ -1,6 +1,7 @@
 import React from "react";
 import {DataStore} from "./DataStore";
 import {extendObservable} from "mobx";
+import {PantherAPI} from "./pantherAPI";
 
 /**
  * basic store holding all other stores
@@ -8,6 +9,7 @@ import {extendObservable} from "mobx";
 export class RootStore {
     constructor() {
         this.dataStore = null
+        this.pantherAPI=new PantherAPI();
         extendObservable(this, {
             dataLoaded: false,
         })
@@ -16,10 +18,12 @@ export class RootStore {
     /**
      * initialized data when data is loaded
      * @param {Object} data
+     * @param mapping
+     * @param species
      * @param {number[]} initialVarFilter
      */
     init(data, mapping, initialVarFilter) {
-        this.dataStore = new DataStore(data, mapping, initialVarFilter)
+        this.dataStore = new DataStore(data, mapping, initialVarFilter,this.pantherAPI)
         this.dataLoaded = true;
     }
 }
