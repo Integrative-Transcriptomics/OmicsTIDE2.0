@@ -12,6 +12,9 @@ export class PantherAPI {
             setSelectedSpecies(newSpecies) {
                 this.selectedSpecies = newSpecies;
             },
+            setGenomesLoaded(loaded){
+                this.genomesLoaded=loaded;
+            }
         })
         this.genomes = [];
         // the three GO onthologies with their IDs
@@ -23,7 +26,7 @@ export class PantherAPI {
          */
         this.getSupportedGenomes(genomes => {
             this.genomes = genomes;
-            this.genomesLoaded = true;
+            this.setGenomesLoaded(true);
         })
     }
 
@@ -114,11 +117,14 @@ export class PantherAPI {
      * @param {string} organism
      * @param {function} callback
      */
-    calcOverrepresentation(geneList, refList, organism, callback) {
-        console.log(refList);
+    calcOverrepresentation(geneList, refList, organism, isWholeGenomeRef, callback) {
         const requests = this.annoSets.map(annoSet => {
-            return (axios.get("http://pantherdb.org/services/oai/pantherdb/enrich/overrep?geneInputList=" + geneList + "&organism="
-                + organism + "&annotDataSet=" + annoSet.id + "&enrichmentTestType=FISHER&correction=FDR&refOrganism="+organism+"&refInputlist="+refList))
+            let requestString="http://pantherdb.org/services/oai/pantherdb/enrich/overrep?geneInputList=" + geneList + "&organism="
+                + organism + "&annotDataSet=" + annoSet.id + "&enrichmentTestType=FISHER&correction=FDR";
+            if(!isWholeGenomeRef){
+                requestString += "&refOrganism="+organism+"&refInputList="+refList;
+            }
+            return (axios.get(requestString))
         })
         axios.all(requests).then(axios.spread((...responses) => {
             callback(responses.map((response, i) => this.transformData(response.data.results.result, this.annoSets[i].id)));

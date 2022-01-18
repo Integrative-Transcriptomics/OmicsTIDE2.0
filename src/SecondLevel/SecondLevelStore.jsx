@@ -40,11 +40,10 @@ export class SecondLevelStore {
             },
 
             // calculates overrepresentation and sets loading status
-            calcOverrepresentation(organism) {
-                console.log(organism)
+            calcOverrepresentation(organism, wholeGenomeRef) {
                 this.isLoading = true;
                 this.isLoaded = false;
-                this.pantherAPI.calcOverrepresentation(this.genes, parent.genes,organism, (response) => {
+                this.pantherAPI.calcOverrepresentation(this.genes, parent.genes ,organism, wholeGenomeRef, (response) => {
                     this.setGoData(response);
                     this.setIsLoading(false);
                     this.setIsLoaded(true);
@@ -60,7 +59,6 @@ export class SecondLevelStore {
                 }));
             },
             createDownload(filter) {
-                console.log(this.goData)
                 let csv;
                 if (filter === null) {
                     csv = convertToCSV(toJS(this.goData).flat());

@@ -105,9 +105,9 @@ const DefaultView = observer((props) => {
             }
             axios.post(url, formData)
                 .then((response) => {
+                    setDataLoading(false)
                     store.init(response.data.data, response.data.mapping, varFilter);
                     props.setDataLoaded(true);
-                    setDataLoading(false)
                 })
         },
         [varFilter, k, testData, files, store, props, idMappingFile, selectedTab, comparisons],

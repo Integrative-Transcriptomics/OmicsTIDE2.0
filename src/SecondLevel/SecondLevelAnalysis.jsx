@@ -3,7 +3,6 @@ import {StoreProvider, useStore} from "../Stores/RootStore";
 import Axis from "../Trends/Axis";
 import * as d3 from "d3";
 import MultiClusterProfilePlot from "./MultiClusterProfilePlot";
-import PropTypes from "prop-types";
 import {Button, Grid, Typography} from "@material-ui/core";
 import GoChart from "./GoChart";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -16,9 +15,12 @@ import {exportPDF} from "../Stores/HelperFunctions";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Radio from "@material-ui/core/Radio";
 import {v4 as uuidv4} from "uuid";
+import {FormControl, FormLabel} from "@mui/material";
+import PropTypes from "prop-types";
+
 
 function download(filename, text) {
-    var element = document.createElement('a');
+    let element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
     element.setAttribute('download', filename);
 
@@ -40,6 +42,7 @@ const SecondLevelAnalysis = observer((props) => {
     const [width, setWidth] = useState(500)
     const [calculationText, setCalculationText] = useState(null)
     const [expType, setExptype] = useState("pdf")
+    const [isWholeGenomeRef,setIsWholeGenomeRef]=useState(false);
 
     const id = "id" + uuidv4()
 
@@ -61,11 +64,11 @@ const SecondLevelAnalysis = observer((props) => {
 
     useEffect(() => {
         setCalculationText(null)
-        store.calcOverrepresentation(store.pantherAPI.selectedSpecies);
+        store.calcOverrepresentation(store.pantherAPI.selectedSpecies, isWholeGenomeRef);
         startTimer().then(() => {
             setCalculationText("This seems to take longer than normally. There might be a problem with PANTHER")
         })
-    },[store, store.species])
+    }, [isWholeGenomeRef, store, store.species])
 
     let goVis = null;
     // show progress vis when enrichment is calculated but calculations are not done
@@ -98,7 +101,7 @@ const SecondLevelAnalysis = observer((props) => {
                 Underrepresented
             </div>
         </Grid>].concat(goEnrichment)
-            .concat(<Button variant="outlined" onClick={() => store.createDownload(null)}>Download all</Button>
+            .concat(<Button variant="outlined" key="download" onClick={() => store.createDownload(null)}>Download all</Button>
             )
     }
     const startTimer = () => {
@@ -131,7 +134,7 @@ const SecondLevelAnalysis = observer((props) => {
             </g>
         </svg>
     const plot2 =
-        <svg key="ds2" width={width} height={height}>
+        <svg key="ds2" width={width} height={height} onMouseLeave={() => store.parent.setHighlightedGenes([])}>
             <g transform={"translate(" + margin.left + ",0)"}>
                 <StoreProvider store={store.parent.ds2}>
                     <MultiClusterProfilePlot selection={store.ds2selection} yScale={yScale} xScale={xScale}
@@ -162,23 +165,37 @@ const SecondLevelAnalysis = observer((props) => {
                 </Grid>
                 <Grid item xs={4}>
                     <StoreProvider store={store.parent}>
-                        <Typography>Search</Typography>
+                        <FormLabel>Search</FormLabel>
                         <GeneSearch filteredGenes={store.genes}
                                     setSearchGenes={(genes) => store.setSearchGenes(genes)}/>
                     </StoreProvider>
-                    <Typography>Export</Typography>
-                    <RadioGroup
-                        row
-                        value={expType}
-                        onChange={(e) => setExptype(e.target.value)}
-                    >
-                        <Button variant="contained" onClick={() => exportPDF(id, expType === "png")}>Export
-                            View</Button>
-                        <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
-                        <FormControlLabel value="png" control={<Radio/>} label="PNG"/>
-                    </RadioGroup>
-                    <Button variant="contained" onClick={() => download("selection.txt", store.genes.join("\n"))}>Save
+                    <FormControl>
+                        <FormLabel>Export</FormLabel>
+                        <RadioGroup
+                            row
+                            value={expType}
+                            onChange={(e) => setExptype(e.target.value)}
+                        >
+                            <Button onClick={() => exportPDF(id, expType === "png")}>Export
+                                View</Button>
+                            <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
+                            <FormControlLabel value="png" control={<Radio/>} label="PNG"/>
+                                   <Button onClick={() => download("selection.txt", store.genes.join("\n"))}>Save
                         gene list to file</Button>
+                        </RadioGroup>
+                    </FormControl>
+                    <FormControl>
+                        <FormLabel>GO enrichment</FormLabel>
+                        <RadioGroup
+                            row
+                            value={isWholeGenomeRef.toString()}
+                            onChange={(e) => setIsWholeGenomeRef(e.target.value==="true")}
+                        >
+                            <FormControlLabel value={"false"} control={<Radio/>}
+                                              label="Use only genes in current comparison as background"/>
+                            <FormControlLabel value={"true"} control={<Radio/>} label="Use all genes as background"/>
+                        </RadioGroup>
+                    </FormControl>
                 </Grid>
                 <Grid item xs={6}/>
                 {goVis}

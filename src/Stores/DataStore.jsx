@@ -1,5 +1,4 @@
 import {Comparison} from "./Comparison";
-import {PantherAPI} from "./pantherAPI";
 
 /**
  * store responsible for holding the data
