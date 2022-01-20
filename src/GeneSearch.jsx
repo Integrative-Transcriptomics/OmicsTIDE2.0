@@ -15,8 +15,9 @@ const GeneSearch = observer((props) => {
     const [selectedGenes, setSelectedGens] = useState([]);
     let options = [];
     if (searchName) {
-        options = props.filteredGenes.sort().map(id => {
-            return ({label: store.dataStore.idToName[id], id: id.toString()})
+        props.filteredGenes.sort().forEach(id => {
+            if(store.dataStore.idToName[id] !== undefined)
+                options.push({label: store.dataStore.idToName[id], id: id.toString()})
         });
     } else {
         options = props.filteredGenes.sort().map(id => {

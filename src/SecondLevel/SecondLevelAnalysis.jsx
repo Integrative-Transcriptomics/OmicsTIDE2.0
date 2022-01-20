@@ -17,6 +17,7 @@ import Radio from "@material-ui/core/Radio";
 import {v4 as uuidv4} from "uuid";
 import {FormControl, FormLabel} from "@mui/material";
 import PropTypes from "prop-types";
+import Alert from "@material-ui/core/Alert";
 
 
 function download(filename, text) {
@@ -42,7 +43,7 @@ const SecondLevelAnalysis = observer((props) => {
     const [width, setWidth] = useState(500)
     const [calculationText, setCalculationText] = useState(null)
     const [expType, setExptype] = useState("pdf")
-    const [isWholeGenomeRef,setIsWholeGenomeRef]=useState(false);
+    const [isWholeGenomeRef, setIsWholeGenomeRef] = useState(false);
 
     const id = "id" + uuidv4()
 
@@ -62,13 +63,16 @@ const SecondLevelAnalysis = observer((props) => {
         }
     }, [changeWidth]);
 
-    useEffect(() => {
+    const performEnrichment = useCallback(() => {
         setCalculationText(null)
         store.calcOverrepresentation(store.pantherAPI.selectedSpecies, isWholeGenomeRef);
         startTimer().then(() => {
             setCalculationText("This seems to take longer than normally. There might be a problem with PANTHER")
         })
-    }, [isWholeGenomeRef, store, store.species])
+    }, [isWholeGenomeRef, store])
+    /*useEffect(() => {
+        performEnrichment();
+    }, [performEnrichment])*/
 
     let goVis = null;
     // show progress vis when enrichment is calculated but calculations are not done
@@ -101,7 +105,8 @@ const SecondLevelAnalysis = observer((props) => {
                 Underrepresented
             </div>
         </Grid>].concat(goEnrichment)
-            .concat(<Button variant="outlined" key="download" onClick={() => store.createDownload(null)}>Download all</Button>
+            .concat(<Button variant="outlined" key="download" onClick={() => store.createDownload(null)}>Download
+                all</Button>
             )
     }
     const startTimer = () => {
@@ -164,8 +169,8 @@ const SecondLevelAnalysis = observer((props) => {
                     </Grid>
                 </Grid>
                 <Grid item xs={4}>
+                    <FormLabel>Search</FormLabel>
                     <StoreProvider store={store.parent}>
-                        <FormLabel>Search</FormLabel>
                         <GeneSearch filteredGenes={store.genes}
                                     setSearchGenes={(genes) => store.setSearchGenes(genes)}/>
                     </StoreProvider>
@@ -176,25 +181,36 @@ const SecondLevelAnalysis = observer((props) => {
                             value={expType}
                             onChange={(e) => setExptype(e.target.value)}
                         >
-                            <Button onClick={() => exportPDF(id, expType === "png")}>Export
+                            <Button size={"small"} style={{marginRight: "5px"}} variant={"contained"}
+                                    onClick={() => exportPDF(id, expType === "png")}>Export
                                 View</Button>
                             <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
                             <FormControlLabel value="png" control={<Radio/>} label="PNG"/>
-                                   <Button onClick={() => download("selection.txt", store.genes.join("\n"))}>Save
-                        gene list to file</Button>
                         </RadioGroup>
+                        <Button size={"small"} style={{marginTop: "5px"}} variant={"contained"}
+                                onClick={() => download("selection.txt", store.genes.join("\n"))}>Save
+                            gene list to file</Button>
                     </FormControl>
+                    <br/>
                     <FormControl>
                         <FormLabel>GO enrichment</FormLabel>
-                        <RadioGroup
-                            row
-                            value={isWholeGenomeRef.toString()}
-                            onChange={(e) => setIsWholeGenomeRef(e.target.value==="true")}
-                        >
-                            <FormControlLabel value={"false"} control={<Radio/>}
-                                              label="Use only genes in current comparison as background"/>
-                            <FormControlLabel value={"true"} control={<Radio/>} label="Use all genes as background"/>
-                        </RadioGroup>
+                        {store.pantherAPI.selectedSpecies !== ''?
+                            [<RadioGroup
+                                row
+                                value={isWholeGenomeRef.toString()}
+                                onChange={(e) => setIsWholeGenomeRef(e.target.value === "true")}
+                            >
+                                <FormControlLabel value={"false"}
+                                                  control={<Radio/>}
+                                                  label="Use only genes in current comparison as background"/>
+                                <FormControlLabel value={"true"}
+                                                  control={<Radio/>} label="Use all genes as background"/>
+                            </RadioGroup>,
+                            <Button size={"small"} style={{marginTop: "5px"}} variant={"contained"} onClick={performEnrichment}>Perform
+                            enrichment</Button>]:
+                            <Alert severity={"info"}>No species selected for GO enrichment</Alert>
+                        }
+
                     </FormControl>
                 </Grid>
                 <Grid item xs={6}/>

@@ -121,7 +121,7 @@ const Controls = observer((props) => {
                 value={expType}
                 onChange={(e) => setExptype(e.target.value)}
             >
-                <Button variant="contained" onClick={() => exportPDF(props.viewID, expType === "png")}>Export
+                <Button style={{marginRight: 5}} variant="contained" onClick={() => exportPDF(props.viewID, expType === "png")}>Export
                     View</Button>
                 <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
                 <FormControlLabel value="png" control={<Radio/>} label="PNG"/>
