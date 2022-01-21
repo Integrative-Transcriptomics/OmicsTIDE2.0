@@ -1,4 +1,4 @@
-import {IconButton, TableContainer, TableHead} from "@material-ui/core";
+import {IconButton, TableContainer} from "@material-ui/core";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import Table from "@material-ui/core/Table";
@@ -29,24 +29,12 @@ function ComparisonTable(props) {
                 </IconButton>
             </TableCell>
             <TableCell>{comparison.files[1].slice(0,-4)}</TableCell>
-            <TableCell><Checkbox checked={comparison.selected} onChange={() => selectFile(i)}/>
+            <TableCell>
+                {props.hasSelect?<Checkbox checked={comparison.selected} onChange={() => selectFile(i)}/>:null}
             </TableCell>
         </TableRow>)
     return (<TableContainer>
         <Table size="small">
-            <TableHead>
-                <TableRow>
-                    <TableCell>
-                        Left
-                    </TableCell>
-                    <TableCell/>
-                    <TableCell>
-                        Right
-                    </TableCell>
-                    <TableCell/>
-                </TableRow>
-
-            </TableHead>
             <TableBody>
                 {cells}
             </TableBody>

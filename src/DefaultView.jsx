@@ -177,12 +177,12 @@ const DefaultView = observer((props) => {
                                             {idMappingFile !== null ? idMappingFile.name : null}
                                         </Typography>
                                     </Grid>
-                                    {files.length > 2 ?
+                                    {files.length > 1 ?
                                         <Grid item xs={12}>
                                             <Typography>
-                                                Select comparisons of interest
+                                                {files.length>2?"Select comparisons of interest":"Comparison"}
                                             </Typography>
-                                            <ComparisonTable comparisons={comparisons}
+                                            <ComparisonTable hasSelect={files.length>2} comparisons={comparisons}
                                                              setComparisons={(newComparisons) => setComparisons(newComparisons)}/>
                                         </Grid> : null}
                                 </Grid>
