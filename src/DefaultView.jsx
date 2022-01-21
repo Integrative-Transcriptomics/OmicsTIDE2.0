@@ -86,6 +86,7 @@ const DefaultView = observer((props) => {
     const launch = useCallback(
         () => {
             setDataLoading(true);
+            props.setDataLoaded(false);
             const formData = new FormData();
             let url = "";
             formData.append("k", k);
