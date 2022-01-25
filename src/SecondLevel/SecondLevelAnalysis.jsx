@@ -127,7 +127,8 @@ const SecondLevelAnalysis = observer((props) => {
     // create one plot for each data set
 
     const plot1 =
-        <svg key="ds1" width={width} height={height} onMouseLeave={() => store.parent.setHighlightedGenes([])}>
+        <svg key="ds1" width={width} height={height} onMouseLeave={() => store.parent.setHighlightedGenes([])}
+             onClick={() => window.open(`https://www.ncbi.nlm.nih.gov/gene/?term=${store.parent.highlightedGenes[0]}`, '_blank').focus()}>
             <g transform={"translate(" + margin.left + ",0)"}>
                 <StoreProvider store={store.parent.ds1}>
                     <MultiClusterProfilePlot selection={store.ds1selection} yScale={yScale} xScale={xScale}
@@ -139,7 +140,8 @@ const SecondLevelAnalysis = observer((props) => {
             </g>
         </svg>
     const plot2 =
-        <svg key="ds2" width={width} height={height} onMouseLeave={() => store.parent.setHighlightedGenes([])}>
+        <svg key="ds2" width={width} height={height} onMouseLeave={() => store.parent.setHighlightedGenes([])}
+             onClick={() => window.open(`https://www.ncbi.nlm.nih.gov/gene/?term=${store.parent.highlightedGenes[0]}`, '_blank').focus()}>
             <g transform={"translate(" + margin.left + ",0)"}>
                 <StoreProvider store={store.parent.ds2}>
                     <MultiClusterProfilePlot selection={store.ds2selection} yScale={yScale} xScale={xScale}
@@ -194,7 +196,7 @@ const SecondLevelAnalysis = observer((props) => {
                     <br/>
                     <FormControl>
                         <FormLabel>GO enrichment</FormLabel>
-                        {store.pantherAPI.selectedSpecies !== ''?
+                        {store.pantherAPI.selectedSpecies !== '' ?
                             [<RadioGroup
                                 row
                                 value={isWholeGenomeRef.toString()}
@@ -206,8 +208,9 @@ const SecondLevelAnalysis = observer((props) => {
                                 <FormControlLabel value={"true"}
                                                   control={<Radio/>} label="Use all genes as background"/>
                             </RadioGroup>,
-                            <Button size={"small"} style={{marginTop: "5px"}} variant={"contained"} onClick={performEnrichment}>Perform
-                            enrichment</Button>]:
+                                <Button size={"small"} style={{marginTop: "5px"}} variant={"contained"}
+                                        onClick={performEnrichment}>Perform
+                                    enrichment</Button>] :
                             <Alert severity={"info"}>No species selected for GO enrichment</Alert>
                         }
 

@@ -7,6 +7,7 @@ import FormControl from '@material-ui/core/FormControl';
 import {useStore} from "./Stores/RootStore";
 import Autocomplete from "@material-ui/core/Autocomplete";
 import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
 
 const GeneSearch = observer((props) => {
     const store = useStore();
@@ -16,7 +17,7 @@ const GeneSearch = observer((props) => {
     let options = [];
     if (searchName) {
         props.filteredGenes.sort().forEach(id => {
-            if(store.dataStore.idToName[id] !== undefined)
+            if (store.dataStore.idToName[id] !== undefined)
                 options.push({label: store.dataStore.idToName[id], id: id.toString()})
         });
     } else {
@@ -52,7 +53,7 @@ const GeneSearch = observer((props) => {
                     value={selectedGenes}
                     onChange={(e, v) => {
                         setSelectedGens(v)
-                        props.setSearchGenes(v.map(d=>d.id));
+                        props.setSearchGenes(v.map(d => d.id));
                     }}
                     renderInput={(params) => (
                         <TextField
@@ -65,6 +66,10 @@ const GeneSearch = observer((props) => {
                     )}
                 />
             </div>
+            <Button component="label" variant="contained">Upload List
+                <input type="file"
+                       hidden/>
+            </Button>
         </div>
     );
 });

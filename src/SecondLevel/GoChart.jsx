@@ -42,7 +42,7 @@ const GoChart = observer((props) => {
                      title={category.termID + " (" + category.termName + "): " + category.padj.toExponential(2)}
                      followCursor>
 
-                <div>
+                <div onClick={()=>window.open(`http://amigo.geneontology.org/amigo/term/${category.termID}`, '_blank').focus()}>
                     <div style={{
                         width: textWidth,
                         whiteSpace: "nowrap",
