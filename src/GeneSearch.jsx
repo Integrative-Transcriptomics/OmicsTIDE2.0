@@ -1,5 +1,5 @@
 import {observer} from "mobx-react";
-import React, {useState} from "react";
+import React, {useCallback, useState} from "react";
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -13,7 +13,27 @@ const GeneSearch = observer((props) => {
     const store = useStore();
 
     const [searchName, setSearchName] = useState(store.dataStore.mappingLoaded);
-    const [selectedGenes, setSelectedGens] = useState([]);
+    const [selectedGenes, setSelectedGenes] = useState([]);
+    const {setSearchGenes} = props;
+    const parseGeneList = useCallback((file) => {
+        const reader = new FileReader();
+        reader.onload = function () {
+            let genes = reader.result.split("\n").filter(d => d !== "");
+            if (searchName) {
+                genes = genes.map(d => store.dataStore.nameToID[d])
+                setSelectedGenes(genes.map(d => {
+                    return ({id: d, label: store.dataStore.idToName[d]})
+                }));
+            }else{
+                setSelectedGenes(genes.map(d => {
+                    return ({id: d, label: d})
+                }));
+            }
+            setSearchGenes(genes);
+        };
+        reader.readAsText(file);
+
+    }, [searchName, setSearchGenes, store.dataStore.idToName, store.dataStore.nameToID])
     let options = [];
     if (searchName) {
         props.filteredGenes.sort().forEach(id => {
@@ -32,7 +52,7 @@ const GeneSearch = observer((props) => {
                     <RadioGroup row aria-label="gender" name="row-radio-buttons-group"
                                 value={searchName ? "name" : "id"}
                                 onChange={(event) => {
-                                    setSelectedGens([])
+                                    setSelectedGenes([])
                                     props.setSearchGenes([]);
                                     setSearchName(event.target.value === "name")
                                 }}>
@@ -52,7 +72,8 @@ const GeneSearch = observer((props) => {
                     options={options}
                     value={selectedGenes}
                     onChange={(e, v) => {
-                        setSelectedGens(v)
+                        setSelectedGenes(v)
+                        console.log(v)
                         props.setSearchGenes(v.map(d => d.id));
                     }}
                     renderInput={(params) => (
@@ -68,6 +89,7 @@ const GeneSearch = observer((props) => {
             </div>
             <Button component="label" variant="contained">Upload List
                 <input type="file"
+                       onChange={(e) => parseGeneList([...e.target.files][0])}
                        hidden/>
             </Button>
         </div>
