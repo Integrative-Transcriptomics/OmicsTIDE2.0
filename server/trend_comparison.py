@@ -69,24 +69,6 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
 
     clustering_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.INTERSECTING)
     clustering_non_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.NON_INTERSECTING)
-    # print(clustering_intersecting)
-
-    ptcf = combine_to_ptcf(clustering_intersecting, clustering_non_intersecting, ds1_colnames, ds2_colnames)
-
-    ptcf = add_additional_columns(ptcf)
-
-    ptcf.loc[:, 'ds1_var'] = ds1_file_var
-    ptcf.loc[:, 'ds2_var'] = ds2_file_var
-    ptcf.loc[:, 'ds1_median'] = ds1_file_median
-    ptcf.loc[:, 'ds2_median'] = ds2_file_median
-
-    i_ptcf = get_intersecting_ptcf_from_ptcf(ptcf)
-    ni_ptcf = get_non_intersecting_ptcf_from_ptcf(ptcf)
-    # print(i_ptcf)
-
-    intersecting_genes = ptcf_to_json(i_ptcf, True, ds1_colnames)
-
-    non_intersecting_genes = ptcf_to_json(ni_ptcf, False, ds1_colnames)
     return {
         'intersecting': extract_genes(clustering_intersecting, tmp_colnames, ds1_file_var, ds2_file_var,
                                       ds2_file_median, ds2_file_median),
@@ -104,17 +86,11 @@ def extract_genes(dataset, value_columns, ds1_variance, ds2_variance, ds1_median
 
 def extract_dataset_genes(ds, value_columns, variances, medians):
     dataset = {}
-    print(ds)
     for row in ds.itertuples():
-        print(row.Index)
         values = []
-
         for column in value_columns:
             values.append(row[column])
-        print({'gene': row.Index, 'values': values, 'median': medians.loc[row.Index],
-                                'variance': variances.loc[row.Index],
-                                'cluster': row['cluster']})
         dataset[row.Index] = {'gene': row.Index, 'values': values, 'median': medians.loc[row.Index],
                                 'variance': variances.loc[row.Index],
-                                'cluster': row['cluster']}
+                                'cluster': getattr(row, 'cluster')}
     return dataset
