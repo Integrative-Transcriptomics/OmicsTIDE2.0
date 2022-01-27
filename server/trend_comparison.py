@@ -25,7 +25,6 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
 
     dict of pairwise trend comparisons and related info
     """
-    preprocess_start = time.time();
     ds1_file = ds1.copy()
     ds2_file = ds2.copy()
 
@@ -70,15 +69,8 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
     ds1_file = ds1_file.T.apply(stats.zscore).T
     ds2_file = ds2_file.T.apply(stats.zscore).T
 
-    preprocess_end = time.time()
-    print("preprocessing: ", preprocess_end - preprocess_start)
-    clustering_start = time.time()
     clustering_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.INTERSECTING)
     clustering_non_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.NON_INTERSECTING)
-    clustering_end = time.time()
-    print("clustering: ", clustering_end - clustering_start)
-
-    postprocess_start = time.time()
     ptcf = combine_to_ptcf(clustering_intersecting, clustering_non_intersecting, ds1_colnames, ds2_colnames)
 
     ptcf = add_additional_columns(ptcf)
@@ -90,12 +82,11 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
 
     i_ptcf = get_intersecting_ptcf_from_ptcf(ptcf)
     ni_ptcf = get_non_intersecting_ptcf_from_ptcf(ptcf)
+    #print(i_ptcf)
 
     intersecting_genes = ptcf_to_json(i_ptcf, True, ds1_colnames)
 
     non_intersecting_genes = ptcf_to_json(ni_ptcf, False, ds1_colnames)
-    postprocess_end = time.time()
-    print("Postprocessing: ", postprocess_end - postprocess_start)
     return {
         'intersecting': intersecting_genes,
         'nonIntersecting': non_intersecting_genes,
