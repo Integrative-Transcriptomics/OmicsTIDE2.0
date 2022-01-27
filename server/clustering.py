@@ -1,4 +1,5 @@
 from sklearn.cluster import KMeans
+import time
 
 from server.enums import ComparisonType
 

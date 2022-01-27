@@ -103,73 +103,6 @@ def get_time_points(data, ds):
                         x != "ds2_median")])
 
 
-def get_x_values(data, ds):
-    """
-    adds "highlighted" and "profile_selected" column 
-
-    :param data: ptcf data frane
-    :return: ptcf data frame with additional information
-    """
-    return [x for x in list(data) if
-            x.startswith(ds) & (x != "ds1_cluster") & (x != "ds2_cluster") & (x != "gene") & (x != "ds1_median") & (
-                    x != "ds2_median")]
-
-
-def get_min_max_values(data, col1, col2):
-    """
-    extracts min and max value of two columns
-
-    :param data: ptcf data frame
-    :param col1: column 1
-    :param col1: column 2
-    :return: dict of min and max values of two columns
-    """
-
-    return {
-        'ds1_min': data[col1].min(),
-        'ds1_max': data[col1].max(),
-        'ds2_min': data[col2].min(),
-        'ds2_max': data[col2].max()
-    }
-
-
-def get_cluster_count(data):
-    """
-    extracts the unique determined clusters/trend 
-
-    :param data: ptcf data frame
-    :return: list of cluster/trend categories
-    """
-
-    ds1_cluster = [x.split("_")[1] for x in data.ds1_cluster.unique() if not pd.isna(x)]
-    ds2_cluster = [x.split("_")[1] for x in data.ds2_cluster.unique() if not pd.isna(x)]
-
-    combined_cluster = ds1_cluster + ds2_cluster
-
-    return len(list(set(combined_cluster)))
-
-
-def extract_additional_information(data):
-    """
-    extracts cluster/trend information and min/max values from PTCF
-
-    :param data: ptcf data frame
-    :return: dict of cluster/trend information and min/max values
-    """
-
-    cluster_count = get_cluster_count(data)
-
-    # consider that min and max could be equal if only one gene occurs
-
-    # consider that one experiment could contain NO genes!
-
-    min_max = get_min_max_values(data, "ds1_median", "ds2_median")
-
-    return {
-        'mod_data': data,
-        'cluster_count': cluster_count,
-        'min_max': min_max
-    }
 
 
 def split_by_link(data):
@@ -203,8 +136,6 @@ def ptcf_to_json(data, is_intersecting, conditions):
 
         data.loc[:, 'gene'] = data.index
 
-        additional_information = extract_additional_information(data)
-
         # split data into links
         datasets = [{}, {}]
         for index, row in data.iterrows():
@@ -231,77 +162,12 @@ def ptcf_to_json(data, is_intersecting, conditions):
                     datasets[0][row['gene']] = {'gene': row['gene'], 'values': values1, 'median': row['ds1_median'],
                                                 'variance': row['ds1_var'],
                                                 'cluster': row['ds1_cluster'].split('_')[1]}
-        if is_intersecting:
-            intersections = split_by_link(additional_information['mod_data'])
-            return {
-                'data': datasets,
-                'intersections': intersections,
-                'ds1_min': additional_information['min_max']['ds1_min'],
-                'ds1_max': additional_information['min_max']['ds1_max'],
-                'ds2_min': additional_information['min_max']['ds2_min'],
-                'ds2_max': additional_information['min_max']['ds2_max']
-            }
-        else:
-            return {
-                'data': datasets,
-                'ds1_min': additional_information['min_max']['ds1_min'],
-                'ds1_max': additional_information['min_max']['ds1_max'],
-                'ds2_min': additional_information['min_max']['ds2_min'],
-                'ds2_max': additional_information['min_max']['ds2_max']
-            }
-
+        return datasets
     else:
         print("no genes found")
         return {}
 
 
-def ptcf_to_json_old(data, is_intersecting):
-    """
-    transforms PTCF to JSON prior to sending it to the client
-
-    :param data: ptcf data frame
-    :param is_intersecting: bool stating whether I_PTCF or NI_PTCF
-    :return: dict of cluster/trend information and min/max values
-    """
-
-    if len(data.index) > 0:
-
-        data.loc[:, 'gene'] = data.index
-
-        additional_information = extract_additional_information(data)
-
-        # split data into links
-        if is_intersecting:
-            data_split = split_by_link(additional_information['mod_data'])
-
-        else:
-            data_split = pd.DataFrame(additional_information['mod_data']).to_dict()
-        return {
-            'data': data_split,
-            'columns': list(additional_information['mod_data']),
-            'time_points': get_time_points(additional_information['mod_data'], "ds1"),
-            'x_values': get_x_values(additional_information['mod_data'], "ds1"),
-            'cluster_count': additional_information['cluster_count'],
-            'ds1_min': additional_information['min_max']['ds1_min'],
-            'ds1_max': additional_information['min_max']['ds1_max'],
-            'ds2_min': additional_information['min_max']['ds2_min'],
-            'ds2_max': additional_information['min_max']['ds2_max']
-        }
-
-    else:
-        print("no genes found")
-
-        return {
-            'data': data.to_dict(),
-            'columns': [],
-            'time_points': 0,
-            'x_values': [],
-            'cluster_count': 0,
-            'ds1_min': 0,
-            'ds1_max': 0,
-            'ds2_min': 0,
-            'ds2_max': 0,
-        }
 
 
 def extract_from_ptcf(ptcf_file, ptcf):

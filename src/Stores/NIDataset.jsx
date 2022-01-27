@@ -50,6 +50,7 @@ export class NIDataset {
                         clusters[this.genes[gene].cluster].push(gene)
                     }
                 })
+                console.log(clusters)
                 return clusters;
             },
             /**

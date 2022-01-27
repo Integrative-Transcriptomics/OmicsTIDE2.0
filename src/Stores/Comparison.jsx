@@ -11,7 +11,7 @@ export class Comparison {
         this.file2 = data.files[1].slice(0, -4);
         this.index = index;
         this.intersecting = new Intersecting(this, this.dataStore, data.intersecting)
-        if ("data" in data.nonIntersecting) {
+        if (Object.keys(data.nonIntersecting).length>0) {
             this.nonIntersecting = new NonIntersecting(this, this.dataStore, data.nonIntersecting);
         } else {
             this.nonIntersecting = null

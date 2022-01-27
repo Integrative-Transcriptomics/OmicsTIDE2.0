@@ -7,8 +7,13 @@ import {clusterSizes, conditionMapping, geneCentricMapping} from "./HelperFuncti
  */
 export class IntersectionDataset {
     constructor(intersecting, data, index) {
+        this.parent = intersecting;
+        this.index = index;
+        this.genes = data;
+        this.initialClusters=this.calculateClusters(this.genes);
+        this.filterStore = new FilterStore(this)
         extendObservable(this, {
-            clusters: {},
+            clusters: this.initialClusters,
             get hoverClusters() {
                 //filter clusters when hovering
                 if (this.highlightedClusters.length > 0) {
@@ -100,6 +105,7 @@ export class IntersectionDataset {
                     clusters[key] = clusters[key]
                         .concat(this.parent.filteredIntersections[intersection])
                 })
+                console.log(clusters);
                 this.clusters = clusters;
             },
             /**
@@ -126,11 +132,16 @@ export class IntersectionDataset {
                     ).filter(intersection => this.parent.filteredIntersections[intersection].length > 0));
             }
         })
-        this.parent = intersecting;
-        this.index = index;
-        this.genes = data;
-        this.filterStore = new FilterStore(this)
     }
-
+    calculateClusters(genes){
+        let clusters={};
+        Object.entries(genes).forEach(([key,value])=>{
+            if(!(Object.keys(clusters).includes(value.cluster))){
+                clusters[value.cluster]=[key];
+            }
+            clusters[value.cluster].push(key)
+        })
+        return(clusters);
+    }
 
 }
