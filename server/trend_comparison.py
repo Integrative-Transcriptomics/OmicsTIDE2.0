@@ -4,8 +4,6 @@ from scipy import stats
 from server.clustering import cluster
 from server.data_quality_assurance import equal_number_of_columns
 from server.enums import ComparisonType
-from server.ptcf import combine_to_ptcf, add_additional_columns, get_intersecting_ptcf_from_ptcf, \
-    get_non_intersecting_ptcf_from_ptcf, ptcf_to_json
 from server.variance_filter import filter_variance
 
 
@@ -23,6 +21,7 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
 
     dict of pairwise trend comparisons and related info
     """
+    # print("called")
     ds1_file = ds1.copy()
     ds2_file = ds2.copy()
 
@@ -42,11 +41,10 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
     ds2_file.drop(columns=["median"], axis=1, inplace=True)
 
     # init colnames
-    ds1_colnames = list(ds1_file)
-    ds2_colnames = list(ds2_file)
+    colnames = list(ds1_file)
 
     # tmp colnames
-    tmp_colnames = list(range(1, len(ds1_colnames) + 1))
+    tmp_colnames = list(range(1, len(colnames) + 1))
 
     ds1_file.columns = tmp_colnames
     ds2_file.columns = tmp_colnames
@@ -71,16 +69,20 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
     clustering_non_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.NON_INTERSECTING)
     return {
         'intersecting': extract_genes(clustering_intersecting, tmp_colnames, ds1_file_var, ds2_file_var,
-                                      ds2_file_median, ds2_file_median),
+                                      ds1_file_median, ds2_file_median),
         'nonIntersecting': extract_genes(clustering_non_intersecting, tmp_colnames, ds1_file_var, ds2_file_var,
-                                         ds2_file_median, ds2_file_median),
-        'conditions': ds1_colnames,
+                                         ds1_file_median, ds2_file_median),
+        'conditions': colnames,
     }
 
 
 def extract_genes(dataset, value_columns, ds1_variance, ds2_variance, ds1_median, ds2_median):
-    ds1 = extract_dataset_genes(dataset[dataset['dataset'] == 1], value_columns, ds1_variance, ds1_median)
-    ds2 = extract_dataset_genes(dataset[dataset['dataset'] == 2], value_columns, ds2_variance, ds2_median)
+    if dataset is not None:
+        ds1 = extract_dataset_genes(dataset[dataset['dataset'] == 1], value_columns, ds1_variance, ds1_median)
+        ds2 = extract_dataset_genes(dataset[dataset['dataset'] == 2], value_columns, ds2_variance, ds2_median)
+    else:
+        ds1 = {}
+        ds2 = {}
     return [ds1, ds2]
 
 
@@ -91,6 +93,6 @@ def extract_dataset_genes(ds, value_columns, variances, medians):
         for column in value_columns:
             values.append(row[column])
         dataset[row.Index] = {'gene': row.Index, 'values': values, 'median': medians.loc[row.Index],
-                                'variance': variances.loc[row.Index],
-                                'cluster': getattr(row, 'cluster')}
+                              'variance': variances.loc[row.Index],
+                              'cluster': str(getattr(row, 'cluster') + 2)}
     return dataset

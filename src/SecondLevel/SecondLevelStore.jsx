@@ -40,10 +40,14 @@ export class SecondLevelStore {
             },
 
             // calculates overrepresentation and sets loading status
-            calcOverrepresentation(organism, wholeGenomeRef) {
+            calcOverrepresentation(organism, wholeGenomeRef, useSelectGenes) {
                 this.isLoading = true;
                 this.isLoaded = false;
-                this.pantherAPI.calcOverrepresentation(this.genes, parent.genes ,organism, wholeGenomeRef, (response) => {
+                let genes=this.genes;
+                if(useSelectGenes){
+                    genes=toJS(this.searchGenes);
+                }
+                this.pantherAPI.calcOverrepresentation(genes, parent.genes ,organism, wholeGenomeRef, (response) => {
                     this.setGoData(response);
                     this.setIsLoading(false);
                     this.setIsLoaded(true);

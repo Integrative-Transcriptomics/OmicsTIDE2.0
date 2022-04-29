@@ -1,20 +1,19 @@
 import os
-from datetime import datetime
-from zipfile import ZipFile
+import tempfile
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 pd.options.mode.chained_assignment = None  # default='warn'
 import simplejson as json
-from flask import make_response, jsonify, request, send_from_directory, Flask
+from flask import make_response, jsonify, request, Flask
 
 from server.data_quality_assurance import valid_cluster_header, valid_cluster_values, invalid_cluster_value_pos, \
     has_equal_number_of_timepoints
 from server.preprocess_files import preprocess_file
 from server.preprocess_files import remove_invalid_genes
-from server.ptcf import get_non_intersecting_ptcf_from_ptcf, get_intersecting_ptcf_from_ptcf, add_additional_columns, \
-    ptcf_to_json
+from server.ptcf import read_comment_lines, read_clustering_file
 # import svgutils
 from server.trend_comparison import pairwise_trendcomparison
 
@@ -27,57 +26,24 @@ here = os.path.dirname(__file__)
 app.config['FILES_BLOODCELLS'] = os.path.join(here, 'data', 'BloodCell')
 app.config['FILES_STREPTOMYCES'] = os.path.join(here, 'data', 'caseStudy_colnames')
 
-
-def get_k_from_ptcf(data):
-    """extracts k parameter from the data
-
-    :param data: data frame
-
-    :return: number of trends/clusters determined
-    """
-
-    ds1_cluster = data['ds1_cluster'].dropna().unique()
-    ds2_cluster = data['ds2_cluster'].dropna().unique()
-
-    ds1_cluster_number_only = [x.split("_")[1] for x in ds1_cluster]
-    ds2_cluster_number_only = [x.split("_")[1] for x in ds2_cluster]
-
-    return len(list(set(ds1_cluster_number_only + ds2_cluster_number_only)))
-
-
-def get_median_values(data, ds):
-    """extracts median abundance values
-
-    :param data: PTCF
-    :param ds: data set identifier (ds1 or ds1)
-
-    :return: median values of given data set
-    """
-
-    values = data[
-        [x for x in list(data) if x.startswith(ds) & (x != "ds1_cluster") & (x != "ds2_cluster") & (x != "gene")]]
-
-    return values.median(axis=1)
-
-
-def get_var_values(data, ds):
-    """extracts gene variance values
-
-    :param data: PTCF
-    :param ds: data set identifier (ds1 or ds1)
-
-    :return: gene variance values of given data set
-    """
-
-    values = data[
-        [x for x in list(data) if x.startswith(ds) & (x != "ds1_cluster") & (x != "ds2_cluster") & (x != "gene")]]
-
-    return values.var(axis=1)
-
-
 ##############
 ### ROUTES ###
 ##############
+
+@app.route('/load_custom_clustering', methods=['POST'])
+def load_clustering():
+    clustering_file = request.files.get("clusteringFile")
+    mapping_file = request.files.get("mappingFile")
+    comparison = read_clustering_file(clustering_file)
+    try:
+        if mapping_file is not None:
+            mapping = pd.read_csv(mapping_file, sep=",").to_numpy().tolist()
+        else:
+            mapping = None
+    except TypeError as te:
+        if str(te) == "object of type 'builtin_function_or_method' has no len()":
+            return jsonify(message='ID column has to be named "gene"'), 500
+    return json.dumps({"data": [comparison], "mapping": mapping}, ignore_nan=True)
 
 
 @app.route('/load_data', methods=['POST'])
@@ -98,7 +64,7 @@ def load_data():
             comparison = pairwise_trendcomparison(ds[combination[0]], ds[combination[1]],
                                                   lower_variance_percentile,
                                                   upper_variance_percentile, k)
-            comparison["files"] = [combination[0], combination[1]]
+            comparison["files"] = [Path(combination[0]).stem, Path(combination[1]).stem]
             data.append(comparison)
         except TypeError as te:
             if str(te) == "object of type 'builtin_function_or_method' has no len()":
@@ -135,7 +101,7 @@ def load_test_data_bloodcell():
         comparison = pairwise_trendcomparison(preprocess_file(transcriptome_data), preprocess_file(proteome_data),
                                               lower_variance_percentile,
                                               upper_variance_percentile, k)
-        comparison["files"] = ["Transcriptome.csv", "Proteome.csv"]
+        comparison["files"] = ["Transcriptome", "Proteome"]
         data.append(comparison)
         mapping = pd.read_csv(mapping_file, sep=",").to_numpy().tolist()
 
@@ -164,13 +130,14 @@ def load_test_data_streptomyces():
         comparison1 = pairwise_trendcomparison(preprocess_file(trans_m1152), preprocess_file(trans_m145),
                                                lower_variance_percentile,
                                                upper_variance_percentile, k)
-        comparison1["files"] = ["Transcriptome_M1152.csv", "Transcriptome_M145.csv"]
+        comparison1["files"] = ["Transcriptome_M1152", "Transcriptome_M145"]
         data.append(comparison1)
         comparison2 = pairwise_trendcomparison(preprocess_file(trans_m1152), preprocess_file(prot_m1152),
                                                lower_variance_percentile,
                                                upper_variance_percentile, k)
-        comparison2["files"] = ["Transcriptome_M1152.csv", "Proteome_M1152.csv"]
+        comparison2["files"] = ["Transcriptome_M1152", "Proteome_M1152"]
         data.append(comparison2)
+
 
     except TypeError as te:
         if str(te) == "object of type 'builtin_function_or_method' has no len()":
@@ -203,7 +170,7 @@ def download_session():
         for gene in session_data["ds1"]:
             row_dict = dict()
             row_dict["GENE"] = gene
-            if not(gene in session_data["filtered"]):
+            if not (gene in session_data["filtered"]):
                 row_dict["FILTERED"] = "TRUE"
             else:
                 row_dict["FILTERED"] = "FALSE"
@@ -236,91 +203,18 @@ def download_session():
                                  session_data["ds2"][gene]["values"]))
                 rows.append(row_dict)
         df = pd.DataFrame(rows)
-        response = make_response(df.to_csv(index=False))
+        tmp = tempfile.NamedTemporaryFile()
+        fp = open(tmp.name, "a")
+        fp.write("# datasets: " + session_data["file1"] + "," + session_data["file2"] + "\n")
+        fp.write("# conditions: " + ','.join(session_data["conditions"]) + "\n")
+        df.to_csv(path_or_buf=fp, index=False)
+        fp.close()
+        fp = open(tmp.name, "r")
+        response = make_response(fp.read())
+        fp.close()
         response.headers.set("Content-Disposition", "attachment", filename="file.csv")
         response.mimetype = 'text/csv'
         return response
-
-
-@app.route('/send_svg', methods=['GET', 'POST'])
-def send_svg():
-    if request.method == 'POST':
-
-        path1 = os.path.join(app.config['UPLOAD_FOLDER'], 'dataset1.svg')
-        path2 = os.path.join(app.config['UPLOAD_FOLDER'], 'dataset2.svg')
-        path_selection = os.path.join(app.config['UPLOAD_FOLDER'], 'selection.csv')
-        path_go = os.path.join(app.config['UPLOAD_FOLDER'], 'go.csv')
-
-        dataset1 = json.loads(request.form.to_dict()['dataset1_plot'])
-        dataset2 = json.loads(request.form.to_dict()['dataset2_plot'])
-        selection = pd.read_json(request.form.to_dict()['selection'], orient='records')
-        selection.set_index('gene', inplace=True)
-
-        try:
-
-            mol_func = pd.read_json(request.form.to_dict()['molecularFunction'], orient='records')
-            bio_proc = pd.read_json(request.form.to_dict()['biologicalProcess'], orient='records')
-            cell_comp = pd.read_json(request.form.to_dict()['cellularComponent'], orient='records')
-
-            mol_func['main_category'] = ['molecularFunction'] * len(mol_func.index)
-            bio_proc['main_category'] = ['biologicalProcess'] * len(bio_proc.index)
-            cell_comp['main_category'] = ['cellularComponent'] * len(cell_comp.index)
-
-            mol_func = mol_func[pd.notnull(mol_func['id'])]
-            bio_proc = bio_proc[pd.notnull(bio_proc['id'])]
-            cell_comp = cell_comp[pd.notnull(cell_comp['id'])]
-
-            mol_func.sort_values(by='FDR', inplace=True)
-            bio_proc.sort_values(by='FDR', inplace=True)
-            cell_comp.sort_values(by='FDR', inplace=True)
-
-            go = pd.concat([mol_func, bio_proc])
-            go = pd.concat([go, cell_comp])
-            go.drop(columns=['term'], inplace=True)
-
-        except:
-            print("no go found")
-
-        selection.drop(columns=['highlighted', 'profile_selected', 'ds1_median', 'ds2_median'], inplace=True)
-
-        svg_1 = open(path1, "a")
-        svg_1.write(dataset1)
-        svg_1.close()
-
-        svg_2 = open(path2, "a")
-        svg_2.write(dataset2)
-        svg_2.close()
-
-        selection.to_csv(path_selection)
-
-        try:
-            go.to_csv(path_go)
-
-        except:
-            print("no go found")
-
-        time_id = str(datetime.now())
-        time_id = time_id.replace(" ", "_")
-        time_id = time_id.replace(":", "_")
-        time_id = time_id.split(".")[0]
-
-        zipObj = ZipFile(os.path.join(app.config['UPLOAD_FOLDER'], "OmicsTIDE_" + str(time_id)), 'w')
-
-        zipObj.write(path1)
-        zipObj.write(path2)
-        zipObj.write(path_selection)
-
-        try:
-            zipObj.write(path_go)
-
-        except:
-            print("no go found")
-
-        zipObj.close()
-
-        timestamp_name = "OmicsTIDE_" + time_id
-
-        return send_from_directory(app.config['UPLOAD_FOLDER'], timestamp_name, as_attachment=True)
 
 
 @app.route('/')
