@@ -69,6 +69,7 @@ const DefaultView = observer((props) => {
     const [k, setK] = useState(3)
     const [testData, setTestData] = useState("")
     const [files, setFiles] = useState([]);
+    const [clusteringFile, setClusteringFile] = useState(null);
     const [idMappingFile, setIDMappingFile] = useState(null);
     const [dataLoading, setDataLoading] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0)
@@ -98,10 +99,14 @@ const DefaultView = observer((props) => {
                 } else if (testData === "s") {
                     url = "/load_test_data_streptomyces";
                 }
-            } else {
+            } else if (selectedTab === 0) {
                 url = "/load_data";
                 files.forEach(file => formData.append("files[]", file));
                 formData.append("comparisons", JSON.stringify(comparisons.filter(d => d.selected).map(d => d.files)))
+                formData.append("mappingFile", idMappingFile);
+            } else {
+                url = "/load_custom_clustering"
+                formData.append("clusteringFile", clusteringFile);
                 formData.append("mappingFile", idMappingFile);
             }
             axios.post(url, formData)
@@ -111,38 +116,64 @@ const DefaultView = observer((props) => {
                     props.setDataLoaded(true);
                 })
         },
-        [varFilter, k, testData, files, store, props, idMappingFile, selectedTab, comparisons],
+        [props, k, varFilter, selectedTab, testData, files, comparisons, idMappingFile, clusteringFile, store],
     );
+    const selectK =
+        <div>
+            <Typography id="discrete-slider" gutterBottom>
+                K for k-means
+            </Typography>
+            <Grid container spacing={10}>
+                <Grid item xs={9}>
+                    <Slider
+                        value={k}
+                        aria-labelledby="discrete-slider"
+                        valueLabelDisplay="auto"
+                        step={1}
+                        marks
+                        onChange={(e, v) => setK(v)}
+                        min={2}
+                        max={10}
+                    />
+                </Grid>
+                <Grid item xs={3} className={classes.centerText}>
+                    {"k=" + k}
+                </Grid>
+            </Grid>
+        </div>
+    const selectVar =
+        <div>
+            <Typography id="range-slider" gutterBottom>
+                Variance Filter
+            </Typography>
+            <Grid container spacing={10}>
+                <Grid item xs={9}>
+                    <Slider
+                        value={varFilter}
+                        onChange={(e, v) => setVarFilter(v)}
+                        valueLabelDisplay="auto"
+                        aria-labelledby="range-slider"
+                    />
+                </Grid>
+                <Grid item xs={3} className={classes.centerText}>
+                    {varFilter[0] + " ≤ var ≤ " + varFilter[1]}
+                </Grid>
+            </Grid>
+        </div>
     return (
         <div style={{padding: 10}}>
-            <Alert severity="info">
-                OmicsTIDE integrates proteomics and transcriptomics data by concatenating two tables with expression
-                labels and clustering them with k-means. As a result, each gene is associated with a cluster in both
-                data sets. The result is visualized in OmicsTIDE.
-                <br/>
-                How it works:
-                <ul>
-                    <li>Select two or more files or load test files. First column: Gene IDs, header "gene", Other
-                        columns conditions, e.g. timepoint 1, timepoint 2, timepoint 3. Cells: expression values
-                    </li>
-                    <li>Select k for k-means: K determines how many trends will be created, feel free to play with
-                        different K for your data.
-                    </li>
-                    <li>Variance filter: Filters data by variance. Sometimes results are improved by only considering
-                        highly variant genes.
-                    </li>
-                </ul></Alert>
             <Grid container spacing={10}>
-                <Grid item xs={6}>
+                <Grid item xs={12}>
                     <Grid container>
                         <Grid item xs={12}>
                             <Tabs value={selectedTab} onChange={(e, v) => setSelectedTab(v)}
                                   aria-label="basic tabs example">
-                                <Tab label="Upload"/>
-                                <Tab label="Test data"/>
+                                <Tab label="Upload expression files"/>
+                                <Tab label="Load test data"/>
+                                <Tab label="Upload custom clustering"/>
                             </Tabs>
                         </Grid>
-                        <Grid item xs={10}>
+                        <Grid item xs={12}>
                             <TabPanel value={selectedTab} index={0}>
                                 <Grid container spacing={1}>
                                     <Grid item xs={8}>
@@ -180,11 +211,48 @@ const DefaultView = observer((props) => {
                                     {files.length > 1 ?
                                         <Grid item xs={12}>
                                             <Typography>
-                                                {files.length>2?"Select comparisons of interest":"Comparison"}
+                                                {files.length > 2 ? "Select comparisons of interest" : "Comparison"}
                                             </Typography>
-                                            <ComparisonTable hasSelect={files.length>2} comparisons={comparisons}
+                                            <ComparisonTable hasSelect={files.length > 2} comparisons={comparisons}
                                                              setComparisons={(newComparisons) => setComparisons(newComparisons)}/>
                                         </Grid> : null}
+                                </Grid>
+                                {selectK}
+                                {selectVar}
+                            </TabPanel>
+                            <TabPanel value={selectedTab} index={2}>
+                                <Grid container spacing={1}>
+                                    <Grid item xs={8}>
+                                        <Button component="label" variant="contained">Select clustering file
+                                            <input type="file"
+                                                   onChange={(e) => setClusteringFile([...e.target.files][0])}
+                                                   hidden/>
+                                        </Button>
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <Typography align="center">
+                                            {clusteringFile !== null ? clusteringFile.name : null}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={8}>
+                                        <Button component="label" variant="contained">Select ID mapping file
+                                            <input type="file"
+                                                   onChange={(e) => setIDMappingFile([...e.target.files][0])}
+                                                   hidden/>
+                                        </Button>
+                                        <Tooltip
+                                            title="Upload gene mapping file to be able to search for specific genes (optional).">
+                                            <InfoIcon/>
+                                        </Tooltip>
+                                        <Typography>
+                                            (optional)
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                        <Typography align="center">
+                                            {idMappingFile !== null ? idMappingFile.name : null}
+                                        </Typography>
+                                    </Grid>
                                 </Grid>
                             </TabPanel>
                             <TabPanel value={selectedTab} index={1}>
@@ -238,48 +306,15 @@ const DefaultView = observer((props) => {
                                             rel="noreferrer"
                                             target="_blank">https://doi.org/10.1016/j.isci.2020.101525</a>
                                         </Typography></Alert> : null}
+                                {selectK}
+                                {selectVar}
                             </TabPanel>
                         </Grid>
                     </Grid>
-                    <Typography id="discrete-slider" gutterBottom>
-                        K for k-means
-                    </Typography>
-                    <Grid container spacing={10}>
-                        <Grid item xs={9}>
-                            <Slider
-                                value={k}
-                                aria-labelledby="discrete-slider"
-                                valueLabelDisplay="auto"
-                                step={1}
-                                marks
-                                onChange={(e, v) => setK(v)}
-                                min={2}
-                                max={10}
-                            />
-                        </Grid>
-                        <Grid item xs={3} className={classes.centerText}>
-                            {"k=" + k}
-                        </Grid>
-                    </Grid>
-                    <Typography id="range-slider" gutterBottom>
-                        Variance Filter
-                    </Typography>
-                    <Grid container spacing={10}>
-                        <Grid item xs={9}>
-                            <Slider
-                                value={varFilter}
-                                onChange={(e, v) => setVarFilter(v)}
-                                valueLabelDisplay="auto"
-                                aria-labelledby="range-slider"
-                            />
-                        </Grid>
-                        <Grid item xs={3} className={classes.centerText}>
-                            {varFilter[0] + " ≤ var ≤ " + varFilter[1]}
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={9}>
+                    <Grid item xs={12}>
                         {store.pantherAPI.genomesLoaded ?
-                            [<Typography key="task">Select species: (optional, required for functional analysis)</Typography>,
+                            [<Typography key="task">Select species: (optional, required for functional
+                                analysis)</Typography>,
                                 <Typography key="powerdBy">Powerd by <b>PANTHER</b> (<a
                                     href="http://pantherdb.org/">http://pantherdb.org/</a>)</Typography>,
                                 <Autocomplete

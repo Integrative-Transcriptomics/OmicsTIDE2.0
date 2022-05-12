@@ -51,16 +51,18 @@ const IntersectVis = observer((props) => {
                 <Grid id={id} ref={ref} item xs={9}>
                     <Grid container spacing={3}>
                         <Grid item xs={3}>
-                            <Typography>{store.comparison.file1}</Typography>
+                            <Typography variant={"h5"}>{store.comparison.file1}</Typography>
                         </Grid>
                         <Grid item xs={6}>
+                            <Typography variant={"h5"}>
                             {"Concordant genes: " + Math.round(store.concordantDiscordant.concordant / store.genes.length * 100)
                             + "% (" + store.concordantDiscordant.concordant
                             + ") Discordant genes: " + Math.round(store.concordantDiscordant.discordant / store.genes.length * 100)
                             + "% (" + store.concordantDiscordant.discordant + ")"}
+                            </Typography>
                         </Grid>
                         <Grid item xs={3}>
-                            <Typography>{store.comparison.file2}</Typography>
+                            <Typography variant={"h5"}>{store.comparison.file2}</Typography>
                         </Grid>
                     </Grid>
                     <Grid container spacing={0}>

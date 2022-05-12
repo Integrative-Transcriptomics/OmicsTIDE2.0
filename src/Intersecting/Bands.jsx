@@ -4,6 +4,7 @@ import React from "react";
 import {useStore} from "../Stores/RootStore";
 import Tooltip from "@material-ui/core/Tooltip";
 import {v4 as uuidv4} from 'uuid';
+import Typography from "@material-ui/core/Typography";
 
 
 const Bands = observer((props) => {
@@ -11,12 +12,13 @@ const Bands = observer((props) => {
     const paths = [];
     // current y position of intersection at ds1
     let currPos1 = 0;
+    let ds1Start=0;
     // array to store y positions of intersections at ds2
     let currPos2 = [];
     // helper to fill currPos2
     let currPos = 0;
     // fill currPos2 with y positions of nodes at ds2
-    store.ds2.filteredClusterNames.forEach((cluster, i) => {
+    store.ds2.filteredClusterNames.forEach((cluster) => {
         const height = props.yScale(store.ds2.clusterSizes[cluster])
         currPos2.push(currPos)
         currPos += height + props.whiteSpace
@@ -58,7 +60,7 @@ const Bands = observer((props) => {
                             <stop offset="100%" style={{stopColor: fill1}}/>
                         </linearGradient>
                     </defs>
-                    <Tooltip title={"Intersection size: " + props.intersections[cluster1 + "," + cluster2]}
+                    <Tooltip title={<Typography>{"Intersection size: " + props.intersections[cluster1 + "," + cluster2]}</Typography>}
                              followCursor>
                         <path
                             d={p1 + " " + p2 + " " + p3 + " " + p4 + " Z"} opacity={opacity}
@@ -78,7 +80,8 @@ const Bands = observer((props) => {
 
         })
         // add whitespace to currPos1 when finished with a cluster
-        currPos1 += props.whiteSpace;
+        ds1Start += props.yScale(store.ds1.clusterSizes[cluster1]) + props.whiteSpace;
+        currPos1=ds1Start
     })
     return (
         <g>{paths}</g>

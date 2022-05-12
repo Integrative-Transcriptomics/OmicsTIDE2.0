@@ -15,7 +15,7 @@ const DatasetTrends = observer((props) => {
         // margins for subplots
         const margin = {
             left: 50,
-            right: 10,
+            right: 15,
             top: 10,
             bot: 30,
         }

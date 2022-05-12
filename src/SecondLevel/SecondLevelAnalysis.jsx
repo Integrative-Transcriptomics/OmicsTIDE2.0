@@ -44,6 +44,7 @@ const SecondLevelAnalysis = observer((props) => {
     const [calculationText, setCalculationText] = useState(null)
     const [expType, setExptype] = useState("pdf")
     const [isWholeGenomeRef, setIsWholeGenomeRef] = useState(false);
+    const [useSelectGenes, setUseSelectGenes]=useState(false);
 
     const id = "id" + uuidv4()
 
@@ -65,11 +66,11 @@ const SecondLevelAnalysis = observer((props) => {
 
     const performEnrichment = useCallback(() => {
         setCalculationText(null)
-        store.calcOverrepresentation(store.pantherAPI.selectedSpecies, isWholeGenomeRef);
+        store.calcOverrepresentation(store.pantherAPI.selectedSpecies, isWholeGenomeRef, useSelectGenes);
         startTimer().then(() => {
             setCalculationText("This seems to take longer than normally. There might be a problem with PANTHER")
         })
-    }, [isWholeGenomeRef, store])
+    }, [isWholeGenomeRef, useSelectGenes, store])
     /*useEffect(() => {
         performEnrichment();
     }, [performEnrichment])*/
@@ -195,7 +196,7 @@ const SecondLevelAnalysis = observer((props) => {
                     </FormControl>
                     <br/>
                     <FormControl>
-                        <FormLabel>GO enrichment</FormLabel>
+                        <FormLabel>GO enrichment background</FormLabel>
                         {store.pantherAPI.selectedSpecies !== '' ?
                             [<RadioGroup
                                 row
@@ -215,6 +216,27 @@ const SecondLevelAnalysis = observer((props) => {
                         }
 
                     </FormControl>
+                    {store.searchGenes.length > 1 ?
+
+                        <FormControl>
+                            <FormLabel>GO enrichment target genes</FormLabel>
+                            <RadioGroup
+                            row
+                            value={useSelectGenes.toString()}
+                            onChange={(e) => setUseSelectGenes(e.target.value === "true")}
+                        >
+                            <FormControlLabel value={"false"}
+                                              control={<Radio/>}
+                                              label="Use all genes in current tab"/>
+                            <FormControlLabel value={"true"}
+                                              control={<Radio/>} label="Use only highlighted genes"/>
+                        </RadioGroup>,
+                            <Button size={"small"} style={{marginTop: "5px"}} variant={"contained"}
+                                    onClick={performEnrichment}>Perform
+                                enrichment</Button>
+
+                        </FormControl>:null
+                    }
                 </Grid>
                 <Grid item xs={6}/>
                 {goVis}

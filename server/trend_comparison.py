@@ -4,8 +4,6 @@ from scipy import stats
 from server.clustering import cluster
 from server.data_quality_assurance import equal_number_of_columns
 from server.enums import ComparisonType
-from server.ptcf import combine_to_ptcf, add_additional_columns, get_intersecting_ptcf_from_ptcf, \
-    get_non_intersecting_ptcf_from_ptcf, ptcf_to_json
 from server.variance_filter import filter_variance
 
 
@@ -23,6 +21,7 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
 
     dict of pairwise trend comparisons and related info
     """
+    # print("called")
     ds1_file = ds1.copy()
     ds2_file = ds2.copy()
 
@@ -42,11 +41,10 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
     ds2_file.drop(columns=["median"], axis=1, inplace=True)
 
     # init colnames
-    ds1_colnames = list(ds1_file)
-    ds2_colnames = list(ds2_file)
+    colnames = list(ds1_file)
 
     # tmp colnames
-    tmp_colnames = list(range(1, len(ds1_colnames) + 1))
+    tmp_colnames = list(range(1, len(colnames) + 1))
 
     ds1_file.columns = tmp_colnames
     ds2_file.columns = tmp_colnames
@@ -64,29 +62,37 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
     ds1_file = pd.DataFrame(data=ds1_file_np, index=ds1_file.index, columns=list(tmp_colnames))
     ds2_file = pd.DataFrame(data=ds2_file_np, index=ds2_file.index, columns=list(tmp_colnames))
 
-    ds1_file = ds1_file.T.apply(stats.zscore).T
-    ds2_file = ds2_file.T.apply(stats.zscore).T
+    ds1_file = ds1_file.apply(stats.zscore, 1, False, "broadcast")
+    ds2_file = ds2_file.apply(stats.zscore, 1, False, "broadcast")
 
     clustering_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.INTERSECTING)
     clustering_non_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.NON_INTERSECTING)
-
-    ptcf = combine_to_ptcf(clustering_intersecting, clustering_non_intersecting, ds1_colnames, ds2_colnames)
-
-    ptcf = add_additional_columns(ptcf)
-
-    ptcf.loc[:, 'ds1_var'] = ds1_file_var
-    ptcf.loc[:, 'ds2_var'] = ds2_file_var
-    ptcf.loc[:, 'ds1_median'] = ds1_file_median
-    ptcf.loc[:, 'ds2_median'] = ds2_file_median
-
-    i_ptcf = get_intersecting_ptcf_from_ptcf(ptcf)
-    ni_ptcf = get_non_intersecting_ptcf_from_ptcf(ptcf)
-
-    intersecting_genes = ptcf_to_json(i_ptcf, True, ds1_colnames)
-
-    non_intersecting_genes = ptcf_to_json(ni_ptcf, False, ds1_colnames)
     return {
-        'intersecting': intersecting_genes,
-        'nonIntersecting': non_intersecting_genes,
-        'conditions': ds1_colnames,
+        'intersecting': extract_genes(clustering_intersecting, tmp_colnames, ds1_file_var, ds2_file_var,
+                                      ds1_file_median, ds2_file_median),
+        'nonIntersecting': extract_genes(clustering_non_intersecting, tmp_colnames, ds1_file_var, ds2_file_var,
+                                         ds1_file_median, ds2_file_median),
+        'conditions': colnames,
     }
+
+
+def extract_genes(dataset, value_columns, ds1_variance, ds2_variance, ds1_median, ds2_median):
+    if dataset is not None:
+        ds1 = extract_dataset_genes(dataset[dataset['dataset'] == 1], value_columns, ds1_variance, ds1_median)
+        ds2 = extract_dataset_genes(dataset[dataset['dataset'] == 2], value_columns, ds2_variance, ds2_median)
+    else:
+        ds1 = {}
+        ds2 = {}
+    return [ds1, ds2]
+
+
+def extract_dataset_genes(ds, value_columns, variances, medians):
+    dataset = {}
+    for row in ds.itertuples():
+        values = []
+        for column in value_columns:
+            values.append(row[column])
+        dataset[row.Index] = {'gene': row.Index, 'values': values, 'median': medians.loc[row.Index],
+                              'variance': variances.loc[row.Index],
+                              'cluster': str(getattr(row, 'cluster') + 2)}
+    return dataset

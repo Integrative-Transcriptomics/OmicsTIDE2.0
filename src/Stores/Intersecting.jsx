@@ -170,8 +170,8 @@ export class Intersecting {
         this.dataStore = dataStore;
         this.comparison = comparison;
         // both data sets
-        this.ds1 = this.initDataSet(data.data[0], 0);
-        this.ds2 = this.initDataSet(data.data[1], 1);
+        this.ds1 = this.initDataSet(data[0], 0);
+        this.ds2 = this.initDataSet(data[1], 1);
         let values = Object.values(this.ds1.genes)
             .map(d => d.values).concat(Object.values(this.ds2.genes)
                 .map(d => d.values)).flat();
@@ -180,18 +180,15 @@ export class Intersecting {
         // maximum value obsereved
         this.maxValue = d3.max(values);
         // complete intersections (unfiltered)
-        this.intersections = this.initIntersections(data)
+        this.intersections = this.calculateIntersections()
         this.initialConcordantDiscordant = this.calculateConcordantDiscordant(this.intersections);
-        // create clusters for each data set based on intersections (quicker than always recomputing intersections from clusters)
-        this.ds1.updateClusters();
-        this.ds2.updateClusters();
 
         // sort clusterNames by cluster size of first data set to ensure
         // reproducibility when loading the same data multiple times
         this.clusterNames = sortClusters(this.ds1.clusters);
         this.clusterOrder = sortClusters(this.ds1.clusters);
-        Object.keys(this.ds2.clusters).forEach(cluster=>{
-            if(!(this.clusterNames.includes(cluster))){
+        Object.keys(this.ds2.clusters).forEach(cluster => {
+            if (!(this.clusterNames.includes(cluster))) {
                 this.clusterOrder.push(cluster);
             }
         })
@@ -204,20 +201,6 @@ export class Intersecting {
                 this.ds1.updateClusters();
                 this.ds2.updateClusters();
             });
-    }
-
-    /**
-     * initialize intersection from data received
-     * @param {Object} data
-     * @returns {{}}
-     */
-    initIntersections(data) {
-        let intersections = {}
-        Object.keys(data.intersections).forEach(intersection => {
-            const key = intersection.split('-').map(ds => ds.split('_')[1])
-            intersections[key] = data.intersections[intersection];
-        })
-        return intersections
     }
 
     /**
@@ -245,6 +228,16 @@ export class Intersecting {
             } else discordantCount += intersections[intersection].length;
         })
         return ({concordant: concordantCount, discordant: discordantCount})
+    }
+
+    calculateIntersections() {
+        let intersections = {};
+        Object.entries(this.ds1.initialClusters).forEach(([key1, value1]) => {
+            Object.entries(this.ds2.initialClusters).forEach(([key2, value2]) => {
+                intersections[key1+","+key2]=value1.filter(value => value2.includes(value));
+            })
+        })
+        return intersections;
     }
 
     /**

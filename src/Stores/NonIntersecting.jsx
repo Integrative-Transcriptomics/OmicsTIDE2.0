@@ -54,8 +54,8 @@ export class NonIntersecting {
         this.dataStore = dataStore;
         this.comparison = comparison;
         // both data sets
-        this.ds1 = this.initDataSet(data.data[0], 0);
-        this.ds2 = this.initDataSet(data.data[1], 1);
+        this.ds1 = this.initDataSet(data[0], 0);
+        this.ds2 = this.initDataSet(data[1], 1);
         let values = Object.values(this.ds1.genes)
             .map(d => d.values).concat(Object.values(this.ds2.genes)
                 .map(d => d.values)).flat();

@@ -19,7 +19,6 @@ export class RootStore {
      * initialized data when data is loaded
      * @param {Object} data
      * @param mapping
-     * @param species
      * @param {number[]} initialVarFilter
      */
     init(data, mapping, initialVarFilter) {
