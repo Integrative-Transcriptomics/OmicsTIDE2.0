@@ -18,8 +18,8 @@ const Boxplot = observer((props) => {
 
         const yScale = props.yScale;
         const createBoxplot = useCallback((outliers, quantiles) => {
-            const points = outliers.map(point => {
-                return <circle cy={yScale(point)} cx={props.width / 2} r={1} opacity={props.opacity}/>
+            const points = outliers.map((point,i) => {
+                return <circle key={i} cy={yScale(point)} cx={props.width / 2} r={1} opacity={props.opacity}/>
             })
             return (<g>
                 <rect ref={box} y={yScale(quantiles[3])} width={props.width}

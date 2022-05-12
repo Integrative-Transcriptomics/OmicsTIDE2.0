@@ -9,6 +9,8 @@ import Tab from "@material-ui/core/Tab";
 import TabPanel from "./TabPanel";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
+import HomeTab from "./HomeTab";
+import HomeIcon from '@mui/icons-material/Home';
 
 const rootStore = new RootStore();
 
@@ -28,8 +30,8 @@ function App() {
     }, [selectedTab, tabs]);
     useEffect(() => {
         if (dataLoaded) {
-            selectTab(1)
-        } else{
+            selectTab(2)
+        } else {
             setTabs([])
         }
     }, [dataLoaded]);
@@ -56,12 +58,16 @@ function App() {
                 onChange={(e, v) => selectTab(v)}
                 scrollButtons="auto"
             >
+                <Tab label={<HomeIcon/>}/>
                 <Tab label="Data upload"/>
                 {dataLoaded ? <Tab label="Overview"/> : null}
                 {tabElems}
             </Tabs>
             {/* eslint-disable-next-line react/jsx-no-undef */}
-            <TabPanel key="data" value={selectedTab} index={0}>
+            <TabPanel key="Explanation" index={0} value={selectedTab}>
+                <HomeTab jumpToLoad={()=>selectTab(1)}/>
+            </TabPanel>
+            <TabPanel key="data" value={selectedTab} index={1}>
                 <StoreProvider store={rootStore}>
                     <DefaultView setDataLoaded={setDataLoaded}/>
                 </StoreProvider>

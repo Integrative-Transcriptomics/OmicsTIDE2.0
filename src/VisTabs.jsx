@@ -16,18 +16,18 @@ function VisTabs(props) {
         const tabIndex = props.tabs.map(d => d.type === "intersect" ? d.index : -1).indexOf(index)
         if (tabIndex === -1) {
             setTabs(props.tabs.concat([{type: "intersect", index: index}]))
-            selectTab(props.tabs.length + 2)
+            selectTab(props.tabs.length + 3)
         } else {
-            selectTab(tabIndex + 2)
+            selectTab(tabIndex + 3)
         }
     }, [props.tabs, setTabs, selectTab]);
     const addNITab = useCallback((index) => {
         const tabIndex = props.tabs.map(d => d.type === "nonIntersect" ? d.index : -1).indexOf(index)
         if (tabIndex === -1) {
             setTabs(props.tabs.concat([{type: "nonIntersect", index: index}]))
-            selectTab(props.tabs.length + 2)
+            selectTab(props.tabs.length + 3)
         } else {
-            selectTab(tabIndex + 2)
+            selectTab(tabIndex + 3)
         }
     }, [props.tabs, setTabs, selectTab]);
     const addDetailTabI = useCallback((index, ds1Selection, ds2Selection) => {
@@ -37,7 +37,7 @@ function VisTabs(props) {
             index: index,
             store: secondLevelStore,
         }]))
-        selectTab(props.tabs.length + 2)
+        selectTab(props.tabs.length + 3)
     }, [store.pantherAPI, store.comparisons, setTabs, props.tabs, selectTab])
     const addDetailTabNI = useCallback((index, ds1Selection, ds2Selection) => {
         const secondLevelStore = new SecondLevelStore(store.pantherAPI, store.comparisons[index].nonIntersecting, ds1Selection, ds2Selection);
@@ -46,40 +46,40 @@ function VisTabs(props) {
             index: index,
             store: secondLevelStore,
         }]))
-        selectTab(props.tabs.length + 2)
+        selectTab(props.tabs.length + 3)
     }, [store.pantherAPI, store.comparisons, setTabs, props.tabs, selectTab])
 
     const tabPanels = [
-        <TabPanel key="Home" value={props.selectedTab} index={1}>
+        <TabPanel key="Home" value={props.selectedTab} index={2}>
             <Overview addIntersectTab={addIntersectTab} addNITab={addNITab}/>
         </TabPanel>]
         .concat(props.tabs.map((tab, i) => {
             if (tab.type === "intersect") {
                 return (
-                    <TabPanel key={tab.type + i} index={i + 2} value={props.selectedTab}>
+                    <TabPanel key={tab.type + i} index={i + 3} value={props.selectedTab}>
                         <StoreProvider store={store.comparisons[tab.index].intersecting}>
                             <IntersectVis conditions={store.conditions} analyzeDetail={addDetailTabI}
-                                          isVisible={props.selectedTab === (i + 2)}/>
+                                          isVisible={props.selectedTab === (i + 3)}/>
                         </StoreProvider>
                     </TabPanel>
                 )
             }
             if (tab.type === "nonIntersect") {
                 return (
-                    <TabPanel key={tab.type + i} index={i + 2} value={props.selectedTab}>
+                    <TabPanel key={tab.type + i} index={i + 3} value={props.selectedTab}>
                         <StoreProvider store={store.comparisons[tab.index].nonIntersecting}>
                             <NIVis conditions={store.conditions} analyzeDetail={addDetailTabNI}
-                                   isVisible={props.selectedTab === (i + 2)}/>
+                                   isVisible={props.selectedTab === (i + 3)}/>
                         </StoreProvider>
                     </TabPanel>
                 )
             }
             if (tab.type === "detail") {
                 return (
-                    <TabPanel key={tab.type + i} index={i + 2} value={props.selectedTab}>
+                    <TabPanel key={tab.type + i} index={i + 3} value={props.selectedTab}>
                         <StoreProvider store={tab.store}>
                             <SecondLevelAnalysis conditions={store.conditions}
-                                                 isVisible={props.selectedTab === (i + 2)}/>
+                                                 isVisible={props.selectedTab === (i + 3)}/>
                         </StoreProvider>
                     </TabPanel>
                 )

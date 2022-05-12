@@ -106,14 +106,12 @@ const DefaultView = observer((props) => {
                 formData.append("mappingFile", idMappingFile);
             } else {
                 url = "/load_custom_clustering"
-                console.log(clusteringFile)
                 formData.append("clusteringFile", clusteringFile);
                 formData.append("mappingFile", idMappingFile);
             }
             axios.post(url, formData)
                 .then((response) => {
                     setDataLoading(false)
-                    console.log(response.data.data);
                     store.init(response.data.data, response.data.mapping, varFilter);
                     props.setDataLoaded(true);
                 })
@@ -164,23 +162,6 @@ const DefaultView = observer((props) => {
         </div>
     return (
         <div style={{padding: 10}}>
-            <Alert severity="info">
-                OmicsTIDE integrates proteomics and transcriptomics data by concatenating two tables with expression
-                labels and clustering them with k-means. As a result, each gene is associated with a cluster in both
-                data sets. The result is visualized in OmicsTIDE.
-                <br/>
-                How it works:
-                <ul>
-                    <li>Select two or more files or load test files. First column: Gene IDs, header "gene", Other
-                        columns conditions, e.g. timepoint 1, timepoint 2, timepoint 3. Cells: expression values
-                    </li>
-                    <li>Select k for k-means: K determines how many trends will be created, feel free to play with
-                        different K for your data.
-                    </li>
-                    <li>Variance filter: Filters data by variance. Sometimes results are improved by only considering
-                        highly variant genes.
-                    </li>
-                </ul></Alert>
             <Grid container spacing={10}>
                 <Grid item xs={12}>
                     <Grid container>

@@ -105,7 +105,6 @@ export class IntersectionDataset {
                     clusters[key] = clusters[key]
                         .concat(this.parent.filteredIntersections[intersection])
                 })
-                console.log(clusters);
                 this.clusters = clusters;
             },
             /**

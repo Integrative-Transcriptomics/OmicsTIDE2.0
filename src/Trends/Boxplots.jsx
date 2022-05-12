@@ -64,7 +64,7 @@ const Boxplots = observer((props) => {
 ;
 
 Boxplots.propTypes = {
-    data: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any))).isRequired,
+    data: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any)).isRequired,
     yScale: PropTypes.func.isRequired,
     xScale: PropTypes.func.isRequired,
     color: PropTypes.string.isRequired,

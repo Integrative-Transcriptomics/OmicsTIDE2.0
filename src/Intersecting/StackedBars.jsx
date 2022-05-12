@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import {useStore} from "../Stores/RootStore";
 import Tooltip from "@material-ui/core/Tooltip";
+import Typography from "@material-ui/core/Typography";
 
 const StackedBars = observer((props) => {
     const store = useStore();
@@ -21,7 +22,7 @@ const StackedBars = observer((props) => {
         }
         // height of current bar
         const height = props.yScale(props.data[cluster])
-        rects.push(<Tooltip key={cluster} title={"Cluster size: " + props.data[cluster]} followCursor>
+        rects.push(<Tooltip key={cluster} title={<Typography>{"Cluster size: " + props.data[cluster]}</Typography>} followCursor>
             <rect height={height} y={currPos} width={props.rectWidth}
                   fill={props.colorScale(cluster)} opacity={opacity}
                   onMouseEnter={() => store.setHighlightedCluster(cluster)}

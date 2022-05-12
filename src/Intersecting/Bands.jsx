@@ -4,6 +4,7 @@ import React from "react";
 import {useStore} from "../Stores/RootStore";
 import Tooltip from "@material-ui/core/Tooltip";
 import {v4 as uuidv4} from 'uuid';
+import Typography from "@material-ui/core/Typography";
 
 
 const Bands = observer((props) => {
@@ -58,7 +59,7 @@ const Bands = observer((props) => {
                             <stop offset="100%" style={{stopColor: fill1}}/>
                         </linearGradient>
                     </defs>
-                    <Tooltip title={"Intersection size: " + props.intersections[cluster1 + "," + cluster2]}
+                    <Tooltip title={<Typography>{"Intersection size: " + props.intersections[cluster1 + "," + cluster2]}</Typography>}
                              followCursor>
                         <path
                             d={p1 + " " + p2 + " " + p3 + " " + p4 + " Z"} opacity={opacity}
