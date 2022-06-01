@@ -12,12 +12,12 @@ export class FilterStore {
             abundanceMinFilter: 0,
             abundanceMaxFilter: 100,
             setVarMin(variance) {
-                if (variance > this.parent.parent.comparison.dataStore.initialVarFilter[0]) {
+                if (variance >= this.parent.parent.comparison.dataStore.initialVarFilter[0]) {
                     this.varianceMinFilter = variance;
                 }
             },
             setVarMax(variance) {
-                if (variance < this.parent.parent.comparison.dataStore.initialVarFilter[1]) {
+                if (variance <= this.parent.parent.comparison.dataStore.initialVarFilter[1]) {
                     this.varianceMaxFilter = variance;
                 }
             },
