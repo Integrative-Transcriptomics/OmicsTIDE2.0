@@ -8,7 +8,7 @@ import Bands from "./Bands";
 
 const Sankey = observer((props) => {
     const whiteSpace = 10
-    const rectWidth = 50
+    const rectWidth = 25
     const store = useStore();
 
     // size of intersections TODO: add to store

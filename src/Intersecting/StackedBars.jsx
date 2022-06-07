@@ -25,8 +25,8 @@ const StackedBars = observer((props) => {
         rects.push(<Tooltip key={cluster} title={<Typography>{"Cluster size: " + props.data[cluster]}</Typography>} followCursor>
             <rect height={height} y={currPos} width={props.rectWidth}
                   fill={props.colorScale(cluster)} opacity={opacity}
-                  onMouseEnter={() => store.setHighlightedCluster(cluster)}
-                  onMouseLeave={() => store.parent.setHighlightedIntersection([])}
+                  onMouseEnter={() => store.highlightCluster(cluster)}
+                  onMouseLeave={() => store.unHighlightCluster(cluster)}
                   onClick={() => store.setSelectedCluster(cluster)} style={{cursor: "pointer"}}/>
         </Tooltip>)
         // increment currpos and add white space

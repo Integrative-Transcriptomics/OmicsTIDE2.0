@@ -7,12 +7,12 @@ import DatasetTrends from "../Trends/DatasetTrends";
 import Sankey from "./Sankey";
 import PropTypes from "prop-types";
 import Sidebar from "./Sidebar";
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 
 
 const IntersectVis = observer((props) => {
     const store = useStore();
-    const ref=createRef();
+    const ref = createRef();
 
     const id = "id" + uuidv4()
 
@@ -23,6 +23,23 @@ const IntersectVis = observer((props) => {
     // states for widths of plots
     const [sankeyWidth, setSankeyWidth] = useState(100);
     const [profilesWidth, setProfilesWidth] = useState(100);
+
+    const handleMouseEnter = useCallback((type) => {
+        if (!store.isHighlightedPermanent) {
+            store.highlightConcDiscIntersections(type);
+        }
+    }, [store])
+    const handleMouseLeave = useCallback(() => {
+        if (!store.isHighlightedPermanent) {
+            store.highlightConcDiscIntersections("none");
+        }
+    }, [store])
+    const handleMouseClick = useCallback((type) => {
+        if ((store.concordantHighlighted && type === "concordant") || (store.discordantHighlighted && type === "discordant")) {
+            store.setIsHighlightedPermanent(!store.isHighlightedPermanent)
+        }
+        store.highlightConcDiscIntersections(type);
+    }, [store])
     const numClusters = Math.max(store.ds1.filteredClusterNames.length, store.ds2.filteredClusterNames.length)
     const height = 800;
     const changeWidth = useCallback(() => {
@@ -53,12 +70,25 @@ const IntersectVis = observer((props) => {
                         <Grid item xs={3}>
                             <Typography variant={"h5"}>{store.comparison.file1}</Typography>
                         </Grid>
-                        <Grid item xs={6}>
-                            <Typography variant={"h5"}>
-                            {"Concordant genes: " + Math.round(store.concordantDiscordant.concordant / store.genes.length * 100)
-                            + "% (" + store.concordantDiscordant.concordant
-                            + ") Discordant genes: " + Math.round(store.concordantDiscordant.discordant / store.genes.length * 100)
-                            + "% (" + store.concordantDiscordant.discordant + ")"}
+                        <Grid item xs={3}>
+                            <Typography
+                                onMouseEnter={() => handleMouseEnter("concordant")}
+                                onMouseLeave={handleMouseLeave}
+                                onClick={() => handleMouseClick("concordant")}
+                                style={{cursor: "pointer", opacity: store.discordantHighlighted ? 0.5 : 1}}>
+                                {"Concordant genes: " + Math.round(store.concordantDiscordant.concordant / store.genes.length * 100)
+                                + "% (" + store.concordantDiscordant.concordant
+                                + ")"}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <Typography
+                                onMouseEnter={() => handleMouseEnter("discordant")}
+                                onMouseLeave={handleMouseLeave}
+                                onClick={() => handleMouseClick("discordant")}
+                                style={{cursor: "pointer", opacity: store.concordantHighlighted ? 0.5 : 1}}>
+                                {"Discordant genes: " + Math.round(store.concordantDiscordant.discordant / store.genes.length * 100)
+                                + "% (" + store.concordantDiscordant.discordant + ")"}
                             </Typography>
                         </Grid>
                         <Grid item xs={3}>

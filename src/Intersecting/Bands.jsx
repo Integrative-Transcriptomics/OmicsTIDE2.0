@@ -12,7 +12,7 @@ const Bands = observer((props) => {
     const paths = [];
     // current y position of intersection at ds1
     let currPos1 = 0;
-    let ds1Start=0;
+    let ds1Start = 0;
     // array to store y positions of intersections at ds2
     let currPos2 = [];
     // helper to fill currPos2
@@ -60,13 +60,14 @@ const Bands = observer((props) => {
                             <stop offset="100%" style={{stopColor: fill1}}/>
                         </linearGradient>
                     </defs>
-                    <Tooltip title={<Typography>{"Intersection size: " + props.intersections[cluster1 + "," + cluster2]}</Typography>}
+                    <Tooltip title={
+                        <Typography>{"Intersection size: " + props.intersections[cluster1 + "," + cluster2]}</Typography>}
                              followCursor>
                         <path
                             d={p1 + " " + p2 + " " + p3 + " " + p4 + " Z"} opacity={opacity}
                             fill={"url(#" + gradientID + ")"}
-                            onMouseEnter={() => store.setHighlightedIntersection([[cluster1, cluster2]])}
-                            onMouseLeave={() => store.setHighlightedIntersection([])}
+                            onMouseEnter={() => store.highlightIntersections([[cluster1, cluster2]])}
+                            onMouseLeave={() => store.unHighlightIntersections([[cluster1, cluster2]])}
                             onClick={() => store.handleIntersectionSelection([cluster1, cluster2])}
                             style={{cursor: "pointer"}}>
                         </path>
@@ -81,7 +82,7 @@ const Bands = observer((props) => {
         })
         // add whitespace to currPos1 when finished with a cluster
         ds1Start += props.yScale(store.ds1.clusterSizes[cluster1]) + props.whiteSpace;
-        currPos1=ds1Start
+        currPos1 = ds1Start
     })
     return (
         <g>{paths}</g>

@@ -111,8 +111,20 @@ export class IntersectionDataset {
              * highlight a cluster and the corresponding intersections
              * @param {string} cluster
              */
-            setHighlightedCluster(cluster) {
-                this.parent.setHighlightedIntersection(Object.keys(this.parent.filteredIntersections)
+            highlightCluster(cluster) {
+                this.parent.highlightIntersections(Object.keys(this.parent.filteredIntersections)
+                    .map(intersection => intersection.split(","))
+                    .filter(intersection =>
+                        intersection[this.index] === cluster
+                    ).filter(intersection => this.parent.filteredIntersections[intersection].length > 0)
+                )
+            },
+                /**
+             * highlight a cluster and the corresponding intersections
+             * @param {string} cluster
+             */
+            unHighlightCluster(cluster) {
+                this.parent.unHighlightIntersections(Object.keys(this.parent.filteredIntersections)
                     .map(intersection => intersection.split(","))
                     .filter(intersection =>
                         intersection[this.index] === cluster
