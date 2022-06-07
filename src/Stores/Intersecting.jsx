@@ -173,6 +173,10 @@ export class Intersecting {
                 indices.sort((a, b) => b - a);
                 indices.forEach(index => this.highlightedIntersections.splice(index, 1));
             },
+            /**
+             * highlights concordant/discordant intersections
+             * @param type {string} concordant/discordant/none
+             */
             highlightConcDiscIntersections(type) {
                 if (type === "concordant") {
                     this.concordantHighlighted = true;
