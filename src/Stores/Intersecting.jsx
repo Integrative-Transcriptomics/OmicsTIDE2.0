@@ -45,9 +45,9 @@ export class Intersecting {
             selectedIntersections: [],
             // highlighted genes (by hovering over lines in profile plots)
             highlightedGenes: [],
-            concordantHighlighted: true,
+            concordantHighlighted: false,
             discordantHighlighted: false,
-            isHighlightedPermanent: true,
+            isHighlightedPermanent: false,
             searchGenes: [],
             plotType: "centroid",
             sizeIntersectionFilter: 0,
