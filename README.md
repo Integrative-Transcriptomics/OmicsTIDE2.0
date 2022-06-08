@@ -1,4 +1,5 @@
-# Welcome to OmicsTIDE! ![build status workflow](https://github.com/Integrative-Transcriptomics/OmicsTIDE2.0/actions/workflows/main.yml/badge.svg)
+# Welcome to OmicsTIDE! ![build status workflow](https://github.com/Integrative-Transcriptomics/OmicsTIDE2.0/actions/workflows/main.yml/badge.svg) [![DOI](https://zenodo.org/badge/389345466.svg)](https://zenodo.org/badge/latestdoi/389345466)
+
 The ***Omics** **T**rend-comparing **I**nteractive **D**ata **E**xplorer* (OmicsTIDE) is a web-based application to study the concordance and the discordance in the regulatory trends between omics data sets. 
 
 OmicsTIDE combines the benefits of data- and hypothesis-driven analysis by using partitioning algorithms to detect regulatory trends between two data sets on the one hand and by allowing the user to contribute to the analysis based on prior knowledge in an interactive and exploratory manner on the other hand.
