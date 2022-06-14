@@ -9,6 +9,7 @@ import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
 import Container from "@material-ui/core/Container";
 import PropTypes from "prop-types";
+import {TableHead} from "@mui/material";
 
 
 function Overview(props) {
@@ -66,6 +67,9 @@ function Overview(props) {
                           colorScale={colorScale}/>
             </TableCell>
             <TableCell>
+                {comparison.silhouetteIntersecting.toFixed(2)}
+            </TableCell>
+            <TableCell>
                 {comparison.intersecting != null ?
                     <Button key={i} onClick={() => props.addIntersectTab(i)}>Analyze Intersecting</Button> : null
                 }
@@ -88,6 +92,18 @@ function Overview(props) {
             <Typography>Comparisons</Typography>
             <TableContainer component={Paper}>
                 <Table>
+                    <TableHead>
+                        <TableCell/>
+                        <TableCell>Comparison</TableCell>
+                        <TableCell>
+                            Genes
+                        </TableCell>
+                        <TableCell>
+                            Silhouette Score
+                        </TableCell>
+                        <TableCell/>
+                        <TableCell/>
+                    </TableHead>
                     <TableBody>
                         {rows}
                     </TableBody>

@@ -112,6 +112,7 @@ const DefaultView = observer((props) => {
             axios.post(url, formData)
                 .then((response) => {
                     setDataLoading(false)
+                    console.log(response.data);
                     store.init(response.data.data, response.data.mapping, varFilter);
                     props.setDataLoaded(true);
                 })

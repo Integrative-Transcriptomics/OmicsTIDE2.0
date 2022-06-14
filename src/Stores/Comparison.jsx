@@ -7,8 +7,10 @@ import {NonIntersecting} from "./NonIntersecting";
 export class Comparison {
     constructor(dataStore, data, index) {
         this.dataStore = dataStore;
-        this.file1 = data.files[0]
-        this.file2 = data.files[1]
+        this.file1 = data.files[0];
+        this.file2 = data.files[1];
+        this.silhouetteIntersecting=data.silhouetteIntersecting;
+        this.silhouetteNonIntersecting=data.silhouetteNonIntersecting;
         this.index = index;
         this.intersecting = new Intersecting(this, this.dataStore, data.intersecting)
         if (Object.keys(data.nonIntersecting).length>0) {

@@ -1,4 +1,6 @@
+import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 
 from server.enums import ComparisonType
 
@@ -22,8 +24,15 @@ def run_k_means(data, k):
             km = KMeans(n_clusters=len(data.index))
             km.fit_predict(data.loc[:, data.columns != 'dataset'])
         data['cluster'] = km.labels_
-        return data
+        #print(len(filtered_data.index))
+        silhouette=-1
+        #if len(np.unique(km.labels_))!=1 and len(filtered_data.index)>1:
+         #   silhouette = silhouette_score(filtered_data, km.labels_)
+        #else:
+         #   silhouette = -1
+        return data, silhouette
     except ValueError as e:
+        #print(data.loc[:, data.columns != 'dataset'])
         print(e)
 
 
@@ -82,5 +91,6 @@ def cluster(file1, file2, cluster, comparison_type):
     # get intersecting or non-intersecting genes only - depending on comparison_type parameter
     combined = get_genes_subset(file1, file2, comparison_type)
     # run kmeans
+    #print(combined)
     combined = run_k_means(combined, cluster)
     return combined

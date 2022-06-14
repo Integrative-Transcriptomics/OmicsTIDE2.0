@@ -65,13 +65,15 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
     ds1_file = ds1_file.apply(stats.zscore, 1, False, "broadcast")
     ds2_file = ds2_file.apply(stats.zscore, 1, False, "broadcast")
 
-    clustering_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.INTERSECTING)
-    clustering_non_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.NON_INTERSECTING)
+    clustering_intersecting, silhouette_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.INTERSECTING)
+    clustering_non_intersecting, silhouette_non_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.NON_INTERSECTING)
     return {
         'intersecting': extract_genes(clustering_intersecting, tmp_colnames, ds1_file_var, ds2_file_var,
                                       ds1_file_median, ds2_file_median),
         'nonIntersecting': extract_genes(clustering_non_intersecting, tmp_colnames, ds1_file_var, ds2_file_var,
                                          ds1_file_median, ds2_file_median),
+        'silhouetteIntersecting': silhouette_intersecting,
+        'silhouetteNonIntersecting': silhouette_non_intersecting,
         'conditions': colnames,
     }
 
