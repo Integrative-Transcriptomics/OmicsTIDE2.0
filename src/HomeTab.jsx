@@ -3,6 +3,7 @@ import {Button} from "@mui/material";
 import abstract from "./graphical_abstract.png"
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
+import axios from "axios";
 
 function HomeTab(props) {
     return <div style={{margin: 10}}>
@@ -32,7 +33,9 @@ function HomeTab(props) {
                         </li>
                     </ul>
                 </Typography>
-                <Typography variant={"body1"}>More information and contact: <a href= "https://tuevis.informatik.uni-tuebingen.de/omicstide/">https://tuevis.informatik.uni-tuebingen.de/omicstide/</a> </Typography>
+                <Typography variant={"body1"}>More information and contact: <a
+                    href="https://tuevis.cs.uni-tuebingen.de/omicstide/">https://tuevis.cs.uni-tuebingen.de/omicstide/</a>
+                </Typography>
                 <Button onClick={props.jumpToLoad} variant={"contained"}>Load Data</Button>
             </Grid>
         </Grid>

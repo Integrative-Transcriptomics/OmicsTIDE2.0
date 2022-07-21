@@ -7,7 +7,7 @@ from pathlib import Path
 
 pd.options.mode.chained_assignment = None  # default='warn'
 import simplejson as json
-from flask import make_response, jsonify, request, Flask
+from flask import make_response, jsonify, request, Flask, send_from_directory
 
 from server.data_quality_assurance import valid_cluster_header, valid_cluster_values, invalid_cluster_value_pos, \
     has_equal_number_of_timepoints
@@ -23,8 +23,10 @@ from server.trend_comparison import pairwise_trendcomparison
 # MAKE SURE tempfile PACKAGE IS INSTALLED ON
 app = Flask(__name__, static_folder='../build', static_url_path='/')
 here = os.path.dirname(__file__)
+app.config['EXAMPLE_DATA'] = os.path.join(here, 'data')
 app.config['FILES_BLOODCELLS'] = os.path.join(here, 'data', 'BloodCell')
 app.config['FILES_STREPTOMYCES'] = os.path.join(here, 'data', 'caseStudy_colnames')
+
 
 ##############
 ### ROUTES ###
@@ -84,6 +86,16 @@ def load_data():
             return jsonify(message='ID column has to be named "gene"'), 500
 
     return json.dumps({"data": data, "mapping": mapping}, ignore_nan=True)
+
+
+@app.route('/download_example_data', methods=['GET', 'POST'])
+def download_example_data():
+    return send_from_directory(app.config['EXAMPLE_DATA'], "example_data.zip", as_attachment=True)
+
+
+@app.route('/download_example_custom_clustering', methods=['GET','POST'])
+def download_example_clustering():
+    return send_from_directory(app.config['EXAMPLE_DATA'], "custom_clustering_example.csv", as_attachment=True)
 
 
 @app.route('/load_test_data_bloodcell', methods=['GET', 'POST'])

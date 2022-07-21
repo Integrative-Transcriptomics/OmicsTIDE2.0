@@ -24,7 +24,6 @@ import ComparisonTable from "./ComparisonTable";
 import Autocomplete from "@material-ui/core/Autocomplete";
 import TextField from "@material-ui/core/TextField";
 
-
 function TabPanel(props) {
     const {children, value, index, ...other} = props;
 
@@ -118,6 +117,15 @@ const DefaultView = observer((props) => {
         },
         [props, k, varFilter, selectedTab, testData, files, comparisons, idMappingFile, clusteringFile, store],
     );
+    const downloadData = (response_data, filename) => {
+        const a = document.createElement("a");
+        document.body.appendChild(a);
+        const url = window.URL.createObjectURL(response_data);
+        a.href = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
     const selectK =
         <div>
             <Typography id="discrete-slider" gutterBottom>
@@ -219,6 +227,13 @@ const DefaultView = observer((props) => {
                                 </Grid>
                                 {selectK}
                                 {selectVar}
+                                Unsure about the data formats? <Button
+                                onClick={() => axios.get("/download_example_data",
+                                    {responseType: "blob"})
+                                    .then(response => {
+                                        downloadData(response.data, "example_data.zip")
+                                    })}>Download example
+                                data</Button>
                             </TabPanel>
                             <TabPanel value={selectedTab} index={2}>
                                 <Grid container spacing={1}>
@@ -254,6 +269,13 @@ const DefaultView = observer((props) => {
                                         </Typography>
                                     </Grid>
                                 </Grid>
+                                Unsure about the data formats? <Button
+                                onClick={() => axios.get("/download_example_custom_clustering",
+                                    {responseType: "blob"})
+                                    .then(response => {
+                                        downloadData(response.data,"custom_clustering_example.csv")
+                                    })}>Download example
+                                data</Button>
                             </TabPanel>
                             <TabPanel value={selectedTab} index={1}>
                                 <FormControl className={classes.formControl} variant="standard">
@@ -354,7 +376,8 @@ const DefaultView = observer((props) => {
             </Backdrop>
         </div>
 
-    );
+    )
+        ;
 });
 
 export default DefaultView;
