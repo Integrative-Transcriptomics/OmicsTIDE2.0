@@ -3,7 +3,6 @@ import {Button} from "@mui/material";
 import abstract from "./graphical_abstract.png"
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-import axios from "axios";
 
 function HomeTab(props) {
     return <div style={{margin: 10}}>
