@@ -1,11 +1,15 @@
 import numpy as np
 from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_score, davies_bouldin_score
+import matplotlib.pyplot as plt
+from yellowbrick.cluster import SilhouetteVisualizer
+
+
 
 from server.enums import ComparisonType
 
 
-def run_k_means(data, k):
+def run_k_means(data, k, type):
     """
     runs k-means on data with given k
 
@@ -14,25 +18,29 @@ def run_k_means(data, k):
 
     :return: data frame with assigned clusters
     """
-
+    filtered_data = data.loc[:, data.columns != 'dataset']
+    if type == ComparisonType.INTERSECTING:
+        data.to_csv("data.csv")
     try:
         if len(data.index) >= k:
-            km = KMeans(n_clusters=k)
-            km.fit_predict(data.loc[:, data.columns != 'dataset'])
-        # if k > num genes change k to num genes
-        else:
+            km = KMeans(n_clusters=k,init='k-means++')
+            km.fit_predict(filtered_data)
+            labels = km.labels_
+            silhouette = silhouette_score(filtered_data, km.labels_)
+        elif len(data.index) > 0:
             km = KMeans(n_clusters=len(data.index))
-            km.fit_predict(data.loc[:, data.columns != 'dataset'])
-        data['cluster'] = km.labels_
-        #print(len(filtered_data.index))
-        silhouette=-1
-        #if len(np.unique(km.labels_))!=1 and len(filtered_data.index)>1:
-         #   silhouette = silhouette_score(filtered_data, km.labels_)
-        #else:
-         #   silhouette = -1
+            km.fit_predict(filtered_data)
+            labels = km.labels_
+            if len(data.index) > 1:
+                silhouette = silhouette_score(filtered_data, km.labels_)
+            else:
+                silhouette = -1
+        else:
+            labels = np.empty(0)
+            silhouette = -1
+        data['cluster'] = labels
         return data, silhouette
     except ValueError as e:
-        #print(data.loc[:, data.columns != 'dataset'])
         print(e)
 
 
@@ -91,6 +99,6 @@ def cluster(file1, file2, cluster, comparison_type):
     # get intersecting or non-intersecting genes only - depending on comparison_type parameter
     combined = get_genes_subset(file1, file2, comparison_type)
     # run kmeans
-    #print(combined)
-    combined = run_k_means(combined, cluster)
+    # print(combined)
+    combined = run_k_means(combined, cluster, comparison_type)
     return combined

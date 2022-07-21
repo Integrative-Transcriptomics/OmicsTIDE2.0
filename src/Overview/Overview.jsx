@@ -67,9 +67,6 @@ function Overview(props) {
                           colorScale={colorScale}/>
             </TableCell>
             <TableCell>
-                {comparison.silhouetteIntersecting.toFixed(2)}
-            </TableCell>
-            <TableCell>
                 {comparison.intersecting != null ?
                     <Button key={i} onClick={() => props.addIntersectTab(i)}>Analyze Intersecting</Button> : null
                 }
@@ -78,6 +75,9 @@ function Overview(props) {
                 {comparison.nonIntersecting != null ?
                     <Button key={i} onClick={() => props.addNITab(i)}>Analyze Non-Intersecting</Button> : null
                 }
+            </TableCell>
+            <TableCell>
+                {comparison.silhouetteIntersecting.toFixed(2)}
             </TableCell>
         </TableRow>);
     });
@@ -98,11 +98,11 @@ function Overview(props) {
                         <TableCell>
                             Genes
                         </TableCell>
-                        <TableCell>
-                            Silhouette Score
+                        <TableCell/>
+                        <TableCell/>
+                         <TableCell>
+                            Silhouette Score (intersecting)
                         </TableCell>
-                        <TableCell/>
-                        <TableCell/>
                     </TableHead>
                     <TableBody>
                         {rows}
