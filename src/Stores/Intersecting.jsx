@@ -39,8 +39,7 @@ export class Intersecting {
 
         extendObservable(this, {
             // highlighted intersections (by hovering over intersections or nodes)
-            highlightedIntersections: Object.keys(this.calculateConcordantDiscordant(this.intersections).concordant)
-                .map(d => d.split(",")),
+            highlightedIntersections: [],
             // select intersections (by clicking on intersections or nodes)
             selectedIntersections: [],
             // highlighted genes (by hovering over lines in profile plots)
