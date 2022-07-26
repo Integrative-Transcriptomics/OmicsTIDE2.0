@@ -21,7 +21,7 @@ function ComparisonTable(props) {
         props.setComparisons(comparisonsCopy);
     }
     const cells = props.comparisons.map((comparison, i) =>
-        <TableRow>
+        <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
             <TableCell>{comparison.files[0].slice(0,-4)}</TableCell>
             <TableCell>
                 <IconButton onClick={() => switchFiles(i)}>

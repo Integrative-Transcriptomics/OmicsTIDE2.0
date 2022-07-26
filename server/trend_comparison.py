@@ -7,21 +7,29 @@ from server.enums import ComparisonType
 from server.variance_filter import filter_variance
 
 
-def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
-                             upper_variance_percentile, k):
-    """
-    wrapper function to conduct pairwise trend comparison for intersecting and non-intersecting genes
+def create_normalized_data(ds, lower_variance_percentile,
+                             upper_variance_percentile):
+    ds_file = ds.copy()
 
-    :param tmp_file1: file1
-    :param tmp_file2: file2
-    :param lower_variance_percentile: left handle of variance percentile filter
-    :param upper_variance_percentile: right handle of variance percentile filter
-    :param k: number of k to be determined
-    :param test_data: bool telling whether test data should be used or not
+    ds_file_var = ds_file["var"]
+    ds_file_median = ds_file["median"]
 
-    dict of pairwise trend comparisons and related info
-    """
-    # print("called")
+    ds_file.drop(columns=["var"], axis=1, inplace=True)
+    ds_file.drop(columns=["median"], axis=1, inplace=True)
+
+    ds_file = filter_variance(ds_file, lower_variance_percentile, upper_variance_percentile)
+
+    # zscore
+    ds_file_np = ds_file.to_numpy()
+    ds_file = pd.DataFrame(data=ds_file_np, index=ds_file.index, columns=list(ds_file))
+
+    ds_file = ds_file.apply(stats.zscore, 1, False, "broadcast")
+    ds_file["var"] = ds_file_var
+    ds_file["median"] = ds_file_median
+    return ds_file
+
+
+def pairwise_trendcomparison(ds1, ds2, k):
     ds1_file = ds1.copy()
     ds2_file = ds2.copy()
 
@@ -32,6 +40,7 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
     ds1_file_var = ds1_file["var"]
     ds2_file_var = ds2_file["var"]
 
+    # median information
     ds1_file_median = ds1_file["median"]
     ds2_file_median = ds2_file["median"]
 
@@ -48,22 +57,6 @@ def pairwise_trendcomparison(ds1, ds2, lower_variance_percentile,
 
     ds1_file.columns = tmp_colnames
     ds2_file.columns = tmp_colnames
-
-    ds1_file = filter_variance(ds1_file, lower_variance_percentile, upper_variance_percentile)
-    ds2_file = filter_variance(ds2_file, lower_variance_percentile, upper_variance_percentile)
-
-    # zscore
-    ds1_file_np = ds1_file.to_numpy()
-    ds2_file_np = ds2_file.to_numpy()
-
-    # ds1_file_np = stats.zscore(ds1_file_np, axis=1)
-    # ds2_file_np = stats.zscore(ds2_file_np, axis=1)
-
-    ds1_file = pd.DataFrame(data=ds1_file_np, index=ds1_file.index, columns=list(tmp_colnames))
-    ds2_file = pd.DataFrame(data=ds2_file_np, index=ds2_file.index, columns=list(tmp_colnames))
-
-    ds1_file = ds1_file.apply(stats.zscore, 1, False, "broadcast")
-    ds2_file = ds2_file.apply(stats.zscore, 1, False, "broadcast")
 
     clustering_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.INTERSECTING)
     clustering_non_intersecting = cluster(ds1_file, ds2_file, k, ComparisonType.NON_INTERSECTING)

@@ -23,6 +23,7 @@ import Backdrop from "@material-ui/core/Backdrop";
 import ComparisonTable from "./ComparisonTable";
 import Autocomplete from "@material-ui/core/Autocomplete";
 import TextField from "@material-ui/core/TextField";
+import {Paper} from "@mui/material";
 
 function TabPanel(props) {
     const {children, value, index, ...other} = props;
@@ -83,6 +84,22 @@ const DefaultView = observer((props) => {
                 return ({files: [file1.name, file2.name], selected: true})
             })));
     }, [])
+    const downloadNormalized = useCallback(
+        () => {
+            const formData = new FormData();
+            let url = "";
+            formData.append("lowerVariancePercentage", varFilter[0]);
+            formData.append("upperVariancePercentage", varFilter[1]);
+            url = "/download_normalized";
+            files.forEach(file => formData.append("files[]", file));
+            formData.append("comparisons", JSON.stringify(comparisons.filter(d => d.selected).map(d => d.files)))
+            axios.post(url, formData, {responseType: "blob"})
+                .then((response) => {
+                    downloadData(response.data, "normalized_data.zip")
+                })
+        },
+        [varFilter, files, comparisons],
+    );
     const launch = useCallback(
         () => {
             setDataLoading(true);
@@ -152,7 +169,7 @@ const DefaultView = observer((props) => {
     const selectVar =
         <div>
             <Typography id="range-slider" gutterBottom>
-                Variance Filter
+                Variance Filter (percentile)
             </Typography>
             <Grid container spacing={10}>
                 <Grid item xs={9}>
@@ -216,24 +233,32 @@ const DefaultView = observer((props) => {
                                             {idMappingFile !== null ? idMappingFile.name : null}
                                         </Typography>
                                     </Grid>
-                                    {files.length > 1 ?
-                                        <Grid item xs={12}>
-                                            <Typography>
-                                                {files.length > 2 ? "Select comparisons of interest" : "Comparison"}
-                                            </Typography>
-                                            <ComparisonTable hasSelect={files.length > 2} comparisons={comparisons}
-                                                             setComparisons={(newComparisons) => setComparisons(newComparisons)}/>
-                                        </Grid> : null}
-                                </Grid>
-                                {selectK}
-                                {selectVar}
-                                Unsure about the data formats? <Button
+                                    <Grid item xs={12}>
+                                               Unsure about the data formats? <Button
                                 onClick={() => axios.get("/download_example_data",
                                     {responseType: "blob"})
                                     .then(response => {
                                         downloadData(response.data, "example_data.zip")
                                     })}>Download example
                                 data</Button>
+                                    </Grid>
+                                    {files.length > 1 ?
+                                        <Grid item xs={12}>
+                                            <Paper elevation={2} sx={{padding:2}}>
+                                            <Typography>
+                                                {files.length > 2 ? "Select comparisons of interest" : "Comparison"}
+                                            </Typography>
+                                            <ComparisonTable hasSelect={files.length > 2} comparisons={comparisons}
+                                                             setComparisons={(newComparisons) => setComparisons(newComparisons)}/>
+                                            </Paper>
+                                        </Grid> : null}
+                                </Grid>
+                                {selectK}
+                                {selectVar}
+                                <Button  size={"small"}
+                                        onClick={downloadNormalized}
+                                        disabled={(selectedTab === 0 && files.length === 0) || (selectedTab === 1 && testData === "")}>Download
+                                    processed data</Button>
                             </TabPanel>
                             <TabPanel value={selectedTab} index={2}>
                                 <Grid container spacing={1}>
@@ -273,7 +298,7 @@ const DefaultView = observer((props) => {
                                 onClick={() => axios.get("/download_example_custom_clustering",
                                     {responseType: "blob"})
                                     .then(response => {
-                                        downloadData(response.data,"custom_clustering_example.csv")
+                                        downloadData(response.data, "custom_clustering_example.csv")
                                     })}>Download example
                                 data</Button>
                             </TabPanel>

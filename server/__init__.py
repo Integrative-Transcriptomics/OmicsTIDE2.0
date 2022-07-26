@@ -1,5 +1,6 @@
 import os
 import tempfile
+import zipfile
 
 import numpy as np
 import pandas as pd
@@ -7,7 +8,7 @@ from pathlib import Path
 
 pd.options.mode.chained_assignment = None  # default='warn'
 import simplejson as json
-from flask import make_response, jsonify, request, Flask, send_from_directory
+from flask import make_response, jsonify, request, Flask, send_from_directory, send_file
 
 from server.data_quality_assurance import valid_cluster_header, valid_cluster_values, invalid_cluster_value_pos, \
     has_equal_number_of_timepoints
@@ -15,7 +16,7 @@ from server.preprocess_files import preprocess_file
 from server.preprocess_files import remove_invalid_genes
 from server.ptcf import read_comment_lines, read_clustering_file
 # import svgutils
-from server.trend_comparison import pairwise_trendcomparison
+from server.trend_comparison import pairwise_trendcomparison, create_normalized_data
 
 # if not os.path.exists(os.path.join('.', 'tmp_files_OmicsTIDE')):
 
@@ -49,6 +50,31 @@ def load_clustering():
     return json.dumps({"data": [comparison], "mapping": mapping}, ignore_nan=True)
 
 
+@app.route('/download_normalized', methods=['POST'])
+def download_normalized():
+    files = request.files.getlist("files[]")
+    comparisons = np.array(json.loads(request.form.getlist('comparisons')[0]))
+    lower_variance_percentile = int(request.form.to_dict()['lowerVariancePercentage'])
+    upper_variance_percentile = int(request.form.to_dict()['upperVariancePercentage'])
+    tmpdir_zip = tempfile.TemporaryDirectory()
+    zip_fn = os.path.join(tmpdir_zip.name, 'normalized_data.zip')
+    zip_obj = zipfile.ZipFile(zip_fn, 'w')
+    for file in files:
+        if file.filename in comparisons.flatten():
+            preprocessed_data = preprocess_file(file)
+            normalized_data = create_normalized_data(preprocessed_data,
+                                                     lower_variance_percentile,
+                                                     upper_variance_percentile)
+            tmp = tempfile.NamedTemporaryFile()
+            fp = open(tmp.name, "a")
+            fp.write("# dataset: " + file.filename + "\n")
+            normalized_data.to_csv(path_or_buf=fp, index=False)
+            fp.close()
+            zip_obj.write(tmp.name, file.filename)
+    zip_obj.close()
+    return send_file(zip_fn)
+
+
 @app.route('/load_data', methods=['POST'])
 def load_data():
     data = []
@@ -61,12 +87,13 @@ def load_data():
     ds = dict()
     for file in files:
         if file.filename in comparisons.flatten():
-            ds[file.filename] = preprocess_file(file)
+            preprocessed_data = preprocess_file(file)
+            ds[file.filename] = create_normalized_data(preprocessed_data,
+                                                       lower_variance_percentile,
+                                                       upper_variance_percentile)
     for combination in comparisons:
         try:
-            comparison = pairwise_trendcomparison(ds[combination[0]], ds[combination[1]],
-                                                  lower_variance_percentile,
-                                                  upper_variance_percentile, k)
+            comparison = pairwise_trendcomparison(ds[combination[0]], ds[combination[1]], k)
             comparison["files"] = [Path(combination[0]).stem, Path(combination[1]).stem]
             data.append(comparison)
         except TypeError as te:
@@ -93,7 +120,7 @@ def download_example_data():
     return send_from_directory(app.config['EXAMPLE_DATA'], "example_data.zip", as_attachment=True)
 
 
-@app.route('/download_example_custom_clustering', methods=['GET','POST'])
+@app.route('/download_example_custom_clustering', methods=['GET', 'POST'])
 def download_example_clustering():
     return send_from_directory(app.config['EXAMPLE_DATA'], "custom_clustering_example.csv", as_attachment=True)
 
@@ -111,9 +138,12 @@ def load_test_data_bloodcell():
     mapping_file = os.path.join(app.config['FILES_BLOODCELLS'], "id_mapping.csv")
 
     try:
-        comparison = pairwise_trendcomparison(preprocess_file(transcriptome_data), preprocess_file(proteome_data),
-                                              lower_variance_percentile,
-                                              upper_variance_percentile, k)
+        comparison = pairwise_trendcomparison(
+            create_normalized_data(preprocess_file(transcriptome_data), lower_variance_percentile,
+                                   upper_variance_percentile)
+            , create_normalized_data(preprocess_file(proteome_data), lower_variance_percentile,
+                                     upper_variance_percentile),
+            k)
         comparison["files"] = ["Transcriptome", "Proteome"]
         data.append(comparison)
         mapping = pd.read_csv(mapping_file, sep=",").to_numpy().tolist()
@@ -140,14 +170,17 @@ def load_test_data_streptomyces():
     prot_m1152 = os.path.join(app.config['FILES_STREPTOMYCES'], "Proteome_M1152.csv")
 
     try:
-        comparison1 = pairwise_trendcomparison(preprocess_file(trans_m1152), preprocess_file(trans_m145),
-                                               lower_variance_percentile,
-                                               upper_variance_percentile, k)
+        normalized_trans_m1152 = create_normalized_data(preprocess_file(trans_m1152), lower_variance_percentile,
+                                                        upper_variance_percentile)
+        normalized_trans_m145 = create_normalized_data(preprocess_file(trans_m145), lower_variance_percentile,
+                                                       upper_variance_percentile)
+        normalized_prot_m1152 = create_normalized_data(preprocess_file(prot_m1152), lower_variance_percentile,
+                                                       upper_variance_percentile)
+
+        comparison1 = pairwise_trendcomparison(normalized_trans_m1152, normalized_trans_m145, k)
         comparison1["files"] = ["Transcriptome_M1152", "Transcriptome_M145"]
         data.append(comparison1)
-        comparison2 = pairwise_trendcomparison(preprocess_file(trans_m1152), preprocess_file(prot_m1152),
-                                               lower_variance_percentile,
-                                               upper_variance_percentile, k)
+        comparison2 = pairwise_trendcomparison(normalized_trans_m1152, normalized_prot_m1152, k)
         comparison2["files"] = ["Transcriptome_M1152", "Proteome_M1152"]
         data.append(comparison2)
 
