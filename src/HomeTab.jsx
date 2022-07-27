@@ -26,9 +26,8 @@ function HomeTab(props) {
                         <li>Select k for k-means: K determines how many trends will be created, feel free to play with
                             different K for your data.
                         </li>
-                        <li>Variance filter: Filters data by variance. Sometimes results are improved by only
-                            considering
-                            highly variant genes.
+                        <li>Variance filter: Filters data by percentile of variance. Sometimes results are improved by only
+                            considering highly variant genes.
                         </li>
                     </ul>
                 </Typography>
