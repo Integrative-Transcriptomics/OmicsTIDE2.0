@@ -16,7 +16,7 @@ from server.preprocess_files import preprocess_file
 from server.preprocess_files import remove_invalid_genes
 from server.ptcf import read_comment_lines, read_clustering_file
 # import svgutils
-from server.trend_comparison import pairwise_trendcomparison, create_normalized_data
+from server.trend_comparison import pairwise_trendcomparison, create_normalized_data, combine
 
 # if not os.path.exists(os.path.join('.', 'tmp_files_OmicsTIDE')):
 
@@ -57,20 +57,49 @@ def download_normalized():
     lower_variance_percentile = int(request.form.to_dict()['lowerVariancePercentage'])
     upper_variance_percentile = int(request.form.to_dict()['upperVariancePercentage'])
     tmpdir_zip = tempfile.TemporaryDirectory()
+    tmpdir_separate = tempfile.TemporaryDirectory(dir=tmpdir_zip.name)
+    tmpdir_comparisons = tempfile.TemporaryDirectory(dir=tmpdir_zip.name)
+    tmpdir_intersecting = tempfile.TemporaryDirectory(dir=tmpdir_comparisons.name)
+    tmpdir_non_intersecting = tempfile.TemporaryDirectory(dir=tmpdir_comparisons.name)
     zip_fn = os.path.join(tmpdir_zip.name, 'normalized_data.zip')
     zip_obj = zipfile.ZipFile(zip_fn, 'w')
+    ds = dict()
     for file in files:
         if file.filename in comparisons.flatten():
             preprocessed_data = preprocess_file(file)
             normalized_data = create_normalized_data(preprocessed_data,
                                                      lower_variance_percentile,
                                                      upper_variance_percentile)
-            tmp = tempfile.NamedTemporaryFile()
-            fp = open(tmp.name, "a")
+            ds[file.filename] = normalized_data.copy()
+            fp = open(os.path.join(tmpdir_separate.name, file.filename), "a")
             fp.write("# dataset: " + file.filename + "\n")
-            normalized_data.to_csv(path_or_buf=fp, index=False)
+            normalized_data.to_csv(path_or_buf=fp)
             fp.close()
-            zip_obj.write(tmp.name, file.filename)
+            zip_obj.write(os.path.join(tmpdir_separate.name, file.filename),
+                          os.path.join("normalized_data", "separate", file.filename))
+    for combination in comparisons:
+        try:
+            comparison = combine(ds[combination[0]], ds[combination[1]])
+            comparison_name = Path(combination[0]).stem + "_" + Path(combination[1]).stem
+            fp_i = open(os.path.join(tmpdir_intersecting.name, comparison_name + "_i.csv"), "a")
+            comparison[0].to_csv(path_or_buf=fp_i)
+            fp_i.close()
+            zip_obj.write(os.path.join(tmpdir_comparisons.name, tmpdir_intersecting.name, comparison_name + "_i.csv"),
+                          os.path.join("normalized_data", "comparisons", "intersecting", comparison_name + "_i.csv"))
+            fp_ni = open(
+                os.path.join(tmpdir_comparisons.name, tmpdir_non_intersecting.name, comparison_name + "_ni.csv"), "a")
+            comparison[1].to_csv(path_or_buf=fp_ni)
+            fp_ni.close()
+            zip_obj.write(os.path.join(tmpdir_non_intersecting.name, comparison_name + "_ni.csv"),
+                          os.path.join("normalized_data", "comparisons", "non_intersecting",
+                                       comparison_name + "_ni.csv"))
+        except TypeError as te:
+            if str(te) == "object of type 'builtin_function_or_method' has no len()":
+                return jsonify(message='ID column has to be named "gene"'), 500
+
+        except ValueError as ve:
+            if str(ve).startswith("Length mismatch: Expected axis has"):
+                return jsonify(message='Number of columns/conditions for the loaded files not identical!'), 500
     zip_obj.close()
     return send_file(zip_fn)
 

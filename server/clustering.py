@@ -62,25 +62,3 @@ def get_genes_subset(file1, file2, comparison_type):
     combined = file1.append(file2)
     combined.dropna(inplace=True)
     return combined
-
-
-def cluster(file1, file2, cluster, comparison_type):
-    """
-    wrapper function for clustering to extract either intersecting or non-intersecting genes and then conduct pairwise comparison
-
-    :param file1: data set 1
-    :param file2: data set 2
-    :param cluster: k parameter
-    :param comparison_type: enum intersecting or non_intersecting
-
-    :return: PTCF file
-    """
-
-    if not isinstance(comparison_type, ComparisonType):
-        raise TypeError('comparison_type must either be INTERSECTING or NON_INTERSECTING')
-
-    # get intersecting or non-intersecting genes only - depending on comparison_type parameter
-    combined = get_genes_subset(file1, file2, comparison_type)
-    # run kmeans
-    combined = run_k_means(combined, cluster)
-    return combined
