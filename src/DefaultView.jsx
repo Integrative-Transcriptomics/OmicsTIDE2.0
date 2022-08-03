@@ -144,7 +144,7 @@ const DefaultView = observer((props) => {
         window.URL.revokeObjectURL(url);
     }
     const selectK =
-        <div>
+        <div style={{marginTop:30}}>
             <Typography id="discrete-slider" gutterBottom>
                 K for k-means
             </Typography>
