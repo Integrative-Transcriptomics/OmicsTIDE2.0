@@ -68,7 +68,7 @@ const SecondLevelAnalysis = observer((props) => {
         setCalculationText(null)
         store.calcOverrepresentation(store.pantherAPI.selectedSpecies, isWholeGenomeRef, useSelectGenes);
         startTimer().then(() => {
-            setCalculationText("This seems to take longer than normally. There might be a problem with PANTHER")
+            setCalculationText("This seems to take longer than normally. This could be due to a large list of genes or there might be a problem with PANTHER.")
         })
     }, [isWholeGenomeRef, useSelectGenes, store])
     /*useEffect(() => {
