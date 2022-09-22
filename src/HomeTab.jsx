@@ -45,6 +45,9 @@ function HomeTab(props) {
                 <Typography variant={"body1"}>More information and contact: <a
                     href="https://tuevis.cs.uni-tuebingen.de/omicstide/">https://tuevis.cs.uni-tuebingen.de/omicstide/</a>
                 </Typography>
+                 <Typography variant={"body1"}>Code and manual: <a
+                    href="https://github.com/Integrative-Transcriptomics/OmicsTIDE2.0">https://github.com/Integrative-Transcriptomics/OmicsTIDE2.0</a>
+                </Typography>
                 <Button onClick={props.jumpToLoad} variant={"contained"}>Load Data</Button>
             </Grid>
         </Grid>
