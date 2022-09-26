@@ -24,7 +24,7 @@ const GeneSearch = observer((props) => {
                 setSelectedGenes(genes.map(d => {
                     return ({id: d, label: store.dataStore.idToName[d]})
                 }));
-            }else{
+            } else {
                 setSelectedGenes(genes.map(d => {
                     return ({id: d, label: d})
                 }));
@@ -61,19 +61,22 @@ const GeneSearch = observer((props) => {
                     </RadioGroup>
                 </FormControl> : null
             }
+            <Button component="label" variant="contained" size="small">Upload List
+                    <input type="file"
+                           onChange={(e) => parseGeneList([...e.target.files][0])}
+                           hidden/>
+                </Button>
             <div>
                 <Autocomplete
                     multiple
                     disableCloseOnSelect
                     filterSelectedOptions
                     freeSolo
-                    fullWidth
                     getOptionLabel={(option) => option.label}
                     options={options}
                     value={selectedGenes}
                     onChange={(e, v) => {
                         setSelectedGenes(v)
-                        console.log(v)
                         props.setSearchGenes(v.map(d => d.id));
                     }}
                     renderInput={(params) => (
@@ -87,11 +90,6 @@ const GeneSearch = observer((props) => {
                     )}
                 />
             </div>
-            <Button component="label" variant="contained">Upload List
-                <input type="file"
-                       onChange={(e) => parseGeneList([...e.target.files][0])}
-                       hidden/>
-            </Button>
         </div>
     );
 });

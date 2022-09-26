@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {useStore} from "./Stores/RootStore";
+import {StoreProvider, useStore} from "./Stores/RootStore";
 import Button from "@material-ui/core/Button";
 import React, {useCallback, useState} from "react";
 import Typography from "@material-ui/core/Typography";
@@ -21,9 +21,8 @@ import Tooltip from "@material-ui/core/Tooltip";
 import InfoIcon from '@material-ui/icons/Info';
 import Backdrop from "@material-ui/core/Backdrop";
 import ComparisonTable from "./ComparisonTable";
-import Autocomplete from "@material-ui/core/Autocomplete";
-import TextField from "@material-ui/core/TextField";
 import {Paper} from "@mui/material";
+import SpeciesSelection from "./SpeciesSelection";
 
 function TabPanel(props) {
     const {children, value, index, ...other} = props;
@@ -144,7 +143,7 @@ const DefaultView = observer((props) => {
         window.URL.revokeObjectURL(url);
     }
     const selectK =
-        <div style={{marginTop:30}}>
+        <div style={{marginTop: 30}}>
             <Typography id="discrete-slider" gutterBottom>
                 K for k-means
             </Typography>
@@ -234,28 +233,28 @@ const DefaultView = observer((props) => {
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12}>
-                                               Unsure about the data formats? <Button
-                                onClick={() => axios.get("/download_example_data",
-                                    {responseType: "blob"})
-                                    .then(response => {
-                                        downloadData(response.data, "example_data.zip")
-                                    })}>Download example
-                                data</Button>
+                                        Unsure about the data formats? <Button
+                                        onClick={() => axios.get("/download_example_data",
+                                            {responseType: "blob"})
+                                            .then(response => {
+                                                downloadData(response.data, "example_data.zip")
+                                            })}>Download example
+                                        data</Button>
                                     </Grid>
                                     {files.length > 1 ?
                                         <Grid item xs={12}>
-                                            <Paper elevation={2} sx={{padding:2}}>
-                                            <Typography>
-                                                {files.length > 2 ? "Select comparisons of interest" : "Comparison"}
-                                            </Typography>
-                                            <ComparisonTable hasSelect={files.length > 2} comparisons={comparisons}
-                                                             setComparisons={(newComparisons) => setComparisons(newComparisons)}/>
+                                            <Paper elevation={2} sx={{padding: 2}}>
+                                                <Typography>
+                                                    {files.length > 2 ? "Select comparisons of interest" : "Comparison"}
+                                                </Typography>
+                                                <ComparisonTable hasSelect={files.length > 2} comparisons={comparisons}
+                                                                 setComparisons={(newComparisons) => setComparisons(newComparisons)}/>
                                             </Paper>
                                         </Grid> : null}
                                 </Grid>
                                 {selectK}
                                 {selectVar}
-                                <Button  size={"small"}
+                                <Button size={"small"}
                                         onClick={downloadNormalized}
                                         disabled={(selectedTab === 0 && files.length === 0) || (selectedTab === 1 && testData === "")}>Download
                                     processed data</Button>
@@ -359,34 +358,9 @@ const DefaultView = observer((props) => {
                         </Grid>
                     </Grid>
                     <Grid item xs={12}>
-                        {store.pantherAPI.genomesLoaded ?
-                            [<Typography key="task">Select species: (optional, required for functional
-                                analysis)</Typography>,
-                                <Typography key="powerdBy">Powerd by <b>PANTHER</b> (<a
-                                    href="http://pantherdb.org/">http://pantherdb.org/</a>)</Typography>,
-                                <Autocomplete
-                                    key="select"
-                                    disableClearable
-                                    getOptionLabel={(option) => option.label}
-                                    options={store.pantherAPI.genomes}
-                                    onChange={(e, v) => {
-                                        store.pantherAPI.setSelectedSpecies(v.value);
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label="Select Genome Reference"
-                                            margin="normal"
-                                            variant="outlined"
-                                            InputProps={{...params.InputProps, type: 'search'}}
-                                        />
-                                    )}
-                                />]
-                            : <Alert severity="warning">Sorry, it seems like we're unable to connect to <a
-                                href="http://pantherdb.org/">http://pantherdb.org/</a> Please
-                                adapt
-                                your
-                                browser settings to allow mixed content and check if their website is down.</Alert>}
+                        <StoreProvider store={store}>
+                            <SpeciesSelection />
+                        </StoreProvider>
                     </Grid>
                     <Button onClick={launch}
                             variant="contained"

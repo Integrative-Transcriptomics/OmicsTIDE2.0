@@ -8,15 +8,23 @@ export class PantherAPI {
     constructor() {
         extendObservable(this, {
             genomesLoaded: false,
-            selectedSpecies: '',
+            selectedSpecies: null,
             setSelectedSpecies(newSpecies) {
                 this.selectedSpecies = newSpecies;
             },
-            setGenomesLoaded(loaded){
-                this.genomesLoaded=loaded;
+            setGenomesLoaded() {
+                this.genomesLoaded = true
+            },
+            get speciesName(){
+                if(this.selectedSpecies !== null){
+                    return(this.genomes[this.selectedSpecies]);
+                }
+                else{
+                    return("")
+                }
             }
         })
-        this.genomes = [];
+        this.genomes={}
         // the three GO onthologies with their IDs
         this.annoSets = [{label: "Molecular Function", id: "GO:0003674"},
             {label: "Biological Process", id: "GO:0008150"},
@@ -25,8 +33,8 @@ export class PantherAPI {
          * get supported genomes only once in the beginning when application is launched
          */
         this.getSupportedGenomes(genomes => {
-            this.genomes = genomes;
-            this.setGenomesLoaded(true);
+            this.genomes=genomes
+            this.setGenomesLoaded(genomes);
         })
     }
 
@@ -37,10 +45,11 @@ export class PantherAPI {
     getSupportedGenomes(callback) {
         axios.get("http://pantherdb.org/services/oai/pantherdb/supportedgenomes",)
             .then((response) => {
-                callback(response.data.search.output.genomes.genome.map(genome => {
-                    return ({label: genome.long_name, value: genome.taxon_id});
-                }))
-
+                let dict ={}
+                response.data.search.output.genomes.genome.forEach(genome=>{
+                    dict[genome.taxon_id]=genome.long_name
+                })
+                callback(dict)
             })
             .catch((error) => {
                 if (error.response) {

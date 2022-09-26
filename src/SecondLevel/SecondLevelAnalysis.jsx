@@ -17,7 +17,7 @@ import Radio from "@material-ui/core/Radio";
 import {v4 as uuidv4} from "uuid";
 import {FormControl, FormLabel} from "@mui/material";
 import PropTypes from "prop-types";
-import Alert from "@material-ui/core/Alert";
+import SpeciesSelection from "../SpeciesSelection";
 
 
 function download(filename, text) {
@@ -44,12 +44,12 @@ const SecondLevelAnalysis = observer((props) => {
     const [calculationText, setCalculationText] = useState(null)
     const [expType, setExptype] = useState("pdf")
     const [isWholeGenomeRef, setIsWholeGenomeRef] = useState(false);
-    const [useSelectGenes, setUseSelectGenes]=useState(false);
+    const [useSelectGenes, setUseSelectGenes] = useState(false);
 
     const id = "id" + uuidv4()
 
 
-    const height = 400;
+    const height = 500;
 
     const changeWidth = useCallback(() => {
         if (props.isVisible && plot.current !== null) {
@@ -197,45 +197,48 @@ const SecondLevelAnalysis = observer((props) => {
                     <br/>
                     <FormControl>
                         <FormLabel>GO enrichment background</FormLabel>
+                        <StoreProvider store={store}>
+                            <SpeciesSelection/>
+                        </StoreProvider>
                         {store.pantherAPI.selectedSpecies !== '' ?
-                            [<RadioGroup
-                                row
-                                value={isWholeGenomeRef.toString()}
-                                onChange={(e) => setIsWholeGenomeRef(e.target.value === "true")}
-                            >
-                                <FormControlLabel value={"false"}
-                                                  control={<Radio/>}
-                                                  label="Use only genes in current comparison as background"/>
-                                <FormControlLabel value={"true"}
-                                                  control={<Radio/>} label="Use all genes as background"/>
-                            </RadioGroup>,
-                                <Button size={"small"} style={{marginTop: "5px"}} variant={"contained"}
+                            [
+                                <RadioGroup
+                                    key="radio"
+                                    row
+                                    value={isWholeGenomeRef.toString()}
+                                    onChange={(e) => setIsWholeGenomeRef(e.target.value === "true")}
+                                >
+                                    <FormControlLabel value={"false"}
+                                                      control={<Radio/>}
+                                                      label="Use only genes in current comparison as background"/>
+                                    <FormControlLabel value={"true"}
+                                                      control={<Radio/>} label="Use all genes as background"/>
+                                </RadioGroup>,
+                                <Button key="button" size={"small"} style={{marginTop: "5px"}} variant={"contained"}
                                         onClick={performEnrichment}>Perform
-                                    enrichment</Button>] :
-                            <Alert severity={"info"}>No species selected for GO enrichment</Alert>
+                                    enrichment</Button>]
+                            : null
                         }
-
                     </FormControl>
                     {store.searchGenes.length > 1 ?
-
                         <FormControl>
                             <FormLabel>GO enrichment target genes</FormLabel>
                             <RadioGroup
-                            row
-                            value={useSelectGenes.toString()}
-                            onChange={(e) => setUseSelectGenes(e.target.value === "true")}
-                        >
-                            <FormControlLabel value={"false"}
-                                              control={<Radio/>}
-                                              label="Use all genes in current tab"/>
-                            <FormControlLabel value={"true"}
-                                              control={<Radio/>} label="Use only highlighted genes"/>
-                        </RadioGroup>,
+                                row
+                                value={useSelectGenes.toString()}
+                                onChange={(e) => setUseSelectGenes(e.target.value === "true")}
+                            >
+                                <FormControlLabel value={"false"}
+                                                  control={<Radio/>}
+                                                  label="Use all genes in current tab"/>
+                                <FormControlLabel value={"true"}
+                                                  control={<Radio/>} label="Use only highlighted genes"/>
+                            </RadioGroup>,
                             <Button size={"small"} style={{marginTop: "5px"}} variant={"contained"}
                                     onClick={performEnrichment}>Perform
                                 enrichment</Button>
 
-                        </FormControl>:null
+                        </FormControl> : null
                     }
                 </Grid>
                 <Grid item xs={6}/>
