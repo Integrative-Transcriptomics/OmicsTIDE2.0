@@ -200,7 +200,7 @@ const SecondLevelAnalysis = observer((props) => {
                         <StoreProvider store={store}>
                             <SpeciesSelection/>
                         </StoreProvider>
-                        {store.pantherAPI.selectedSpecies !== '' ?
+                        {store.pantherAPI.selectedSpecies !== null ?
                             [
                                 <RadioGroup
                                     key="radio"
