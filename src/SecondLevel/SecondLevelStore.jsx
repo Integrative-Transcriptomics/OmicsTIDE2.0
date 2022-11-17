@@ -18,6 +18,7 @@ export class SecondLevelStore {
         extendObservable(this, {
             // calculated goData
             goData: [],
+            apiMessage:"success",
 
             //loading status
             isLoading: false,
@@ -27,6 +28,9 @@ export class SecondLevelStore {
 
             setGoData(data){
                 this.goData = data;
+            },
+            setAPIMessage(message){
+                this.apiMessage=message
             },
             setIsLoading(loading){
                 this.isLoading = loading;
@@ -48,7 +52,8 @@ export class SecondLevelStore {
                     genes=toJS(this.searchGenes);
                 }
                 this.pantherAPI.calcOverrepresentation(genes, parent.genes ,organism, wholeGenomeRef, (response) => {
-                    this.setGoData(response);
+                    this.setGoData(response.data);
+                    this.setAPIMessage(response.message)
                     this.setIsLoading(false);
                     this.setIsLoaded(true);
                 })

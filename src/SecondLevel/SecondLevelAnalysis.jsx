@@ -15,7 +15,7 @@ import {exportPDF} from "../Stores/HelperFunctions";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Radio from "@material-ui/core/Radio";
 import {v4 as uuidv4} from "uuid";
-import {FormControl, FormLabel} from "@mui/material";
+import {Alert, FormControl, FormLabel} from "@mui/material";
 import PropTypes from "prop-types";
 import SpeciesSelection from "../SpeciesSelection";
 
@@ -84,14 +84,14 @@ const SecondLevelAnalysis = observer((props) => {
                 <Typography>{calculationText}</Typography>
                 <CircularProgress/>
             </Grid>;
-    } else if (store.isLoaded) {
+    } else if (store.isLoaded && store.apiMessage==="success") {
         const goEnrichment = store.goData.map((d, i) =>
             <Grid item xs={4} key={store.pantherAPI.annoSets[i].id}>
                 <Typography variant="h6">{store.pantherAPI.annoSets[i].label}
                     <IconButton
                         onClick={() => store.createDownload(store.pantherAPI.annoSets[i].id)}><DownloadIcon/></IconButton></Typography>
                 <GoChart data={d} maxVal={store.totalMax} isVisible={props.isVisible}/>
-            </Grid>)
+            </Grid>);
         goVis = [<Grid item xs={12} key={"OP"}>
             <div>
                 <svg width={20} height={12}>
@@ -109,6 +109,8 @@ const SecondLevelAnalysis = observer((props) => {
             .concat(<Button variant="outlined" key="download" onClick={() => store.createDownload(null)}>Download
                 all</Button>
             )
+    } else{
+        goVis=<Grid item xs={12}><Alert severity={"warning"}>{store.apiMessage}</Alert></Grid>
     }
     const startTimer = () => {
         return new Promise((resolve, reject) => {

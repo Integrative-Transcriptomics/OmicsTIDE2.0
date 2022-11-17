@@ -142,7 +142,19 @@ export class PantherAPI {
             return (axios.post(requestString, new URLSearchParams(requestObject)))
         })
         axios.all(requests).then(axios.spread((...responses) => {
-            callback(responses.map((response, i) => this.transformData(response.data.results.result, this.annoSets[i].id)));
+            let returnMessage = "success"
+            callback({
+                data: responses.map((response, i) => {
+                    let responseData = []
+                    if (response.data.results.input_list.mapped_count === 0) {
+                        returnMessage = "No genes ids matching reference"
+                    }
+                    if(Object.keys(response.data.results).includes("result")){
+                        responseData=this.transformData(response.data.results.result, this.annoSets[i].id);
+                    }
+                    return (responseData)
+                }), message: returnMessage
+            });
             // use/access the results
         })).catch(errors => {
             // react on errors.
