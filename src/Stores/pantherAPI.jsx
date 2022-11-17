@@ -15,16 +15,15 @@ export class PantherAPI {
             setGenomesLoaded() {
                 this.genomesLoaded = true
             },
-            get speciesName(){
-                if(this.selectedSpecies !== null){
-                    return(this.genomes[this.selectedSpecies]);
-                }
-                else{
-                    return("")
+            get speciesName() {
+                if (this.selectedSpecies !== null) {
+                    return (this.genomes[this.selectedSpecies]);
+                } else {
+                    return ("")
                 }
             }
         })
-        this.genomes={}
+        this.genomes = {}
         // the three GO onthologies with their IDs
         this.annoSets = [{label: "Molecular Function", id: "GO:0003674"},
             {label: "Biological Process", id: "GO:0008150"},
@@ -33,7 +32,7 @@ export class PantherAPI {
          * get supported genomes only once in the beginning when application is launched
          */
         this.getSupportedGenomes(genomes => {
-            this.genomes=genomes
+            this.genomes = genomes
             this.setGenomesLoaded(genomes);
         })
     }
@@ -45,9 +44,9 @@ export class PantherAPI {
     getSupportedGenomes(callback) {
         axios.get("http://pantherdb.org/services/oai/pantherdb/supportedgenomes",)
             .then((response) => {
-                let dict ={}
-                response.data.search.output.genomes.genome.forEach(genome=>{
-                    dict[genome.taxon_id]=genome.long_name
+                let dict = {}
+                response.data.search.output.genomes.genome.forEach(genome => {
+                    dict[genome.taxon_id] = genome.long_name
                 })
                 callback(dict)
             })
@@ -128,12 +127,19 @@ export class PantherAPI {
      */
     calcOverrepresentation(geneList, refList, organism, isWholeGenomeRef, callback) {
         const requests = this.annoSets.map(annoSet => {
-            let requestString="http://pantherdb.org/services/oai/pantherdb/enrich/overrep?geneInputList=" + geneList + "&organism="
-                + organism + "&annotDataSet=" + annoSet.id + "&enrichmentTestType=FISHER&correction=FDR";
-            if(!isWholeGenomeRef){
-                requestString += "&refOrganism="+organism+"&refInputList="+refList;
+            let requestString = "http://pantherdb.org/services/oai/pantherdb/enrich/overrep";
+            let requestObject = {
+                geneInputList: geneList, //gave the values directly for testing
+                organism: organism,
+                annotDataSet: annoSet.id,
+                enrichmentTestType: "FISCHER",
+                correction: "FDR"
             }
-            return (axios.get(requestString))
+            if (!isWholeGenomeRef) {
+                requestObject["refOrganism"] = organism;
+                requestObject["refInputList"] = refList;
+            }
+            return (axios.post(requestString, new URLSearchParams(requestObject)))
         })
         axios.all(requests).then(axios.spread((...responses) => {
             callback(responses.map((response, i) => this.transformData(response.data.results.result, this.annoSets[i].id)));
