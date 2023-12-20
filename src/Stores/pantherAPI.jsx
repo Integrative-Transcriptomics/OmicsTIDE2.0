@@ -42,7 +42,7 @@ export class PantherAPI {
      * @param {function} callback
      */
     getSupportedGenomes(callback) {
-        axios.get("http://pantherdb.org/services/oai/pantherdb/supportedgenomes",)
+        axios.get("https://pantherdb.org/services/oai/pantherdb/supportedgenomes",)
             .then((response) => {
                 let dict = {}
                 response.data.search.output.genomes.genome.forEach(genome => {
@@ -127,7 +127,7 @@ export class PantherAPI {
      */
     calcOverrepresentation(geneList, refList, organism, isWholeGenomeRef, callback) {
         const requests = this.annoSets.map(annoSet => {
-            let requestString = "http://pantherdb.org/services/oai/pantherdb/enrich/overrep";
+            let requestString = "https://pantherdb.org/services/oai/pantherdb/enrich/overrep";
             let requestObject = {
                 geneInputList: geneList, //gave the values directly for testing
                 organism: organism,
