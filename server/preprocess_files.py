@@ -6,7 +6,7 @@ from scipy import stats
 def remove_invalid_genes(data):
     data.index = data.index.astype('str')
 
-    return data[~data.index.str.contains('.')]
+    return data[~data.index.str.contains(r'\.')]
 
 
 def preprocess_file(input_file):
