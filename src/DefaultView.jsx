@@ -89,7 +89,7 @@ const DefaultView = observer((props) => {
             let url = "";
             formData.append("lowerVariancePercentage", varFilter[0]);
             formData.append("upperVariancePercentage", varFilter[1]);
-            url = "/download_normalized";
+            url = "/api/download_normalized";
             files.forEach(file => formData.append("files[]", file));
             formData.append("comparisons", JSON.stringify(comparisons.filter(d => d.selected).map(d => d.files)))
             axios.post(url, formData, {responseType: "blob"})
@@ -110,17 +110,17 @@ const DefaultView = observer((props) => {
             formData.append("upperVariancePercentage", varFilter[1]);
             if (selectedTab === 1) {
                 if (testData === "bc") {
-                    url = "/load_test_data_bloodcell";
+                    url = "/api/load_test_data_bloodcell";
                 } else if (testData === "s") {
-                    url = "/load_test_data_streptomyces";
+                    url = "/api/load_test_data_streptomyces";
                 }
             } else if (selectedTab === 0) {
-                url = "/load_data";
+                url = "/api/load_data";
                 files.forEach(file => formData.append("files[]", file));
                 formData.append("comparisons", JSON.stringify(comparisons.filter(d => d.selected).map(d => d.files)))
                 formData.append("mappingFile", idMappingFile);
             } else {
-                url = "/load_custom_clustering"
+                url = "/api/load_custom_clustering"
                 formData.append("clusteringFile", clusteringFile);
                 formData.append("mappingFile", idMappingFile);
             }
@@ -234,7 +234,7 @@ const DefaultView = observer((props) => {
                                     </Grid>
                                     <Grid item xs={12}>
                                         Unsure about the data formats? <Button
-                                        onClick={() => axios.get("/download_example_data",
+                                        onClick={() => axios.get("/api/download_example_data",
                                             {responseType: "blob"})
                                             .then(response => {
                                                 downloadData(response.data, "example_data.zip")
@@ -294,7 +294,7 @@ const DefaultView = observer((props) => {
                                     </Grid>
                                 </Grid>
                                 Unsure about the data formats? <Button
-                                onClick={() => axios.get("/download_example_custom_clustering",
+                                onClick={() => axios.get("/api/download_example_custom_clustering",
                                     {responseType: "blob"})
                                     .then(response => {
                                         downloadData(response.data, "custom_clustering_example.csv")

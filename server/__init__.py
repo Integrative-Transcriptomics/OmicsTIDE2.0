@@ -20,9 +20,8 @@ from server.trend_comparison import pairwise_trendcomparison, create_normalized_
 
 # if not os.path.exists(os.path.join('.', 'tmp_files_OmicsTIDE')):
 
-# MAY HAVE TO BE CHANGED ON TUEVIS DUE TO PERMISSIONS (-> "tempfile.TemporaryDirectory(dir="/tmp")
 # MAKE SURE tempfile PACKAGE IS INSTALLED ON
-app = Flask(__name__, static_folder='../build', static_url_path='/')
+app = Flask(__name__, static_folder='../dist', static_url_path='/')
 here = os.path.dirname(__file__)
 app.config['EXAMPLE_DATA'] = os.path.join(here, 'data')
 app.config['FILES_BLOODCELLS'] = os.path.join(here, 'data', 'BloodCell')
@@ -34,7 +33,7 @@ app.config['FILES_STREPTOMYCES'] = os.path.join(here, 'data', 'caseStudy_colname
 ##############
 
 
-@app.route('/load_custom_clustering', methods=['POST'])
+@app.route('/api/load_custom_clustering', methods=['POST'])
 def load_clustering():
     clustering_file = request.files.get("clusteringFile")
     mapping_file = request.files.get("mappingFile")
@@ -50,7 +49,7 @@ def load_clustering():
     return json.dumps({"data": [comparison], "mapping": mapping}, ignore_nan=True)
 
 
-@app.route('/download_normalized', methods=['POST'])
+@app.route('/api/download_normalized', methods=['POST'])
 def download_normalized():
     files = request.files.getlist("files[]")
     comparisons = np.array(json.loads(request.form.getlist('comparisons')[0]))
@@ -104,7 +103,7 @@ def download_normalized():
     return send_file(zip_fn)
 
 
-@app.route('/load_data', methods=['POST'])
+@app.route('/api/load_data', methods=['POST'])
 def load_data():
     data = []
     files = request.files.getlist("files[]")
@@ -144,17 +143,17 @@ def load_data():
     return json.dumps({"data": data, "mapping": mapping}, ignore_nan=True)
 
 
-@app.route('/download_example_data', methods=['GET', 'POST'])
+@app.route('/api/download_example_data', methods=['GET', 'POST'])
 def download_example_data():
     return send_from_directory(app.config['EXAMPLE_DATA'], "example_data.zip", as_attachment=True)
 
 
-@app.route('/download_example_custom_clustering', methods=['GET', 'POST'])
+@app.route('/api/download_example_custom_clustering', methods=['GET', 'POST'])
 def download_example_clustering():
     return send_from_directory(app.config['EXAMPLE_DATA'], "custom_clustering_example.csv", as_attachment=True)
 
 
-@app.route('/load_test_data_bloodcell', methods=['GET', 'POST'])
+@app.route('/api/load_test_data_bloodcell', methods=['GET', 'POST'])
 def load_test_data_bloodcell():
     data = []
     mapping = []
@@ -187,7 +186,7 @@ def load_test_data_bloodcell():
     return json.dumps({"data": data, "mapping": mapping}, ignore_nan=True)
 
 
-@app.route('/load_test_data_streptomyces', methods=['GET', 'POST'])
+@app.route('/api/load_test_data_streptomyces', methods=['GET', 'POST'])
 def load_test_data_streptomyces():
     data = []
     k = int(request.form.to_dict()['k'])
@@ -237,7 +236,7 @@ def fill_columns(ds_name, conditions, variance, median, cluster, values):
     return row_dict
 
 
-@app.route('/download_session', methods=['GET', 'POST'])
+@app.route('/api/download_session', methods=['GET', 'POST'])
 def download_session():
     if request.method == 'POST':
         session_data = request.json

@@ -1,3 +1,4 @@
+import pandas as pd
 from sklearn.cluster import KMeans
 
 from server.enums import ComparisonType
@@ -12,14 +13,14 @@ def run_k_means(data, k):
 
     :return: data frame with assigned clusters
     """
-
+    #print(len(data.index))
     try:
         if len(data.index) >= k:
-            km = KMeans(n_clusters=k)
+            km = KMeans(n_clusters=k, n_init='auto')
             km.fit_predict(data.loc[:, data.columns != 'dataset'])
         # if k > num genes change k to num genes
         else:
-            km = KMeans(n_clusters=len(data.index))
+            km = KMeans(n_clusters=len(data.index), n_init='auto')
             km.fit_predict(data.loc[:, data.columns != 'dataset'])
         data['cluster'] = km.labels_
         return data
@@ -59,6 +60,6 @@ def get_genes_subset(file1, file2, comparison_type):
 
     file1['dataset'] = 1
     file2['dataset'] = 2
-    combined = file1.append(file2)
+    combined = pd.concat([file1,file2])
     combined.dropna(inplace=True)
     return combined

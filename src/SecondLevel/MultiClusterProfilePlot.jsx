@@ -12,7 +12,7 @@ const MultiClusterProfilePlot = observer((props) => {
                          xScale={props.xScale}
                          color={props.colorScale(cluster)} opacity={0.5}/>
             <HighlightLines data={props.selection[cluster]} yScale={props.yScale} xScale={props.xScale}
-                            genes={props.highlightedGenes} stroke={"black"}/>/>
+                            genes={props.highlightedGenes} stroke={"black"}/>
             <HighlightLines data={props.selection[cluster]} yScale={props.yScale} xScale={props.xScale}
                             genes={props.searchGenes} stroke={"black"}/>
         </g>)

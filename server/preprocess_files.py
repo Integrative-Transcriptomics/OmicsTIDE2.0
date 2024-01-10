@@ -6,7 +6,7 @@ from scipy import stats
 def remove_invalid_genes(data):
     data.index = data.index.astype('str')
 
-    return data[~data.index.str.contains('\.')]
+    return data[~data.index.str.contains('.')]
 
 
 def preprocess_file(input_file):
@@ -30,18 +30,17 @@ def preprocess_file(input_file):
 
         else:
             return jsonify(message="Error: Values neither comma- nor tab-separated!"), 500
+    # drop NA
+    init.dropna(inplace=True)
+    # remove columns with dot
+    init = remove_invalid_genes(init)
+
+    # remove duplicated indices
+    init = init.loc[~init.index.duplicated(keep='first')]
+
     variance = init.var(axis=1)
     median = init.median(axis=1)
 
     init.loc[:, 'var'] = [stats.percentileofscore(variance, a, 'rank') for a in variance]
     init.loc[:, 'median'] = [stats.percentileofscore(median, a, 'rank') for a in median]
-
-    # remove columns with dot
-    init = remove_invalid_genes(init)
-
-    # drop NA
-    init.dropna(inplace=True)
-
-    # remove duplicated indices
-    init = init.loc[~init.index.duplicated(keep='first')]
     return init
