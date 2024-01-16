@@ -29,18 +29,20 @@ The Sankey diagrams shows the size of the clusters (nodes) and how many genes ar
 - Visualization: The second level analysis shows the selected genes as profile plots. Similarly to the first level analysis you can search for genes and export the visualization.
 - Functional Analysis: PANTHER can be used to perform GO term enrichment for the genes in the detailed analysis. You can either choose all the genes in the current comparison (first level analysis) as the background or all the genes of the species. 
 ## Local Installation Guide
-The following steps are required to set up and run OmicsTIDE. The installation process includes python libraries for the back-end implementation. Scripts required for the front-end functions are all loaded directly from the web. 
-
-**NOTE: Although it is recommended to work with a virtual environment to avoid package version conflicts, this step can also be skipped if the user is aware of potential conflicts.**
-
+The following steps are required to set up and run OmicsTIDE. The installation process includes python libraries for the back-end implementation. Scripts required for the front-end functions are all loaded directly from the web.
 ### 1) Basic Requirements
-Python, pip and virtualenv version should be >= 3.7, >= 20.2.3 and >=20.0.23, respectively.
+
+Software | Version |
+---|---
+Python | 3.10 |
+pip | 23.3.2 |
+node | 22.1.0 |
 
 ### 2) Setting up a Virtual Environment (venv) in Python
 cd to the directory where the venv should be located and create the venv
 ```console
 user@example:~$ cd <path/to/venv-parent-dir>
-user@example:~/path/to/venv-parent-dir$ virtualenv <your-venv>
+user@example:~/path/to/venv-parent-dir$ python -m venv <your-venv>
 ```
 ### 3) Install required Python packages
 Install required Python packages by referring to the requirements.txt-file.
@@ -53,12 +55,12 @@ user@example:~$ source <your-venv>/bin/activate
 cd to the project directory
 ```console
 user@example:~$ cd <path/to/project-dir>
-user@example:~/path/to/project-dir$ npm install
+user@example:~/path/to/project-dir$ yarn install
 ```
 ## Running OmicsTIDE
 Activate venv and run the python file which will open the web application in a new browser window. 
 ```console
 user@example:~$ source <your-venv>/bin/activate
-(<your-venv>) user@example:~$ npm run dev
+(<your-venv>) user@example:~$ yarn run dev
 ```
 OmicsTIDE requires a stable internet connection to request data from [Panther](http://www.pantherdb.org/). 
