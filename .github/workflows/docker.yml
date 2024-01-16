@@ -1,0 +1,66 @@
+name: Build and Push Docker Image
+
+on:
+    workflow_dispatch:
+    push:
+        branches: [master]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Build Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  push: false
+                  tags: omicstide
+                  load: true # This is important, it will allow the image to be loaded to Docker environment
+
+            - name: Save Docker image
+              run: docker save omicstide | gzip > omicstide.tar.gz
+
+            - name: Install SSH client
+              run: sudo apt-get install -qq -y openssh-client
+            - name: Transfer Docker image to server
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+                  SSH_CONFIG: ${{ secrets.SSH_CONFIG }}
+                  SERVER_IP: ${{ secrets.SERVER_IP }} #changed
+                  KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS_DOCKER }}
+                  TARGET: ${{secrets.TARGET}}
+              run: |
+                  mkdir -p ~/.ssh && chmod 700 ~/.ssh
+                  echo "$SSH_CONFIG" > ~/.ssh/config
+                  echo "$SSH_PRIVATE_KEY" > ~/.ssh/github-actions
+                  echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+                  chmod 600 ~/.ssh/config
+                  chmod 600 ~/.ssh/github-actions
+                  chmod 600 ~/.ssh/known_hosts
+                  scp -o UserKnownHostsFile=~/.ssh/known_hosts omicstide.tar.gz $SERVER_IP:$TARGET
+                  scp -o UserKnownHostsFile=~/.ssh/known_hosts deploy.sh $SERVER_IP:$TARGET
+
+            - name: Load and run Docker image on server
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+                  SSH_CONFIG: ${{ secrets.SSH_CONFIG }}
+                  SERVER_IP: ${{ secrets.SERVER_IP }}
+                  KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS_DOCKER }}
+                  UPDATE_CMDS: ${{ secrets.UPDATE_CMDS }}
+                  DOCKER_PORT: ${{ secrets.DOCKER_PORT }}
+              run: |
+                  mkdir -p ~/.ssh && chmod 700 ~/.ssh
+                  echo "$SSH_CONFIG" > ~/.ssh/config
+                  echo "$SSH_PRIVATE_KEY" > ~/.ssh/github-actions
+                  echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+                  chmod 600 ~/.ssh/config
+                  chmod 600 ~/.ssh/github-actions
+                  chmod 600 ~/.ssh/known_hosts
+                  ssh -o UserKnownHostsFile=~/.ssh/known_hosts $SERVER_IP "$UPDATE_CMDS $DOCKER_PORT"
